@@ -1,4 +1,5 @@
 // build.gradle
+//    If running prompt ./gradlew clean build --refresh-dependencies
 plugins {
     id 'java'
     id 'org.springframework.boot' version '2.5.4' // Plugin for Spring Boot projects
@@ -9,18 +10,14 @@ group 'com.example'
 version '1.0' // Set an initial version
 
 // Spring Boot dependencies
+repositories {
+    mavenCentral() // Add Maven Central repository
+}
 dependencies {
-    implementation 'org.springframework.boot:spring-boot-starter-web'
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    implementation 'org.springframework.boot:spring-boot-starter-web:2.5.4'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test:2.5.4'
 }
 
-// Define the main class for the Spring Boot application
-// You need to replace 'com.example.api.Application' with the actual package and class name of your main application class.
-
-// Spring Boot specific configurations
-bootJar {
-    archiveFileName = 'my-rest-api.jar'
-}
 
 // Spring Boot specific configurations
 bootJar {
