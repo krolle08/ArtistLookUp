@@ -27,6 +27,6 @@ public class testHelloWorldController {
     @Test
     public void testFarvelWorldEndpoint() {
         String response = testRestTemplate.getForObject("http://localhost:" + port + "/farvel", String.class);
-        assertThat(response).isEqualTo("Du gjorde det");
+        assertThat(response).isEqualTo("Du gjorde det igen");
     }
 }
