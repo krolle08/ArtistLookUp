@@ -3,13 +3,6 @@
   <component name="AutoImportSettings">
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
-  <component name="ChangeListManager">
-    <list default="true" id="132ce0cc-5619-46be-a76e-930c7193eae8" name="Changes" comment="Remove coverartarchive-api directory" />
-    <option name="SHOW_DIALOG" value="false" />
-    <option name="HIGHLIGHT_CONFLICTS" value="true" />
-    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
-    <option name="LAST_RESOLUTION" value="IGNORE" />
-  </component>
   <component name="ComposerSettings">
     <execution />
   </component>
@@ -338,14 +331,6 @@
       <option name="project" value="LOCAL" />
       <updated>1710152039784</updated>
     </task>
-    <task id="LOCAL-00009" summary="Remove coverartarchive-api directory">
-      <option name="closed" value="true" />
-      <created>1710154786883</created>
-      <option name="number" value="00009" />
-      <option name="presentableId" value="LOCAL-00009" />
-      <option name="project" value="LOCAL" />
-      <updated>1710154786883</updated>
-    </task>
     <option name="localTasksCounter" value="10" />
     <servers />
   </component>
@@ -362,10 +347,5 @@
         </entry>
       </map>
     </option>
-  </component>
-  <component name="VcsManagerConfiguration">
-    <MESSAGE value="PROD" />
-    <MESSAGE value="Remove coverartarchive-api directory" />
-    <option name="LAST_COMMIT_MESSAGE" value="Remove coverartarchive-api directory" />
   </component>
 </project>
