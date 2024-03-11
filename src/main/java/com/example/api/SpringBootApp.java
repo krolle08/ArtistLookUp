@@ -6,17 +6,21 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 import java.util.Scanner;
 
+
 @SpringBootApplication
-public class YourApplication {
+public class SpringBootApp {
+    public void runApplication() {
+        // Create an instance of a class from the submodule
+        SubmoduleClass submoduleObject = new SubmoduleClass();
 
+        // Use the methods or properties of the submodule class
+        String submoduleResult = submoduleObject.someMethod();
+
+        // Print the result or perform other application logic
+        System.out.println("Application is running! Submodule result: " + submoduleResult);
+    }
     public static void main(String[] args) {
-        SpringApplication.run(SpringBootApp.class, args);
-
-        // Create an instance of YourApplication
-        SpringBootApp app = new SpringBootApp();
-
-        // Call the method to run the application logic
-        app.runApplication();
+        SpringApplication.run(SpringBootApplication.class, args);
 
         Scanner scanner = new Scanner(System.in);
 
