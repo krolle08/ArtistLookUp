@@ -17,6 +17,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest(classes = YourApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class testMusicBrainzSearchRoute {
 
+
     @LocalServerPort
     private int port;
     @Autowired
