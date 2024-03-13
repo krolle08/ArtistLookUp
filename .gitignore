@@ -34,3 +34,15 @@ bin/
 *.iml
 *.ipr
 out
+
+# IntelliJ IDEA
+.idea/
+
+.idea_modules/
+
+
+# Gradle
+build/
+.gradle/
+*.log
+gradle-wrapper.jar
