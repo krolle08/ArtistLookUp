@@ -1,4 +1,4 @@
-package com.example.api;
+package Application.api;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -9,8 +9,7 @@ public class HelloWorldController {
 
     @GetMapping("/hello")
     public String helloYou() {
-
-        return "Du gjorde det";
+        return "Hello World Controller";
     }
 
     @GetMapping("/farvel")
