@@ -1,0 +1,36 @@
+// build.gradle
+//    If running prompt ./gradlew clean build --refresh-dependencies
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '2.5.4' // Plugin for Spring Boot projects
+    id 'com.github.ben-manes.versions' version '0.39.0'
+}
+
+group 'com.example'
+version '1.0' // Set an initial version
+
+// Spring Boot dependencies
+repositories {
+    mavenCentral() // Add Maven Central repository
+}
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-web:2.5.4'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test:2.5.4'
+    implementation group: 'fm.last', name: 'coverartarchive-api', version: '2.1.1'
+    implementation 'org.apache.httpcomponents:httpclient:4.5.13' // Use the appropriate version
+    implementation 'org.apache.camel:camel-core:3.14.0' //Core apache camel library
+    implementation 'org.apache.camel:camel-rest:3.14.0' // Apache rest service
+    implementation 'org.springframework.boot:spring-boot-starter-tomcat'
+}
+
+test {
+    useJUnitPlatform()
+    testLogging {
+        events "passed", "skipped", "failed"
+    }
+}
+
+// Spring Boot specific configurations
+bootJar {
+    archiveFileName = 'my-rest-api.jar'
+}
