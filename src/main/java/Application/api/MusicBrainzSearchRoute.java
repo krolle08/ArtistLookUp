@@ -35,20 +35,44 @@ public class MusicBrainzSearchRoute {
     private static final String BASE_PATH = "/ws/2/";
 
     private static final String END_PATH = "?inc=aliases";
-    public final String MUSIC_BRAINZ_URI = new URIBuilder()
-            .setScheme(protocol)
-            .setHost(host)
-            .setPort(port)
-            //  .setPath(SERVICEPATH)
-            .toString();
-
-    @GetMapping("/MBArtist/{artistId}")
-    public String searchArtist(@PathVariable String artistId) throws URISyntaxException {
-        String fullPath = constructUrl(BASE_PATH + "artist/" + artistId + END_PATH);
+    @GetMapping("/MBArtist/{Id}")
+    public ResponseEntity<String> searchArtist(@PathVariable String Id) throws URISyntaxException {
+        String fullPath = constructUrl(BASE_PATH + "artist/" + Id + END_PATH);
         RestTemplate restTemplate = restTemplate();
         URI uri = new URI(fullPath);
-        ResponseEntity<String> response = restTemplate.getForEntity(uri, String.class);
-        return response.getBody();
+        return restTemplate.getForEntity(uri, String.class);
+    }
+
+    @GetMapping("/MBgenre/{Id}")
+    public ResponseEntity<String> searchGenre(@PathVariable String Id) throws URISyntaxException {
+        String fullPath = constructUrl(BASE_PATH + "genre/" + Id + END_PATH);
+        RestTemplate restTemplate = restTemplate();
+        URI uri = new URI(fullPath);
+        return restTemplate.getForEntity(uri, String.class);
+    }
+
+    @GetMapping("/MBcover/{Id}")
+    public ResponseEntity<String> searchCover(@PathVariable String Id) throws URISyntaxException {
+        String fullPath = constructUrl(BASE_PATH + "cover/" + Id + END_PATH);
+        RestTemplate restTemplate = restTemplate();
+        URI uri = new URI(fullPath);
+        return restTemplate.getForEntity(uri, String.class);
+    }
+
+    @GetMapping("/MBrelease/{Id}")
+    public ResponseEntity<String> searchRelease(@PathVariable String Id) throws URISyntaxException {
+        String fullPath = constructUrl(BASE_PATH + "release/" + Id + END_PATH);
+        RestTemplate restTemplate = restTemplate();
+        URI uri = new URI(fullPath);
+        return restTemplate.getForEntity(uri, String.class);
+    }
+
+    @GetMapping("/MBreleaseGroup/{Id}")
+    public ResponseEntity<String> searchReleaseGroup(@PathVariable String Id) throws URISyntaxException {
+        String fullPath = constructUrl(BASE_PATH + "releasegroup/" + Id + END_PATH);
+        RestTemplate restTemplate = restTemplate();
+        URI uri = new URI(fullPath);
+        return restTemplate.getForEntity(uri, String.class);
     }
 
     private String constructUrl(String path) {
