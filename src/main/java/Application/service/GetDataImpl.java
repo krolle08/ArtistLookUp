@@ -22,7 +22,7 @@ public class GetDataImpl {
     String paramValue;
     String paramName;
 
-    private GetDataImpl() {
+    public GetDataImpl() {
         // Initialize the map with mappings from numbers and corresponding search types
         searchTypes = new HashMap<>();
         searchTypes.put("1", "Area");
@@ -104,7 +104,7 @@ public class GetDataImpl {
         System.out.println("Response from /farvel endpoint: " + farvelResponse.getBody());
     }
 
-    private Map<String, String> getTypeOfSearch() throws Exception {
+    public Map<String, String> getTypeOfSearch() throws Exception {
         System.out.println("Type in the number corresponding to the type of search you want to perform:\n" +
                 "1 Area\n" +
                 "2 Artist\n" +
