@@ -1,33 +1,58 @@
 package Application.service;
 
+import Application.api.MusicBrainzNameSearchRoute;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 import Application.api.CoverArtArchiveService;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Scanner;
 
 import static Application.service.TypeOfSearchEnum.isSearchTypePossible;
 
 
 public class GetDataImpl {
-    private boolean endSearch;
+
+    private Map<String, String> searchTypes;
     int typoLimit = 10;
     int consecutiveTypoMistakes = 0;
+    MusicBrainzNameSearchRoute musicBrainzNameSearchRoute = new MusicBrainzNameSearchRoute();
     Scanner scanner = new Scanner(System.in);
-    String type;
+    String paramValue;
+    String paramName;
+
+    private GetDataImpl() {
+        // Initialize the map with mappings from numbers and corresponding search types
+        searchTypes = new HashMap<>();
+        searchTypes.put("1", "Area");
+        searchTypes.put("2", "Artist");
+        searchTypes.put("3", "Event");
+        searchTypes.put("4", "Genre");
+        searchTypes.put("5", "Instrument");
+        searchTypes.put("6", "Label");
+        searchTypes.put("7", "Place");
+        searchTypes.put("8", "Recording");
+        searchTypes.put("9", "Release Group");
+        searchTypes.put("10", "URL");
+        searchTypes.put("11", "Work");
+    }
 
     public void run() throws Exception {
-        do {
-            if (istypeOfSearchPossible()) {
-                continue;
-            }
 
-            TypeOfSearchEnum typeOfSearch = TypeOfSearchEnum.convertToEnum(type);
+
+        do {
+            Map<String, String> searchParam = getTypeOfSearch();
+            TypeOfSearchEnum typeOfSearch = TypeOfSearchEnum.convertToEnum(paramValue);
             try {
                 switch (typeOfSearch) {
                     case AREA:
                         break;
                     case ARTIST:
+                        ResponseEntity response = musicBrainzNameSearchRoute.getMBID(searchParam);
+                        String mBID = response.getBody()
+
+
                         break;
                     case EVENT:
                         break;
@@ -63,9 +88,8 @@ public class GetDataImpl {
 
             // Call the method to run the application logic
             app.runApplication(artist);
-            endSearch(scanner);
         }
-        while (endSearch);
+        while (endSearch());
 
 
         // Create a RestTemplate instance
@@ -80,43 +104,49 @@ public class GetDataImpl {
         System.out.println("Response from /farvel endpoint: " + farvelResponse.getBody());
     }
 
-    private boolean istypeOfSearchPossible() throws Exception {
-        System.out.println("What do you want to search for?\n" +
-                "1. Area\n" +
-                "2. Artist\n" +
-                "3. Event\n" +
-                "4. Genre\n" +
-                "5. Instrument\n" +
-                "6. Label\n" +
-                "7. Place\n" +
-                "8. Recording\n" +
-                "9. Relase Group\n" +
-                "10. URL\n" +
-                "11. Work\n");
+    private Map<String, String> getTypeOfSearch() throws Exception {
+        System.out.println("Type in the number corresponding to the type of search you want to perform:\n" +
+                "1 Area\n" +
+                "2 Artist\n" +
+                "3 Event\n" +
+                "4 Genre\n" +
+                "5 Instrument\n" +
+                "6 Label\n" +
+                "7 Place\n" +
+                "8 Recording\n" +
+                "9 Relase Group\n" +
+                "10 URL\n" +
+                "11 Work\n");
 
-        type = scanner.nextLine();
+        // Get user input
+        String userInputType = scanner.nextLine().trim();
 
-        if (TypeOfSearchEnum.isSearchTypePossible(type)) {
-            System.out.println("The type of search is not possible, please type in the type of search as presentend in the list.");
-            return true;
+        // Check if the input corresponds to a valid search type
+        if (!searchTypes.containsKey(userInputType)) {
+            throw new Exception("Invalid search type.");
         }
-        return false;
-    }
 
-    private void endSearch(Scanner scanner) {
+            System.out.println("What" + searchTypes.get(userInputType) + "do you want to search for?");
+            String userInputValue = scanner.nextLine().trim();
+
+            // Return the corresponding search type
+            return Map.of(searchTypes.get(userInputType), userInputValue);
+        }
+    private boolean endSearch() {
         while (typoLimit > consecutiveTypoMistakes) {
             System.out.println("Want to make a new search? (Yes/No)");
             String input = scanner.nextLine();
             if (input.equals("Yes")) {
-                endSearch = false;
+                return false;
             } else if (input.equals("No")) {
-                endSearch = true;
+                return true;
             } else {
                 consecutiveTypoMistakes++;
             }
         }
         System.out.println("Too many consecutive typos. Terminating program.");
         scanner.close();
+        return true;
     }
 }
 
