@@ -53,5 +53,7 @@ public class CoverArtArchiveService {
         // Make a GET request to /farvel endpoint
         ResponseEntity<String> farvelResponse = restTemplate.getForEntity("http://localhost:8080/farvel", String.class);
         System.out.println("Response from /farvel endpoint: " + farvelResponse.getBody());
+
+        scanner.close();
     }
 }

@@ -1,9 +1,7 @@
 package Application.api;
 
 import org.apache.http.HttpHost;
-import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
@@ -17,7 +15,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 @RestController
-public class MusicBrainzSearchRoute {
+public class MusicBrainzIDSearchRoute {
 
     /*  @Value("${musicBrainz.protocol}")
       private String PROTOCOL;
@@ -36,7 +34,7 @@ public class MusicBrainzSearchRoute {
 
     private static final String END_PATH = "?inc=aliases";
     @GetMapping("/MBArtist/{Id}")
-    public ResponseEntity<String> searchArtist(@PathVariable String Id) throws URISyntaxException {
+    public ResponseEntity<String> getArtist(@PathVariable String Id) throws URISyntaxException {
         String fullPath = constructUrl(BASE_PATH + "artist/" + Id + END_PATH);
         RestTemplate restTemplate = restTemplate();
         URI uri = new URI(fullPath);
@@ -44,7 +42,7 @@ public class MusicBrainzSearchRoute {
     }
 
     @GetMapping("/MBgenre/{Id}")
-    public ResponseEntity<String> searchGenre(@PathVariable String Id) throws URISyntaxException {
+    public ResponseEntity<String> getGenre(@PathVariable String Id) throws URISyntaxException {
         String fullPath = constructUrl(BASE_PATH + "genre/" + Id + END_PATH);
         RestTemplate restTemplate = restTemplate();
         URI uri = new URI(fullPath);
@@ -52,7 +50,7 @@ public class MusicBrainzSearchRoute {
     }
 
     @GetMapping("/MBcover/{Id}")
-    public ResponseEntity<String> searchCover(@PathVariable String Id) throws URISyntaxException {
+    public ResponseEntity<String> getCover(@PathVariable String Id) throws URISyntaxException {
         String fullPath = constructUrl(BASE_PATH + "cover/" + Id + END_PATH);
         RestTemplate restTemplate = restTemplate();
         URI uri = new URI(fullPath);
@@ -60,7 +58,7 @@ public class MusicBrainzSearchRoute {
     }
 
     @GetMapping("/MBrelease/{Id}")
-    public ResponseEntity<String> searchRelease(@PathVariable String Id) throws URISyntaxException {
+    public ResponseEntity<String> getRelease(@PathVariable String Id) throws URISyntaxException {
         String fullPath = constructUrl(BASE_PATH + "release/" + Id + END_PATH);
         RestTemplate restTemplate = restTemplate();
         URI uri = new URI(fullPath);
@@ -68,7 +66,7 @@ public class MusicBrainzSearchRoute {
     }
 
     @GetMapping("/MBreleaseGroup/{Id}")
-    public ResponseEntity<String> searchReleaseGroup(@PathVariable String Id) throws URISyntaxException {
+    public ResponseEntity<String> getReleaseGroup(@PathVariable String Id) throws URISyntaxException {
         String fullPath = constructUrl(BASE_PATH + "releasegroup/" + Id + END_PATH);
         RestTemplate restTemplate = restTemplate();
         URI uri = new URI(fullPath);

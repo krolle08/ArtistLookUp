@@ -1,6 +1,6 @@
 package service;
 
-import Application.api.MusicBrainzSearchRoute;
+import Application.api.MusicBrainzIDSearchRoute;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -15,14 +15,13 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class testMockMusicBrainzSearchRoute {
+public class testMockMusicBrainzIDSearchRoute {
     @Mock
     private RestTemplate restTemplate;
     @InjectMocks
-    private MusicBrainzSearchRoute musicBrainzSearchRoute;
+    private MusicBrainzIDSearchRoute musicBrainzIDSearchRoute;
     @Test
     public void testSearchArtist() throws URISyntaxException {
         // Mock the response from the external service
@@ -38,7 +37,7 @@ public class testMockMusicBrainzSearchRoute {
 
 
         // Create a mock ResponseEntity
-        ResponseEntity<String> result = musicBrainzSearchRoute.searchArtist("5b11f4ce-a62d-471e-81fc-a69a8278c7da");
+        ResponseEntity<String> result = musicBrainzIDSearchRoute.getArtist("5b11f4ce-a62d-471e-81fc-a69a8278c7da");
 
         // Verify the result
             assertThat(result.getBody()).contains(responseBody);

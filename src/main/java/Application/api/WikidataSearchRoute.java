@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 
 @RestController
-public class HelloWorldController {
+public class WikidataSearchRoute {
 
     @GetMapping("/hello")
     public String helloYou() {

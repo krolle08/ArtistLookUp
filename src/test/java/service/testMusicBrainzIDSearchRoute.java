@@ -1,7 +1,7 @@
 package service;
 
 import Application.YourApplication;
-import Application.api.MusicBrainzSearchRoute;
+import Application.api.MusicBrainzIDSearchRoute;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -15,19 +15,19 @@ import java.net.URISyntaxException;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(classes = YourApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class testMusicBrainzSearchRoute {
-
+public class testMusicBrainzIDSearchRoute {
+    String cdkey ="VHVQX-NNDCE-G08DB";
 
     @LocalServerPort
     private int port;
     @Autowired
     private TestRestTemplate restTemplate;
     @Autowired
-    private MusicBrainzSearchRoute musicBrainzSearchRoute;
+    private MusicBrainzIDSearchRoute musicBrainzIDSearchRoute;
     @Test
     public void testHelloWorldEndpoint() throws URISyntaxException {
         String nirvana = "5b11f4ce-a62d-471e-81fc-a69a8278c7da";
-        ResponseEntity<String> rest = musicBrainzSearchRoute.searchArtist(nirvana);
+        ResponseEntity<String> rest = musicBrainzIDSearchRoute.getArtist(nirvana);
         assertThat(rest.getBody()).contains("Nirvana");
     }
     @Test
