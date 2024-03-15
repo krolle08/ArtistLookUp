@@ -27,7 +27,7 @@ public class testMusicBrainzIDSearchRoute {
     @Test
     public void testHelloWorldEndpoint() throws URISyntaxException {
         String nirvana = "5b11f4ce-a62d-471e-81fc-a69a8278c7da";
-        ResponseEntity<String> rest = musicBrainzIDSearchRoute.getArtist(nirvana);
+        ResponseEntity<String> rest = musicBrainzIDSearchRoute.getDataFromArtist(nirvana);
         assertThat(rest.getBody()).contains("Nirvana");
     }
     @Test

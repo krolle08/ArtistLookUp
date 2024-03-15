@@ -37,7 +37,7 @@ public class testMockMusicBrainzIDSearchRoute {
 
 
         // Create a mock ResponseEntity
-        ResponseEntity<String> result = musicBrainzIDSearchRoute.getArtist("5b11f4ce-a62d-471e-81fc-a69a8278c7da");
+        ResponseEntity<String> result = musicBrainzIDSearchRoute.getDataFromArtist("5b11f4ce-a62d-471e-81fc-a69a8278c7da");
 
         // Verify the result
             assertThat(result.getBody()).contains(responseBody);

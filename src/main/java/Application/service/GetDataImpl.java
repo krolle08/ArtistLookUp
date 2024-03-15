@@ -2,6 +2,8 @@ package Application.service;
 
 import Application.api.*;
 import fm.last.musicbrainz.coverart.CoverArt;
+import org.apache.juli.logging.Log;
+import org.apache.juli.logging.LogFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
@@ -11,6 +13,7 @@ import java.util.Scanner;
 
 
 public class GetDataImpl {
+    private Log log = LogFactory.getLog(GetDataImpl.class);
     private Map<String, String> searchTypes;
     private final MusicBrainzNameSearchRoute musicBrainzNameSearchRoute; // Dependency injection for MusicBrainzNameSearchRoute
     private final MusicBrainzIDSearchRoute musicBrainzIDSearchRoute = new MusicBrainzIDSearchRoute();
@@ -19,7 +22,6 @@ public class GetDataImpl {
     int typoLimit = 10;
     int consecutiveTypoMistakes = 0;
     private final Scanner scanner;
-    private String mBID;
     public GetDataImpl(Scanner scanner, MusicBrainzNameSearchRoute musicBrainzNameSearchRoute) {
         this.musicBrainzNameSearchRoute = musicBrainzNameSearchRoute;
         this.scanner = scanner;
@@ -48,14 +50,19 @@ public class GetDataImpl {
                     case AREA:
                         break;
                     case ARTIST:
-                        Map<String, String> response = musicBrainzNameSearchRoute.getMBIDAndDescription(searchParam);
-                        mBID = response.get("MBID");
-                        ResponseEntity responseMB = musicBrainzIDSearchRoute.getArtist(response.get("MBID")); // Do some logic that can determin what type of search is needed
-                        CoverArtArchiveService app = new CoverArtArchiveService();
-                        CoverArt coverArt = app.run(mBID);
+                        Map<String, String> response = musicBrainzNameSearchRoute.getMBID(searchParam);
+                        if(response.isEmpty()){
+                            response.putAll(musicBrainzIDSearchRoute.getDataFromArtist(searchParam.get(TypeOfSearchEnum.ARTIST.toString()))); // Do some logic that can determin what type of search is needed
+                        } else {
+                            response.putAll(musicBrainzIDSearchRoute.getDataFromArtist(response.get("MBID"))); // Do some logic that can determin what type of search is needed
+                        }
+                        if(!response.isEmpty()){
+                            CoverArtArchiveService app = new CoverArtArchiveService();
+                            CoverArt coverArt = app.run(response.get("MBID"));
 
-
-
+                        } else {
+                            log.info("No information available for the provided input neither as an Artist name or Music Brainz ID:" + searchParam.get(TypeOfSearchEnum.ARTIST.toString()));
+                        }
 
                         break;
                     case EVENT:
@@ -82,7 +89,6 @@ public class GetDataImpl {
                 throw new Exception("An internal error occured, please try again. Sorry for the inconvenience");
             }
         } while (endSearch());
-
 
         // Create a RestTemplate instance
         RestTemplate restTemplate = new RestTemplate();

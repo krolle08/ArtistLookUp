@@ -45,7 +45,7 @@ public class testGetDataImpl {
         ResponseEntity<String> mockedResponse = new ResponseEntity<>(expectedMBID, HttpStatus.OK);
 
         MusicBrainzNameSearchRoute musicBrainzNameSearchRouteMock = Mockito.mock(MusicBrainzNameSearchRoute.class);
-        Mockito.when(musicBrainzNameSearchRouteMock.getMBIDAndDescription(any(Map.class))).thenReturn(mockedResponse);
+        Mockito.when(musicBrainzNameSearchRouteMock.getMBID(any(Map.class))).thenReturn((Map) mockedResponse);
 /*
         Scanner scannerMock = Mockito.mock(Scanner.class);
         Mockito.when(scannerMock.nextLine())
