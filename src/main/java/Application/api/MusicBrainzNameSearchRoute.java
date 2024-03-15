@@ -104,7 +104,91 @@ public class MusicBrainzNameSearchRoute {
 
 
 
-
+{
+        "type-id": "e431f5f6-b5d2-343d-8b36-72607fffb74b",
+        "end_area": null,
+        "begin_area": {
+        "sort-name": "Aberdeen",
+        "type": null,
+        "id": "a640b45c-c173-49b1-8030-973603e895b5",
+        "type-id": null,
+        "name": "Aberdeen",
+        "disambiguation": ""
+        },
+        "disambiguation": "1980s~1990s US grunge band",
+        "end-area": null,
+        "id": "5b11f4ce-a62d-471e-81fc-a69a8278c7da",
+        "isnis": [
+        "0000000123486830",
+        "0000000123487390"
+        ],
+        "begin-area": {
+        "sort-name": "Aberdeen",
+        "type": null,
+        "id": "a640b45c-c173-49b1-8030-973603e895b5",
+        "type-id": null,
+        "name": "Aberdeen",
+        "disambiguation": ""
+        },
+        "type": "Group",
+        "sort-name": "Nirvana",
+        "country": "US",
+        "ipis": [],
+        "life-span": {
+        "end": "1994-04-05",
+        "begin": "1987",
+        "ended": true
+        },
+        "aliases": [
+        {
+        "type-id": "894afba6-2816-3c24-8072-eadb66bd04bc",
+        "sort-name": "Nirvana",
+        "type": "Artist name",
+        "primary": true,
+        "begin": null,
+        "end": null,
+        "name": "Nirvana",
+        "locale": "en",
+        "ended": false
+        },
+        {
+        "begin": null,
+        "primary": null,
+        "type": null,
+        "sort-name": "Nirvana US",
+        "type-id": null,
+        "ended": false,
+        "locale": null,
+        "name": "Nirvana US",
+        "end": null
+        },
+        {
+        "name": "ニルヴァーナ",
+        "end": null,
+        "ended": false,
+        "locale": "ja",
+        "type-id": "894afba6-2816-3c24-8072-eadb66bd04bc",
+        "begin": null,
+        "primary": true,
+        "sort-name": "ニルヴァーナ",
+        "type": "Artist name"
+        }
+        ],
+        "gender-id": null,
+        "gender": null,
+        "name": "Nirvana",
+        "area": {
+        "sort-name": "United States",
+        "type": null,
+        "id": "489ce91b-6658-3307-9877-795b68554c98",
+        "type-id": null,
+        "disambiguation": "",
+        "iso-3166-1-codes": [
+        "US"
+        ],
+        "name": "United States"
+        }
+        }
 
 
 
