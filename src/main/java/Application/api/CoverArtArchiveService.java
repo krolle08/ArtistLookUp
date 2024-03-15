@@ -16,10 +16,8 @@ import java.util.UUID;
 public class CoverArtArchiveService {
     DefaultCoverArtArchiveClient defaultCoverArtArchiveClient = new DefaultCoverArtArchiveClient();
     CoverArtArchiveClient client = new DefaultCoverArtArchiveClient();
-    public void runApplication(String artist) {
-        UUID mbid = UUID.fromString("76df3287-6cda-33eb-8e9a-044b5e15ffdd");
-        defaultCoverArtArchiveClient.getByMbid(mbid);
-
+    public CoverArt run(String mBID) {
+        UUID mbid = UUID.fromString(mBID);
         CoverArt coverArt = null;
         try {
             coverArt = client.getByMbid(mbid);
@@ -36,6 +34,7 @@ public class CoverArtArchiveService {
 
         final boolean useHttps = true;
         CoverArtArchiveClient clients = new DefaultCoverArtArchiveClient(useHttps);
+        return coverArt;
     }
 
     public void test(String test) {

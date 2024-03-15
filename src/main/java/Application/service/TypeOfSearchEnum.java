@@ -1,7 +1,7 @@
 package Application.service;
 
 public enum TypeOfSearchEnum {
-    AREA("AREA"),
+    AREA("Area"),
     ARTIST("ARTIST"),
     EVENT("ARTIST"),
     GENRE("ARTIST"),

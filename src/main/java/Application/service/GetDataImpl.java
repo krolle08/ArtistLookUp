@@ -1,28 +1,28 @@
 package Application.service;
 
-import Application.api.MusicBrainzNameSearchRoute;
+import Application.api.*;
+import fm.last.musicbrainz.coverart.CoverArt;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
-import Application.api.CoverArtArchiveService;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 
-import static Application.service.TypeOfSearchEnum.isSearchTypePossible;
-
 
 public class GetDataImpl {
-
     private Map<String, String> searchTypes;
+    private final MusicBrainzNameSearchRoute musicBrainzNameSearchRoute; // Dependency injection for MusicBrainzNameSearchRoute
+    private final MusicBrainzIDSearchRoute musicBrainzIDSearchRoute = new MusicBrainzIDSearchRoute();
+    private final WikidataSearchRoute wikidataSearchRoute = new WikidataSearchRoute();
+    private final WikipediaSearchRoute wikipediaSearchRoute = new WikipediaSearchRoute();
     int typoLimit = 10;
     int consecutiveTypoMistakes = 0;
-    MusicBrainzNameSearchRoute musicBrainzNameSearchRoute = new MusicBrainzNameSearchRoute();
-    Scanner scanner = new Scanner(System.in);
-    String paramValue;
-    String paramName;
-
-    public GetDataImpl() {
+    private final Scanner scanner;
+    private String mBID;
+    public GetDataImpl(Scanner scanner, MusicBrainzNameSearchRoute musicBrainzNameSearchRoute) {
+        this.musicBrainzNameSearchRoute = musicBrainzNameSearchRoute;
+        this.scanner = scanner;
         // Initialize the map with mappings from numbers and corresponding search types
         searchTypes = new HashMap<>();
         searchTypes.put("1", "Area");
@@ -39,18 +39,22 @@ public class GetDataImpl {
     }
 
     public void run() throws Exception {
-
-
         do {
             Map<String, String> searchParam = getTypeOfSearch();
-            TypeOfSearchEnum typeOfSearch = TypeOfSearchEnum.convertToEnum(paramValue);
+            Map.Entry<String, String> entry = searchParam.entrySet().iterator().next();
+            TypeOfSearchEnum typeOfSearch = TypeOfSearchEnum.convertToEnum(entry.getKey());
             try {
                 switch (typeOfSearch) {
                     case AREA:
                         break;
                     case ARTIST:
-                        ResponseEntity response = musicBrainzNameSearchRoute.getMBID(searchParam);
-                        String mBID = response.getBody()
+                        Map<String, String> response = musicBrainzNameSearchRoute.getMBIDAndDescription(searchParam);
+                        mBID = response.get("MBID");
+                        ResponseEntity responseMB = musicBrainzIDSearchRoute.getArtist(response.get("MBID")); // Do some logic that can determin what type of search is needed
+                        CoverArtArchiveService app = new CoverArtArchiveService();
+                        CoverArt coverArt = app.run(mBID);
+
+
 
 
                         break;
@@ -77,19 +81,7 @@ public class GetDataImpl {
             } catch (Exception e) {
                 throw new Exception("An internal error occured, please try again. Sorry for the inconvenience");
             }
-
-
-
-
-            String artist = scanner.nextLine();
-
-            // Create an instance of api.YourApplication
-            CoverArtArchiveService app = new CoverArtArchiveService();
-
-            // Call the method to run the application logic
-            app.runApplication(artist);
-        }
-        while (endSearch());
+        } while (endSearch());
 
 
         // Create a RestTemplate instance
@@ -103,7 +95,6 @@ public class GetDataImpl {
         ResponseEntity<String> farvelResponse = restTemplate.getForEntity("http://localhost:8080/farvel", String.class);
         System.out.println("Response from /farvel endpoint: " + farvelResponse.getBody());
     }
-
     public Map<String, String> getTypeOfSearch() throws Exception {
         System.out.println("Type in the number corresponding to the type of search you want to perform:\n" +
                 "1 Area\n" +
@@ -126,12 +117,37 @@ public class GetDataImpl {
             throw new Exception("Invalid search type.");
         }
 
-            System.out.println("What" + searchTypes.get(userInputType) + "do you want to search for?");
-            String userInputValue = scanner.nextLine().trim();
+        System.out.println("What " + searchTypes.get(userInputType) + " do you want to search for?");
+        String userInputValue = scanner.nextLine().trim();
 
-            // Return the corresponding search type
-            return Map.of(searchTypes.get(userInputType), userInputValue);
+        // Return the corresponding search type
+        Map<String, String> result = new HashMap<>();
+        result.put(searchTypes.get(userInputType), userInputValue);
+        return result;
+    }
+
+    private String extractMBID(ResponseEntity response) {
+        String artistIdSubstring = "";
+        // Find the start index of "[artist:"
+        int startIndex = response.toString().indexOf("[artist:");
+        if (startIndex != -1) {
+            // Find the end index of "]"
+            int endIndex = response.toString().indexOf("|", startIndex);
+            if (endIndex != -1) {
+                // Extract the substring between "[artist:" and "]"
+                artistIdSubstring = response.toString().substring(startIndex + "[artist:".length(), endIndex);
+                // Now artistIdSubstring should contain "5b11f4ce-a62d-471e-81fc-a69a8278c7da"
+            } else {
+                // Handle case where "|" is not found
+                System.out.println("Closing bracket '|' not found");
+            }
+        } else {
+            // Handle case where "[artist:" is not found
+            System.out.println("Substring '[artist:' not found");
         }
+        return artistIdSubstring;
+    }
+
     private boolean endSearch() {
         while (typoLimit > consecutiveTypoMistakes) {
             System.out.println("Want to make a new search? (Yes/No)");
