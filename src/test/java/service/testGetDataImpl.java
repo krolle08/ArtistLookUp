@@ -21,12 +21,10 @@ import static org.mockito.Mockito.when;
 
 @SpringBootTest(classes = YourApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class testGetDataImpl {
-/*
     @Test
     public void testRun() throws Exception {
         //Arrange
         Map<String, String> response = new HashMap<>();
-        response.put("MBID", "123456");
         // Mock dependencies
         MusicBrainzNameSearchRoute musicBrainzNameSearchRoute = mock(MusicBrainzNameSearchRoute.class);
         MusicBrainzIDSearchRoute musicBrainzIDSearchRoute = mock(MusicBrainzIDSearchRoute.class);
@@ -39,10 +37,9 @@ public class testGetDataImpl {
         when(scanner.nextLine()).thenReturn("2", "Nirvana"); // Simulate user input
         when(musicBrainzNameSearchRoute.getMBID(anyMap())).thenReturn(response); // Simulate empty response
 
-        when(musicBrainzNameSearchRoute.getMBID(anyMap())).thenReturn(response);
 
         // Create instance of the class to be tested
-        GetDataImpl testClass = new GetDataImpl(musicBrainzNameSearchRoute, musicBrainzIDSearchRoute, wikidataSearchRoute, wikipediaSearchRoute, coverArtArchiveService);
+        GetDataImpl testClass = new GetDataImpl(scanner);
 
         // Invoke the method
         testClass.run();
@@ -65,7 +62,7 @@ public class testGetDataImpl {
                 .thenReturn("Nirvana");  // Simulate user entering search value
 
         MusicBrainzNameSearchRoute musicBrainzNameSearchRouteMock = mock(MusicBrainzNameSearchRoute.class);
-        GetDataImpl getDataImpl = new GetDataImpl(scannerMock, musicBrainzNameSearchRouteMock);
+        GetDataImpl getDataImpl = new GetDataImpl(scannerMock);
         when(musicBrainzNameSearchRouteMock.getMBID(any(Map.class))).thenReturn((Map) mockedResponse);
         when(getDataImpl.getTypeOfSearch()).thenReturn(typeOFsearch);
 
@@ -82,5 +79,5 @@ public class testGetDataImpl {
 
     }
 
- */
+
 }

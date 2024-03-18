@@ -11,7 +11,9 @@ import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
+import java.net.URLDecoder;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -37,21 +39,17 @@ public class testWikiDataSearchRoute {
         Map<String, String> rest = wikidataSearchRoute.getWikidataFromArtist(nirvanaTerm);
 
         //Then
-        assertThat(rest.get("wikipediaSearchTerm")).isEqualTo(succescriteria);
+        assertThat(decodeString(rest.get("wikipediaSearchTerm"))).isEqualTo(succescriteria);
         assertThat(rest.get("wikidataStatusCode")).isEqualTo("200");
 
     }
-
-    @Test
-    public void testSearchArtistEndpoint() {
-        // Given
-        String nirvana = "5b11f4ce-a62d-471e-81fc-a69a8278c7da"; // Example artist ID
-
-        // When
-        ResponseEntity<String> responseEntity = restTemplate.getForEntity("/MBArtist/" + nirvana, String.class);
-
-        // Then
-        // assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-        // assertThat(responseEntity.getBody()).isNotNull();
+    public static String decodeString(String input) {
+        try {
+            return URLDecoder.decode(input, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            // Handle decoding exception
+            e.printStackTrace();
+            return null;
+        }
     }
 }

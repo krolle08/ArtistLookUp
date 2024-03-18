@@ -3,22 +3,17 @@ package Application.api;
 import Application.features.CustomRetryTemplate;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.http.HttpHost;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.juli.logging.Log;
 import org.apache.juli.logging.LogFactory;
-import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.retry.RetryCallback;
-import org.springframework.retry.RetryContext;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.net.URI;
+import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
+import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -35,12 +30,9 @@ public class WikidataSearchRoute {
     private final String protocol = "https";
     private final String schemeDelimiter = "://";
     private final String host = "wikidata.org";
-
     private final String pathPrefix = "/w";
     private final String api = "/api.php";
-
     private final String enwiki = "enwiki";
-
     public Map<String, String> getWikidataFromArtist(String searchTerm) throws URISyntaxException {
         Map<String, String> result = new HashMap<>();
         if (searchTerm.isEmpty()) {
@@ -63,21 +55,20 @@ public class WikidataSearchRoute {
             return result;
         }
         // Handle the original response
+        // Extract HTTP status code
+        result.put("wikidataStatusCode", String.valueOf(response.getStatusCodeValue()));
         result.putAll(extractData(response, searchTerm));
         return result;
     }
-
     private void processResponse(ResponseEntity<String> response, String uri) {
         if (response.getBody().isEmpty()) {
             log.info("The request on uri:" + uri + "did not match any data in Wikidata");
         }
     }
-
     private Map<String, String> extractData(ResponseEntity response, String searchTerm) {
         Map<String, String> extractedData = new HashMap<>();
         try {
             // Extract HTTP status code
-            extractedData.put("wikidataStatusCode", String.valueOf(response.getStatusCodeValue()));
             ObjectMapper mapper = new ObjectMapper();
             JsonNode rootNode = mapper.readTree(response.getBody().toString());
             String wikipediaSearchTerm = rootNode.path("entities").path(searchTerm.toUpperCase()).path("sitelinks").path(enwiki).get("title").asText();
@@ -85,23 +76,19 @@ public class WikidataSearchRoute {
                 log.info("No description in the response for:" + searchTerm);
                 return extractedData;
             }
-            extractedData.put("wikipediaSearchTerm", wikipediaSearchTerm);
+            extractedData.put("wikipediaSearchTerm", encodeString(wikipediaSearchTerm));
         } catch (Exception e) {
             e.printStackTrace();
         }
         return extractedData;
     }
-
     private void handleRateLimitations(String apiUrl) {
         log.warn("Rate limits detected. Retrying...");
         // Construct RetryTemplate
         CustomRetryTemplate retryTemplate = new CustomRetryTemplate();
-        RetryCallback<ResponseEntity<String>, URISyntaxException> retryCallback = new RetryCallback<ResponseEntity<String>, URISyntaxException>() {
-            @Override
-            public ResponseEntity<String> doWithRetry(RetryContext retryContext) throws URISyntaxException {
-                RestTemplate restTemplate = new RestTemplate();
-                return restTemplate.getForEntity(apiUrl, String.class);
-            }
+        RetryCallback<ResponseEntity<String>, URISyntaxException> retryCallback = retryContext -> {
+            RestTemplate restTemplate = new RestTemplate();
+            return restTemplate.getForEntity(apiUrl, String.class);
         };
         // Execute with RetryTemplate
         ResponseEntity<String> newResponse = null;
@@ -113,5 +100,14 @@ public class WikidataSearchRoute {
         }
         // Handle the response after retry
         processResponse(newResponse, apiUrl);
+    }
+    public static String encodeString(String input) {
+        try {
+            return URLEncoder.encode(input, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            // Handle encoding exception
+            e.printStackTrace();
+            return null;
+        }
     }
 }

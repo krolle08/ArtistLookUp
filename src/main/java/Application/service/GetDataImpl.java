@@ -1,6 +1,7 @@
 package Application.service;
 
 import Application.api.*;
+import Application.utils.ScannerWrapper;
 import org.apache.juli.logging.Log;
 import org.apache.juli.logging.LogFactory;
 import org.springframework.http.ResponseEntity;
@@ -18,18 +19,18 @@ import java.util.Scanner;
 public class GetDataImpl {
     private Log log = LogFactory.getLog(GetDataImpl.class);
     private final Map<String, String> searchTypes;
-    private final MusicBrainzNameSearchRoute musicBrainzNameSearchRoute; // Dependency injection for MusicBrainzNameSearchRoute
+    private final MusicBrainzNameSearchRoute musicBrainzNameSearchRoute = new MusicBrainzNameSearchRoute(); // Dependency injection for MusicBrainzNameSearchRoute
     private final MusicBrainzIDSearchRoute musicBrainzIDSearchRoute = new MusicBrainzIDSearchRoute();
     private final CoverArtArchiveService coverArtArchiveService = new CoverArtArchiveService();
     private final WikidataSearchRoute wikidataSearchRoute = new WikidataSearchRoute();
     private final WikipediaSearchRoute wikipediaSearchRoute = new WikipediaSearchRoute();
     int typoLimit = 10;
     int consecutiveTypoMistakes = 0;
-    private final Scanner scanner;
+    private final ScannerWrapper scannerWrapper;
 
-    public GetDataImpl(Scanner scanner, MusicBrainzNameSearchRoute musicBrainzNameSearchRoute) {
-        this.musicBrainzNameSearchRoute = musicBrainzNameSearchRoute;
-        this.scanner = scanner;
+
+    public GetDataImpl(ScannerWrapper scannerWrapper) {
+        this.scannerWrapper = scannerWrapper;
         // Initialize the map with mappings from numbers and corresponding search types
         searchTypes = new HashMap<>();
         searchTypes.put("1", "Area");

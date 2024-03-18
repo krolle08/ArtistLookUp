@@ -12,6 +12,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 
 @RestController
@@ -54,11 +55,13 @@ public class WikipediaSearchRoute {
         url.append(searchTerm);
         return url;
     }
+
     private Map<String, String> extractData(ResponseEntity response, String searchTerm) {
         Map<String, String> extractedData = new HashMap<>();
         try {
             ObjectMapper mapper = new ObjectMapper();
             JsonNode rootNode = mapper.readTree(String.valueOf(response.getBody()));
+            extractedData.put("description", Objects.requireNonNull(rootNode.path("query").path("pages").elements().next().get("extract").asText()));
             JsonNode extractNode = rootNode.path("query").path("pages").elements().next().get("extract");
             if (extractNode != null && !extractNode.isNull()) {
                 extractedData.put("description", extractNode.asText());
