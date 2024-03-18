@@ -1,4 +1,4 @@
-package service;
+package service.musicbrainz;
 
 import Application.api.MusicBrainzIDSearchRoute;
 import org.junit.jupiter.api.Test;
@@ -13,6 +13,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -37,11 +38,10 @@ public class testMockMusicBrainzIDSearchRoute {
 
 
         // Create a mock ResponseEntity
-        ResponseEntity<String> result = musicBrainzIDSearchRoute.getDataFromArtist("5b11f4ce-a62d-471e-81fc-a69a8278c7da");
+        Map<String, String> rest = musicBrainzIDSearchRoute.getDataFromArtist("5b11f4ce-a62d-471e-81fc-a69a8278c7da");
 
         // Verify the result
-            assertThat(result.getBody()).contains(responseBody);
-            assertThat(result.getStatusCode().equals(HttpStatus.OK));
+        assertThat(rest.get("name").toString()).contains(responseBody);
     }
 
 

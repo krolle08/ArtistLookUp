@@ -10,14 +10,18 @@ import org.springframework.web.client.RestTemplate;
 
 
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Scanner;
 import java.util.UUID;
 
 public class CoverArtArchiveService {
     DefaultCoverArtArchiveClient defaultCoverArtArchiveClient = new DefaultCoverArtArchiveClient();
     CoverArtArchiveClient client = new DefaultCoverArtArchiveClient();
-    public CoverArt run(String mBID) {
+    public Map<String, String> getCovers(String mBID) {
         UUID mbid = UUID.fromString(mBID);
+        Map<String, String> extractedData = new HashMap<>();
+
         CoverArt coverArt = null;
         try {
             coverArt = client.getByMbid(mbid);
@@ -34,7 +38,7 @@ public class CoverArtArchiveService {
 
         final boolean useHttps = true;
         CoverArtArchiveClient clients = new DefaultCoverArtArchiveClient(useHttps);
-        return coverArt;
+        return extractedData;
     }
 
     public void test(String test) {

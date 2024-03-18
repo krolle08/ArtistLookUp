@@ -1,7 +1,6 @@
 package Application.service;
 
 import Application.api.*;
-import fm.last.musicbrainz.coverart.CoverArt;
 import org.apache.juli.logging.Log;
 import org.apache.juli.logging.LogFactory;
 import org.springframework.http.ResponseEntity;
@@ -11,17 +10,23 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 
-
+/**
+ * I include the Scanner in the constructor when the class relies on user input and it is unlikely that
+ * the scanner needs to be swapped out for another Scanner instance during the class's lifetime. It simplifies method
+ * signatures and encapsulates the dependency, resulting in cleaner code.
+ */
 public class GetDataImpl {
     private Log log = LogFactory.getLog(GetDataImpl.class);
-    private Map<String, String> searchTypes;
+    private final Map<String, String> searchTypes;
     private final MusicBrainzNameSearchRoute musicBrainzNameSearchRoute; // Dependency injection for MusicBrainzNameSearchRoute
     private final MusicBrainzIDSearchRoute musicBrainzIDSearchRoute = new MusicBrainzIDSearchRoute();
+    private final CoverArtArchiveService coverArtArchiveService = new CoverArtArchiveService();
     private final WikidataSearchRoute wikidataSearchRoute = new WikidataSearchRoute();
     private final WikipediaSearchRoute wikipediaSearchRoute = new WikipediaSearchRoute();
     int typoLimit = 10;
     int consecutiveTypoMistakes = 0;
     private final Scanner scanner;
+
     public GetDataImpl(Scanner scanner, MusicBrainzNameSearchRoute musicBrainzNameSearchRoute) {
         this.musicBrainzNameSearchRoute = musicBrainzNameSearchRoute;
         this.scanner = scanner;
@@ -51,19 +56,20 @@ public class GetDataImpl {
                         break;
                     case ARTIST:
                         Map<String, String> response = musicBrainzNameSearchRoute.getMBID(searchParam);
-                        if(response.isEmpty()){
+                        if (response.isEmpty()) {
                             response.putAll(musicBrainzIDSearchRoute.getDataFromArtist(searchParam.get(TypeOfSearchEnum.ARTIST.toString()))); // Do some logic that can determin what type of search is needed
                         } else {
                             response.putAll(musicBrainzIDSearchRoute.getDataFromArtist(response.get("MBID"))); // Do some logic that can determin what type of search is needed
                         }
-                        if(!response.isEmpty()){
-                            CoverArtArchiveService app = new CoverArtArchiveService();
-                            CoverArt coverArt = app.run(response.get("MBID"));
-
-                        } else {
+                        if (response.isEmpty()) {
                             log.info("No information available for the provided input neither as an Artist name or Music Brainz ID:" + searchParam.get(TypeOfSearchEnum.ARTIST.toString()));
+                            return;
                         }
-
+                        if (response.containsKey("wikidata") && !response.containsKey("wikipedia")) {
+                            response.putAll(wikidataSearchRoute.getWikidataFromArtist(response.get("wikidataSearchTerm")));
+                        }
+                        response.putAll(wikipediaSearchRoute.getWikipediadataFromArtist(response.get("enwiki")));
+                        response.putAll(coverArtArchiveService.getCovers(response.get("MBID")));
                         break;
                     case EVENT:
                         break;
@@ -89,7 +95,6 @@ public class GetDataImpl {
                 throw new Exception("An internal error occured, please try again. Sorry for the inconvenience");
             }
         } while (endSearch());
-
         // Create a RestTemplate instance
         RestTemplate restTemplate = new RestTemplate();
 
@@ -101,6 +106,7 @@ public class GetDataImpl {
         ResponseEntity<String> farvelResponse = restTemplate.getForEntity("http://localhost:8080/farvel", String.class);
         System.out.println("Response from /farvel endpoint: " + farvelResponse.getBody());
     }
+
     public Map<String, String> getTypeOfSearch() throws Exception {
         System.out.println("Type in the number corresponding to the type of search you want to perform:\n" +
                 "1 Area\n" +

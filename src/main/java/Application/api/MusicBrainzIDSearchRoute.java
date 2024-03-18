@@ -19,6 +19,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 @RestController
 public class MusicBrainzIDSearchRoute {
@@ -39,15 +40,23 @@ public class MusicBrainzIDSearchRoute {
     private final Integer port = 80;
     private final String pathPrefix = "/ws";
     private final String version = "/2";
-    private final String queryTypeArtist = "artist/";
+    private final String queryTypeArtist = "/artist/";
     private static final String pathPostFix = "?fmt=json&inc=url-rels+release-groups";
+    private Map<String, String> result = new HashMap<>();
 
-    @GetMapping("/MBArtist/{Id}")
-    public Map<String, String> getDataFromArtist(@PathVariable String Id) throws URISyntaxException {
+    //@GetMapping("/MBArtist/{Id}")
+    public Map<String, String> getDataFromArtist(String Id) throws URISyntaxException {
         String fullPath = constructUrl(Id, queryTypeArtist).toString();
         RestTemplate restTemplate = restTemplate();
         URI uri = new URI(fullPath);
-        return getAndextractData(restTemplate, uri);
+        ResponseEntity<String> response = restTemplate.getForEntity(uri, String.class);
+        result.put("statuscode", String.valueOf(response.getStatusCodeValue()));
+        if (response.getBody().isEmpty()) {
+            log.info("No body was given with the provided search parameters");
+            return result;
+        }
+        result.putAll(extractData(response.getBody()));
+        return result;
     }
 
     @GetMapping("/MBgenre/{Id}")
@@ -66,12 +75,14 @@ public class MusicBrainzIDSearchRoute {
         return restTemplate.getForEntity(uri, String.class);
     }
 
-    @GetMapping("/MBrelease/{Id}")
+
     public Map<String, String> getRelease(@PathVariable String Id) throws URISyntaxException {
         String fullPath = constructUrl(Id, queryTypeArtist).toString();
         RestTemplate restTemplate = restTemplate();
         URI uri = new URI(fullPath);
-        return getAndextractData(restTemplate, uri);
+        ResponseEntity<String> response = restTemplate.getForEntity(uri, String.class);
+        String responseBody = response.getBody();
+        return extractData(responseBody);
     }
 
     @GetMapping("/MBreleaseGroup/{Id}")
@@ -82,7 +93,7 @@ public class MusicBrainzIDSearchRoute {
         return restTemplate.getForEntity(uri, String.class);
     }
 
-    private StringBuffer constructUrl(String iD, String queryType) throws URISyntaxException {
+    private StringBuffer constructUrl(String iD, String queryType) {
         StringBuffer url = new StringBuffer();
         url.append(protocol).append(schemeDelimiter).append(host);
         if (port != null) {
@@ -109,26 +120,39 @@ public class MusicBrainzIDSearchRoute {
                 .build();
     }
 
-    private Map<String, String> getAndextractData(RestTemplate restTemplate, URI uri) {
+    private Map<String, String> extractData(String response) {
         Map<String, String> extractedData = new HashMap<>();
-        String wikipedia = "wikipedia";
-        String wikidata = "wikidata";
         try {
+            // Extract response body
             ObjectMapper mapper = new ObjectMapper();
-            JsonNode rootNode = mapper.readTree(restTemplate.getForEntity(uri, String.class).getBody());
-            // Iterate through the array of objects
-            for (JsonNode node : rootNode) {
-                // Check if the object has a direct wikipedia link
-                if(wikipedia.equals(node.get("type").asText())){
-                    extractedData.put(wikipedia, node.get("url").get("resource").asText());
-                }else if (wikidata.equals(node.get("type").asText())) {
-                    // Extract the entity field
-                    extractedData.put("MBID", node.get("entity").asText());
-                }
-            }
+            JsonNode rootNode = mapper.readTree(response);
+            extractedData.put("name", rootNode.get("name").asText());
+            extractedData.putAll(extractwikiData(rootNode));
         } catch (Exception e) {
             e.printStackTrace();
         }
         return extractedData;
+    }
+
+    private Map<String, String> extractwikiData(JsonNode rootNode) {
+        Map<String, String> result = new HashMap<>();
+        JsonNode relations = rootNode.get("relations");
+        final String wikipedia = "wikipedia";
+        final String wikidata = "wikidata";
+        // Iterate through the array of objects
+        for (JsonNode node : relations) {
+            if (!node.isNull() || !node.isEmpty()) {
+                // Check if the object has a direct wikipedia link
+                if ((node.get("type").asText()).toString().contains(wikipedia)) {
+                    result.put(wikipedia, node.get("url").get("resource").asText());
+                    break;
+                } else if (node.get("type").asText().toString().contains(wikidata)) {
+                    String wikiData = node.get("url").get("resource").asText();
+                    String wikiDataTerm = wikiData.replaceAll("^.*?/(Q\\d+)$", "$1");
+                    result.put("wikidataSearchTerm", wikiDataTerm);
+                }
+            }
+        }
+        return result;
     }
 }
