@@ -41,7 +41,6 @@ public class testWikiDataSearchRoute {
         //Then
         assertThat(decodeString(rest.get("wikipediaSearchTerm"))).isEqualTo(succescriteria);
         assertThat(rest.get("wikidataStatusCode")).isEqualTo("200");
-
     }
     public static String decodeString(String input) {
         try {

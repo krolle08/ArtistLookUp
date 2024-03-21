@@ -33,8 +33,10 @@ public class testMockMusicBrainzIDSearchRoute {
         ResponseEntity<String> responseEntity = new ResponseEntity<>(responseBody, HttpStatus.OK);
 
         // Stub the behavior of RestTemplate.getForEntity to return the mock ResponseEntity
-        Mockito.lenient().when(restTemplate.getForEntity(new URI("http://musicbrainz.org/ws/2/artist/" + artistId + "?inc=aliases"), String.class))
+      /*  Mockito.lenient().when(restTemplate.getForEntity(new URI("http://musicbrainz.org/ws/2/artist/" + artistId + "?inc=aliases"), String.class))
                 .thenReturn(responseEntity);
+
+       */
 
 
         // Create a mock ResponseEntity

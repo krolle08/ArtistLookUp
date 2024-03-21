@@ -20,7 +20,6 @@ import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -43,12 +42,12 @@ public class MusicBrainzNameSearchRoute {
     private Integer port = 80;
     private String pathPrefix = "/ws";
     private String version = "/2";
-    private String annotation = "/annotation";
+    private String annotation = "/artist";
     private String query = "/?query=";
-    private String queryType = "Artist:";
     private String json = "fmt=json";
-    public Map<String, String> getMBID(Map<String, String> filterParams) {
-        Map<String, String> extractedData = new HashMap<>();
+
+    public Map<String, Object> getMBID(Map<String, String> filterParams) {
+        Map<String, Object> extractedData = new HashMap<>();
         URI uri = null;
         try {
             uri = new URI(constructUrl(filterParams).toString());
@@ -57,8 +56,8 @@ public class MusicBrainzNameSearchRoute {
         }
         RestTemplate restTemplate = restTemplate();
         ResponseEntity<String> responseEntity = restTemplate.getForEntity(uri, String.class);
-        if (responseEntity.getBody().isEmpty()) {
-            log.info("No response was given ");
+        if (isBodyEmpty(responseEntity)) {
+            log.info("No response was given");
             return extractedData;
         }
         try {
@@ -68,16 +67,29 @@ public class MusicBrainzNameSearchRoute {
         }
     }
 
+    private boolean isBodyEmpty(ResponseEntity responseEntity) {
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            JsonNode rootNode = mapper.readTree(responseEntity.getBody().toString());
+            if (rootNode.path("artists").isEmpty()) {
+                return true;
+            }
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
     private StringBuffer constructUrl(Map<String, String> filterParams) {
         StringBuffer url = new StringBuffer();
         url.append(protocol).append(schemeDelimiter).append(host);
         if (port != null) {
             url.append(":").append(port);
         }
-
         url.append(pathPrefix).append(version).append(annotation).append(query);
-        if (filterParams == null) {
+        if (filterParams.isEmpty()) {
             log.info("No parameter for the search has been provided");
+            return new StringBuffer();
         } else {
             // Append each parameter from filterParams
             for (Map.Entry<String, String> entry : filterParams.entrySet()) {
@@ -97,38 +109,42 @@ public class MusicBrainzNameSearchRoute {
         return new RestTemplateBuilder().requestFactory(() -> new HttpComponentsClientHttpRequestFactory(HttpClientBuilder.create().setDefaultRequestConfig(config).build())).build();
     }
 
-    private Map<String, String> extractMBID(ResponseEntity responseEntity, Map<String, String> filterParams, Map<String, String> extractedData) throws JsonProcessingException {
+    private Map<String, Object> extractMBID(ResponseEntity responseEntity, Map<String, String> filterParams, Map<String, Object> extractedData) throws JsonProcessingException {
         extractedData.put("MBstatuscode", String.valueOf(responseEntity.getStatusCodeValue()));
         extractedData.putAll(filterParams);
         ObjectMapper mapper = new ObjectMapper();
+        JsonNode rootNode = mapper.readTree(responseEntity.getBody().toString());
+        if (rootNode.path("artists").isEmpty()) {
+            return extractedData;
+        }
         try {
-            String artist = "artist";
-            JsonNode rootNode = mapper.readTree(responseEntity.getBody().toString());
-            Iterator<JsonNode> annotationIterator = rootNode.path("annotations").elements();
+            String artist = filterParams.get(TypeOfSearchEnum.ARTIST.getSearchType());
+            Iterator<JsonNode> annotationIterator = rootNode.path("artists").elements();
             // Flag variable to indicate whether the desired ID has been found
-            boolean idFound = false;
+            int highestScore = Integer.MIN_VALUE;
+            String highestScoreId = null;
 
             // Iterate through the annotations
-            while (annotationIterator.hasNext() && !idFound) {
+            while (annotationIterator.hasNext()) {
                 JsonNode annotation = annotationIterator.next();
-                String type = annotation.path("type").asText();
-                if (artist.equals(type) && annotation.path("text").asText().contains(filterParams.get(TypeOfSearchEnum.ARTIST.getSearchType()))) {
-                    String text = annotation.path("text").asText();
-                    String id = extractMBIdFromText(text, filterParams.get(TypeOfSearchEnum.ARTIST.getSearchType()));
-                    if (id != null) {
-                        extractedData.put("MBID", id);
-                        idFound = true; // Set the flag to true once the desired ID is found
-                    }
+                int score = annotation.path("score").asInt(); // Get the score
+                String type = annotation.path("name").asText();
+
+                if (artist.equalsIgnoreCase(type) && score > highestScore) {
+                    highestScore = score;
+                    highestScoreId = annotation.path("id").asText();
                 }
             }
+            extractedData.put("MBID", highestScoreId);
         } catch (Exception e) {
             e.printStackTrace();
         }
         return extractedData;
     }
-    private String extractMBIdFromText(String text, String name) {
+
+    private String extractMBIdFromText(String text, String searchTerm) {
         // Regular expression to extract the ID between [artist: and | characters
-        String regex = "\\[artist:([a-f0-9\\-]+)\\|" + name + "\\]";
+        String regex = "([a-f0-9]{8}(-[a-f0-9]{4}){3}-[a-f0-9]{12})" + Pattern.quote(searchTerm);
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(text);
         if (matcher.find()) {

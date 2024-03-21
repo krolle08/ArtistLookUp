@@ -5,7 +5,10 @@ import fm.last.musicbrainz.coverart.CoverArtArchiveClient;
 import fm.last.musicbrainz.coverart.CoverArtImage;
 import fm.last.musicbrainz.coverart.impl.DefaultCoverArtArchiveClient;
 import org.apache.commons.io.FileUtils;
+import org.apache.juli.logging.Log;
+import org.apache.juli.logging.LogFactory;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
 
@@ -14,8 +17,19 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.UUID;
-
+@RestController
 public class CoverArtArchiveService {
+
+    private Log log = LogFactory.getLog(MusicBrainzIDSearchRoute.class);
+    private final String protocol = "http";
+    private final String schemeDelimiter = "://";
+    private final String host = "musicbrainz.org";
+    private final Integer port = 80;
+    private final String pathPrefix = "/ws";
+    private final String version = "/2";
+    private final String queryTypeArtist = "/artist/";
+    private static final String pathPostFix = "?fmt=json&inc=url-rels+release-groups";
+    private Map<String, String> result = new HashMap<>();
     DefaultCoverArtArchiveClient defaultCoverArtArchiveClient = new DefaultCoverArtArchiveClient();
     CoverArtArchiveClient client = new DefaultCoverArtArchiveClient();
     public Map<String, String> getCovers(String mBID) {

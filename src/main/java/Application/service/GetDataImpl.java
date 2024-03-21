@@ -5,11 +5,9 @@ import Application.utils.ScannerWrapper;
 import org.apache.juli.logging.Log;
 import org.apache.juli.logging.LogFactory;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.client.RestTemplate;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Scanner;
 
 /**
  * I include the Scanner in the constructor when the class relies on user input and it is unlikely that
@@ -50,29 +48,29 @@ public class GetDataImpl {
 
     public void run() throws Exception {
         do {
-            Map<String, String> searchParam = getTypeOfSearch();
-            Map.Entry<String, String> entry = searchParam.entrySet().iterator().next();
+            Map<String, Object> searchParam = getTypeOfSearch();
+            Map.Entry<String, Object> entry = searchParam.entrySet().iterator().next();
             TypeOfSearchEnum typeOfSearch = TypeOfSearchEnum.convertToEnum(entry.getKey());
             try {
                 switch (typeOfSearch) {
                     case AREA:
                         break;
                     case ARTIST:
-                        Map<String, String> response = musicBrainzNameSearchRoute.getMBID(searchParam);
-                        if (response.isEmpty()) {
-                            response.putAll(musicBrainzIDSearchRoute.getDataFromArtist(searchParam.get(TypeOfSearchEnum.ARTIST.toString()))); // Do some logic that can determin what type of search is needed
-                        } else {
-                            response.putAll(musicBrainzIDSearchRoute.getDataFromArtist(response.get("MBID"))); // Do some logic that can determin what type of search is needed
+                        Map<String, Object> response = musicBrainzNameSearchRoute.getMBID(searchParam);
+                        if (!response.containsKey("MBID")) {
+                            response.putAll(musicBrainzIDSearchRoute.getDataFromArtist(searchParam.get(TypeOfSearchEnum.ARTIST).toString()));
                         }
-                        if (response.isEmpty()) {
-                            log.info("No information available for the provided input neither as an Artist name or Music Brainz ID:" + searchParam.get(TypeOfSearchEnum.ARTIST.toString()));
+                        response.putAll(musicBrainzIDSearchRoute.getDataFromArtist(response.get("MBID").toString()));
+                        if (!response.containsKey("name")) {
+                            log.info("No information available for the provided input neither as an Artist or Music Brainz ID:" + searchParam.get(TypeOfSearchEnum.ARTIST.toString()));
                             return;
                         }
                         if (response.containsKey("wikidata") && !response.containsKey("wikipedia")) {
-                            response.putAll(wikidataSearchRoute.getWikidataFromArtist(response.get("wikidataSearchTerm")));
+                            response.putAll(wikidataSearchRoute.getWikidataFromArtist(response.get("wikidataSearchTerm").toString()));
                         }
-                        response.putAll(wikipediaSearchRoute.getWikipediadataFromArtist(response.get("enwiki")));
-                        response.putAll(coverArtArchiveService.getCovers(response.get("MBID")));
+                        response.putAll(wikipediaSearchRoute.getWikipediadataFromArtist(response.get("enwiki").toString()));
+                        response.putAll(coverArtArchiveService.getCovers(response.get("MBID").toString()));
+                        response.put("test","test");
                         break;
                     case EVENT:
                         break;
@@ -100,7 +98,7 @@ public class GetDataImpl {
         } while (endSearch());
     }
 
-    public Map<String, String> getTypeOfSearch() throws Exception {
+    public Map<String, Object> getTypeOfSearch() throws Exception {
         System.out.println("Type in the number corresponding to the type of search you want to perform:\n" +
                 "1 Area\n" +
                 "2 Artist\n" +
@@ -120,7 +118,7 @@ public class GetDataImpl {
         // Check if the input corresponds to a valid search type
         if (!searchTypes.containsKey(userInputType)) {
             log.info("Invalid search type:" + userInputType);
-            if(++typos> 10){
+            if (++typos > 10) {
                 System.exit(0);
             }
             getTypeOfSearch();
@@ -130,7 +128,7 @@ public class GetDataImpl {
         String userInputValue = scannerWrapper.nextLine().trim();
 
         // Return the corresponding search type
-        Map<String, String> result = new HashMap<>();
+        Map<String, Object> result = new HashMap<>();
         result.put(searchTypes.get(userInputType), userInputValue);
         return result;
     }
@@ -157,7 +155,7 @@ public class GetDataImpl {
         return artistIdSubstring;
     }
 
-    private boolean endSearch() {
+    public boolean endSearch() {
         while (typoLimit > consecutiveTypoMistakes) {
             System.out.println("Want to make a new search? (Yes/No)");
             String input = scannerWrapper.nextLine();
@@ -173,10 +171,9 @@ public class GetDataImpl {
         return true;
     }
 
-    private void terminate(){
-        System.out.println("Too many consecutive typos. Terminating program.");
+    private void terminate() {
+        System.out.println("Too many consecutive typos. Restarting search engine.");
         scannerWrapper.close();
-        System.exit(0);
     }
 }
 

@@ -41,7 +41,7 @@ public class WikipediaSearchRoute {
         }
         // Extract HTTP status code
         result.put("wikidatastatusCode", String.valueOf(response.getStatusCodeValue()));
-        result.putAll(extractData(response, searchTerm));
+        result.putAll(extractData(response));
         return result;
     }
 
@@ -56,7 +56,7 @@ public class WikipediaSearchRoute {
         return url;
     }
 
-    private Map<String, String> extractData(ResponseEntity response, String searchTerm) {
+    private Map<String, String> extractData(ResponseEntity response) {
         Map<String, String> extractedData = new HashMap<>();
         try {
             ObjectMapper mapper = new ObjectMapper();

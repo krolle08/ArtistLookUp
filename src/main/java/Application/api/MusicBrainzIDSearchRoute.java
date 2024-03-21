@@ -3,6 +3,7 @@ package Application.api;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.http.HttpHost;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.juli.logging.Log;
 import org.apache.juli.logging.LogFactory;
@@ -13,13 +14,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
-import org.apache.http.client.config.RequestConfig;
 
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
 @RestController
 public class MusicBrainzIDSearchRoute {
@@ -42,10 +41,10 @@ public class MusicBrainzIDSearchRoute {
     private final String version = "/2";
     private final String queryTypeArtist = "/artist/";
     private static final String pathPostFix = "?fmt=json&inc=url-rels+release-groups";
-    private Map<String, String> result = new HashMap<>();
+    private Map<String, Object> result = new HashMap<>();
 
     //@GetMapping("/MBArtist/{Id}")
-    public Map<String, String> getDataFromArtist(String Id) throws URISyntaxException {
+    public Map<String, Object> getDataFromArtist(String Id) throws URISyntaxException {
         String fullPath = constructUrl(Id, queryTypeArtist).toString();
         RestTemplate restTemplate = restTemplate();
         URI uri = new URI(fullPath);
@@ -112,12 +111,7 @@ public class MusicBrainzIDSearchRoute {
     public RestTemplate restTemplate() {
         HttpHost proxy = new HttpHost(host, port);
         RequestConfig config = RequestConfig.custom().setProxy(proxy).build();
-        return new RestTemplateBuilder().requestFactory(() ->
-                        new HttpComponentsClientHttpRequestFactory(HttpClientBuilder
-                                .create()
-                                .setDefaultRequestConfig(config)
-                                .build()))
-                .build();
+        return new RestTemplateBuilder().requestFactory(() -> new HttpComponentsClientHttpRequestFactory(HttpClientBuilder.create().setDefaultRequestConfig(config).build())).build();
     }
 
     private Map<String, String> extractData(String response) {
@@ -128,6 +122,10 @@ public class MusicBrainzIDSearchRoute {
             JsonNode rootNode = mapper.readTree(response);
             extractedData.put("name", rootNode.get("name").asText());
             extractedData.putAll(extractwikiData(rootNode));
+
+            // Add coverData map directly to extractedData
+            Map<String, String> coverData = extractCoverIdAndTitle(rootNode);
+            extractedData.put("Covers",coverData.toString());
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -155,4 +153,16 @@ public class MusicBrainzIDSearchRoute {
         }
         return result;
     }
+
+    private Map<String, String> extractCoverIdAndTitle(JsonNode rootNode) {
+        Map<String, String> result = new HashMap<>();
+        JsonNode relations = rootNode.get("release-groups");
+        for (JsonNode node : relations) {
+            if (!node.isNull() || !node.isEmpty()) {
+                result.put(node.get("title").asText(), node.get("id").asText());
+            }
+        }
+        return result;
+    }
+
 }

@@ -5,6 +5,7 @@ import Application.api.*;
 import Application.service.GetDataImpl;
 import Application.service.TypeOfSearchEnum;
 import Application.utils.ScannerWrapper;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -13,19 +14,62 @@ import org.springframework.http.ResponseEntity;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Scanner;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+
 @SpringBootTest(classes = YourApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class testGetDataImpl {
     @Test
-    public void testRun() throws Exception {
+    public void testTypeOfSearch() throws Exception {
         //Arrange
         Map<String, String> response = new HashMap<>();
+        String searchType = "2";
+        String search = "Nirvana";
+        // Mock dependencies
+        ScannerWrapper scannerWrapper = mock(ScannerWrapper.class);
+
+        // Configure behavior of mocks
+        when(scannerWrapper.nextLine()).thenReturn(searchType, search); // Simulate user input
+
+        // Create instance of the class to be tested
+        GetDataImpl testClass = new GetDataImpl(scannerWrapper);
+
+        // Invoke the method
+        response = testClass.getTypeOfSearch();
+
+        // Verify that the method behaves as expected
+        Assertions.assertThat(response.get(TypeOfSearchEnum.ARTIST.getSearchType()).equals(search));
+    }
+
+    @Test
+    public void testEndSearch() throws Exception {
+        //Arrange
+        Map<String, String> response = new HashMap<>();
+        String endSearch = "WrongTypo";
+        // Mock dependencies
+        ScannerWrapper scannerWrapper = mock(ScannerWrapper.class);
+
+        // Configure behavior of mocks
+        when(scannerWrapper.nextLine()).thenReturn(endSearch, endSearch, endSearch, endSearch, endSearch, endSearch, endSearch, endSearch, endSearch, endSearch, endSearch); // Simulate user input
+
+        // Create instance of the class to be tested
+        GetDataImpl testClass = new GetDataImpl(scannerWrapper);
+
+        // Invoke the method
+        boolean result = testClass.endSearch();
+
+        // Verify that the method behaves as expected
+        Assertions.assertThat(response.get(TypeOfSearchEnum.ARTIST.getSearchType()).equals(endSearch));
+    }
+    @Test
+    public void testMockedService() {
+        Map<String, String> response = new HashMap<>();
+        String searchType = "2";
+        String search = "Nirvana";
         // Mock dependencies
         MusicBrainzNameSearchRoute musicBrainzNameSearchRoute = mock(MusicBrainzNameSearchRoute.class);
         MusicBrainzIDSearchRoute musicBrainzIDSearchRoute = mock(MusicBrainzIDSearchRoute.class);
@@ -35,23 +79,15 @@ public class testGetDataImpl {
         ScannerWrapper scannerWrapper = mock(ScannerWrapper.class);
 
         // Configure behavior of mocks
-        when(scannerWrapper.nextLine()).thenReturn("2", "Nirvana"); // Simulate user input
+        when(scannerWrapper.nextLine()).thenReturn(searchType, search); // Simulate user input
         when(musicBrainzNameSearchRoute.getMBID(anyMap())).thenReturn(response); // Simulate empty response
 
 
         // Create instance of the class to be tested
         GetDataImpl testClass = new GetDataImpl(scannerWrapper);
-
-        // Invoke the method
-        testClass.run();
-
-        // Verify that the method behaves as expected
-        // For example, you can verify that certain methods were called with specific arguments
-        Mockito.verify(musicBrainzIDSearchRoute).getDataFromArtist("someArtistName");
-        // You can also verify other interactions with mocks based on the expected behavior of the method
     }
     @Test
-    public void testRun_Artist() throws Exception {
+    public void testtestEndSearch() throws Exception {
         // Arrange
         String expectedMBID = "MockedMBID";
         ResponseEntity<String> mockedResponse = new ResponseEntity<>(expectedMBID, HttpStatus.OK);
@@ -79,6 +115,5 @@ public class testGetDataImpl {
 
 
     }
-
 
 }
