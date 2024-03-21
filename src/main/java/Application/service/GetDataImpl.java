@@ -26,6 +26,8 @@ public class GetDataImpl {
     private final WikipediaSearchRoute wikipediaSearchRoute = new WikipediaSearchRoute();
     int typoLimit = 10;
     int consecutiveTypoMistakes = 0;
+
+    int typos = 0;
     private final ScannerWrapper scannerWrapper;
 
 
@@ -96,16 +98,6 @@ public class GetDataImpl {
                 throw new Exception("An internal error occured, please try again. Sorry for the inconvenience");
             }
         } while (endSearch());
-        // Create a RestTemplate instance
-        RestTemplate restTemplate = new RestTemplate();
-
-        // Make a GET request to /hello endpoint
-        ResponseEntity<String> helloResponse = restTemplate.getForEntity("http://localhost:8080/hello", String.class);
-        System.out.println("Response from /hello endpoint: " + helloResponse.getBody());
-
-        // Make a GET request to /farvel endpoint
-        ResponseEntity<String> farvelResponse = restTemplate.getForEntity("http://localhost:8080/farvel", String.class);
-        System.out.println("Response from /farvel endpoint: " + farvelResponse.getBody());
     }
 
     public Map<String, String> getTypeOfSearch() throws Exception {
@@ -123,15 +115,19 @@ public class GetDataImpl {
                 "11 Work\n");
 
         // Get user input
-        String userInputType = scanner.nextLine().trim();
+        String userInputType = scannerWrapper.nextLine().trim();
 
         // Check if the input corresponds to a valid search type
         if (!searchTypes.containsKey(userInputType)) {
-            throw new Exception("Invalid search type.");
+            log.info("Invalid search type:" + userInputType);
+            if(++typos> 10){
+                System.exit(0);
+            }
+            getTypeOfSearch();
         }
 
         System.out.println("What " + searchTypes.get(userInputType) + " do you want to search for?");
-        String userInputValue = scanner.nextLine().trim();
+        String userInputValue = scannerWrapper.nextLine().trim();
 
         // Return the corresponding search type
         Map<String, String> result = new HashMap<>();
@@ -164,7 +160,7 @@ public class GetDataImpl {
     private boolean endSearch() {
         while (typoLimit > consecutiveTypoMistakes) {
             System.out.println("Want to make a new search? (Yes/No)");
-            String input = scanner.nextLine();
+            String input = scannerWrapper.nextLine();
             if (input.equals("Yes")) {
                 return false;
             } else if (input.equals("No")) {
@@ -173,9 +169,14 @@ public class GetDataImpl {
                 consecutiveTypoMistakes++;
             }
         }
-        System.out.println("Too many consecutive typos. Terminating program.");
-        scanner.close();
+        terminate();
         return true;
+    }
+
+    private void terminate(){
+        System.out.println("Too many consecutive typos. Terminating program.");
+        scannerWrapper.close();
+        System.exit(0);
     }
 }
 

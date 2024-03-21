@@ -147,7 +147,7 @@ public class MusicBrainzIDSearchRoute {
                     result.put(wikipedia, node.get("url").get("resource").asText());
                     break;
                 } else if (node.get("type").asText().toString().contains(wikidata)) {
-                    String wikiData = node.get("url").get("resource").asText();
+                    String wikiData = node.get("url").get("resource").asText().toString();
                     String wikiDataTerm = wikiData.replaceAll("^.*?/(Q\\d+)$", "$1");
                     result.put("wikidataSearchTerm", wikiDataTerm);
                 }

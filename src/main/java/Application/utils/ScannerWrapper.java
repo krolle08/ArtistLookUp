@@ -4,11 +4,19 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.util.Scanner;
 
-public class ScannerWrapper extends com.sun.tools.javac.parser.Scanner {
+public class ScannerWrapper {
     private Scanner scanner;
+    // Boolean indicating if this scanner has been closed
+    private boolean closed = false;
+    // The input source
+    private Readable source;
+    // Boolean is true if source is done
+    private boolean sourceClosed = false;
+    // A holder of the last IOException encountered
+    private IOException lastException;
 
-    public ScannerWrapper(Scanner scanner) {
-        this.scanner = scanner;
+    public ScannerWrapper() {
+        this.scanner = new Scanner(System.in);
     }
 
     public String nextLine() {

@@ -4,6 +4,7 @@ import Application.YourApplication;
 import Application.api.*;
 import Application.service.GetDataImpl;
 import Application.service.TypeOfSearchEnum;
+import Application.utils.ScannerWrapper;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -31,15 +32,15 @@ public class testGetDataImpl {
         WikidataSearchRoute wikidataSearchRoute = mock(WikidataSearchRoute.class);
         WikipediaSearchRoute wikipediaSearchRoute = mock(WikipediaSearchRoute.class);
         CoverArtArchiveService coverArtArchiveService = mock(CoverArtArchiveService.class);
-        Scanner scanner = mock(Scanner.class);
+        ScannerWrapper scannerWrapper = mock(ScannerWrapper.class);
 
         // Configure behavior of mocks
-        when(scanner.nextLine()).thenReturn("2", "Nirvana"); // Simulate user input
+        when(scannerWrapper.nextLine()).thenReturn("2", "Nirvana"); // Simulate user input
         when(musicBrainzNameSearchRoute.getMBID(anyMap())).thenReturn(response); // Simulate empty response
 
 
         // Create instance of the class to be tested
-        GetDataImpl testClass = new GetDataImpl(scanner);
+        GetDataImpl testClass = new GetDataImpl(scannerWrapper);
 
         // Invoke the method
         testClass.run();
@@ -56,7 +57,7 @@ public class testGetDataImpl {
         ResponseEntity<String> mockedResponse = new ResponseEntity<>(expectedMBID, HttpStatus.OK);
         Map<String, String> typeOFsearch = new HashMap<>();
         typeOFsearch.put("2", TypeOfSearchEnum.ARTIST.toString());
-        Scanner scannerMock = mock(Scanner.class);
+        ScannerWrapper scannerMock = mock(ScannerWrapper.class);
         when(scannerMock.nextLine())
                 .thenReturn("2")  // Simulate user selecting Artist
                 .thenReturn("Nirvana");  // Simulate user entering search value

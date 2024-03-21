@@ -1,12 +1,14 @@
 package Application;
 
 import Application.api.MusicBrainzNameSearchRoute;
+import Application.utils.ScannerWrapper;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.boot.SpringApplication;
 import Application.service.GetDataImpl;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+import java.io.InputStream;
 import java.util.Map;
 import java.util.Scanner;
 
@@ -17,8 +19,8 @@ public class YourApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(YourApplication.class, args);
-        Scanner scanner = new Scanner(System.in);
-        GetDataImpl getData = new GetDataImpl(scanner, new MusicBrainzNameSearchRoute());
+        ScannerWrapper scanner = new ScannerWrapper();
+        GetDataImpl getData = new GetDataImpl(scanner);
         do {
             try {
                 getData.run();
@@ -35,7 +37,7 @@ public class YourApplication {
         return objectMapper.writeValueAsString(map);
     }
 
-        private static boolean endSearch(Scanner scanner) {
+        private static boolean endSearch(ScannerWrapper scanner) {
             while (typoLimit > consecutiveTypoMistakes) {
                 System.out.println("Want to make a new search? (Yes/No)");
                 String input = scanner.nextLine();
@@ -51,5 +53,3 @@ public class YourApplication {
             return true;
         }
 }
-
-
