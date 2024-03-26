@@ -1,5 +1,6 @@
 package Application.api;
 
+import Application.service.AlbumInfo;
 import fm.last.musicbrainz.coverart.CoverArt;
 import fm.last.musicbrainz.coverart.CoverArtArchiveClient;
 import fm.last.musicbrainz.coverart.CoverArtImage;
@@ -14,34 +15,32 @@ import java.util.UUID;
 
 @RestController
 public class CoverArtArchiveService {
-
     private Log log = LogFactory.getLog(MusicBrainzIDSearchRoute.class);
-    private final String protocol = "http";
-    private final String schemeDelimiter = "://";
-    private final String host = "musicbrainz.org";
-    private final Integer port = 80;
-    private final String pathPrefix = "/ws";
-    private final String version = "/2";
-    private final String queryTypeArtist = "/artist/";
-    private static final String pathPostFix = "?fmt=json&inc=url-rels+release-groups";
-    private Map<String, String> result = new HashMap<>();
-    DefaultCoverArtArchiveClient defaultCoverArtArchiveClient = new DefaultCoverArtArchiveClient();
     CoverArtArchiveClient client = new DefaultCoverArtArchiveClient();
 
+
     public Map<String, String> getCovers(Map<String, String> covers) {
-        Map<String, String> imageURLAndId = new HashMap<>();
+        Map<String, Object> imageURLAndId = new HashMap<>();
         try {
             covers.forEach((title, id) -> {
                 UUID coverId = UUID.fromString(id);
                 Map<String, Object> extractedData = new HashMap<>();
                 CoverArt coverArt = null;
-                coverArt = client.getByMbid(coverId);
+                //coverArt = client.getByMbid(coverId);
                 coverArt = client.getReleaseGroupByMbid(coverId);
                 if (coverArt != null) {
                     for (CoverArtImage coverArtImage : coverArt.getImages()) {
-                        imageURLAndId.put(id,coverArtImage.getImageUrl());
+                        AlbumInfo album = new AlbumInfo(id, title, coverArtImage.getImageUrl());
+                        if (album instanceof Map) {
+                            imageURLAndId.put(id, album);
+                        } else {
+                            log.warn("Object CoverArtArchiveImpl is not an instanceof Map");
+                        }
                     }
+                } else {
+                    log.warn("No images found for album title: " + title + " with the coverid: " + id);
                 }
+                ;
             });
         } catch (Exception e) {
             e.printStackTrace();

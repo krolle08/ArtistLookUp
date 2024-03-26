@@ -27,7 +27,7 @@ public class testMusicBrainzIDSearchRoute {
         String nirvana = "5b11f4ce-a62d-471e-81fc-a69a8278c7da";
         String succescriteria = "Q11649";
         //When
-        Map<String, Object> result = musicBrainzIDSearchRoute.getDataFromArtist(nirvana);
+        Map<String, Object> result = musicBrainzIDSearchRoute.getDataWithMBID(nirvana);
 
         //Then
         assertThat(result.get("name")).isEqualTo("Nirvana");

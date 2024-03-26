@@ -1,15 +1,15 @@
 package Application.api;
 
+import Application.features.RestTemp;
+import Application.service.AlbumInfo;
+import Application.service.ArtistInfo;
+import Application.service.WikiInfo;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.http.HttpHost;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.juli.logging.Log;
 import org.apache.juli.logging.LogFactory;
-import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
@@ -17,7 +17,9 @@ import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -41,95 +43,97 @@ public class MusicBrainzIDSearchRoute {
     private final String version = "/2";
     private final String queryTypeArtist = "/artist/";
     private static final String pathPostFix = "?fmt=json&inc=url-rels+release-groups";
-    private Map<String, Object> result = new HashMap<>();
 
     @GetMapping("/MBArtist/{Id}")
-    public Map<String, Object> getDataFromArtist(@PathVariable String Id) throws URISyntaxException {
-        String fullPath = constructUrl(Id, queryTypeArtist).toString();
-        RestTemplate restTemplate = restTemplate();
-        URI uri = new URI(fullPath);
-        ResponseEntity<String> response = restTemplate.getForEntity(uri, String.class);
-        result.put("MBstatuscode", String.valueOf(response.getStatusCodeValue()));
-        if (response.getBody().isEmpty()) {
-            log.info("No body was given with the provided search parameters");
-            return result;
+    public void getDataWithMBID(@PathVariable String Id, ArtistInfo artistInfo) throws URISyntaxException {
+        URI uri = createURI(artistInfo.getmBID().toString(), Id);
+        ResponseEntity<String> response = getResponse(uri);
+        artistInfo.setmBStatusCode(String.valueOf(response.getStatusCodeValue()));
+        if (RestTemp.isBodyEmpty(response)) {
+            log.info("No response was given on the provided URI: " + uri + " make sure that the search type and criteria are correct");
+            return;
         }
-        result.putAll(extractData(response.getBody()));
-        return result;
+        extractData(response, artistInfo);
     }
 
-    private StringBuffer constructUrl(String iD, String queryType) {
-        StringBuffer url = new StringBuffer();
-        url.append(protocol).append(schemeDelimiter).append(host);
-        if (port != null) {
-            url.append(":").append(port);
+    private URI createURI(String mBID, String iD) throws URISyntaxException {
+        String fullPath;
+        if (mBID != null) {
+            fullPath = RestTemp.constructUrl(mBID, queryTypeArtist, protocol, schemeDelimiter, host,
+                    port, pathPrefix, version, pathPostFix).toString();
+        } else {
+            fullPath = RestTemp.constructUrl(iD, queryTypeArtist, protocol, schemeDelimiter, host,
+                    port, pathPrefix, version, pathPostFix).toString();
         }
-        if (iD.isEmpty()) {
-            log.info("No ID was given for the search:" + iD);
-
-        }
-
-        url.append(pathPrefix).append(version).append(queryType).append(iD);
-        url.append(pathPostFix);
-        return url;
+        return new URI(fullPath);
     }
 
-    public RestTemplate restTemplate() {
-        HttpHost proxy = new HttpHost(host, port);
-        RequestConfig config = RequestConfig.custom().setProxy(proxy).build();
-        return new RestTemplateBuilder().requestFactory(() -> new HttpComponentsClientHttpRequestFactory(HttpClientBuilder.create().setDefaultRequestConfig(config).build())).build();
+
+    private ResponseEntity getResponse(URI uri) {
+        RestTemplate restTemplate = RestTemp.restTemplate(host, port);
+        return restTemplate.getForEntity(uri, String.class);
     }
 
-    private Map<String, Object> extractData(String response) {
-        Map<String, Object> extractedData = new HashMap<>();
+    private void extractData(ResponseEntity response, ArtistInfo artistInfo) {
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode rootNode = null;
         try {
-            // Extract response body
-            ObjectMapper mapper = new ObjectMapper();
-            JsonNode rootNode = mapper.readTree(response);
-            extractedData.put("name", rootNode.get("name").asText());
-            extractedData.putAll(extractwikiData(rootNode));
-
-            // Add coverData map directly to extractedData
-            Map<String, String> coverData = extractCoverIdAndTitle(rootNode);
-            extractedData.put("Covers", coverData);
-        } catch (Exception e) {
-            e.printStackTrace();
+            rootNode = mapper.readTree(response.getBody().toString());
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
         }
-        return extractedData;
+        artistInfo.setName(extractName(rootNode));
+        artistInfo.setWikiInfo(extractwikiData(rootNode));
+        artistInfo.setAlbums(extractCoverAlbumData(rootNode));
     }
 
-    private Map<String, String> extractwikiData(JsonNode rootNode) {
+    private String extractName(JsonNode rootNode) {
+        if (!rootNode.get("name").isNull()) {
+            return rootNode.get("name").asText();
+        }
+        return null;
+    }
+
+    private WikiInfo extractwikiData(JsonNode rootNode) {
         Map<String, String> result = new HashMap<>();
         JsonNode relations = rootNode.get("relations");
         final String wikipedia = "wikipedia";
         final String wikidata = "wikidata";
+        String wikipediaResult = null;
+        String wikidataResult = null;
         // Iterate through the array of objects
         for (JsonNode node : relations) {
             if (!node.isNull() || !node.isEmpty()) {
                 // Check if the object has a direct wikipedia link
                 if ((node.get("type").asText()).toString().contains(wikipedia)) {
-                    result.put(wikipedia, node.get("url").get("resource").asText());
+                    wikipediaResult = node.get("url").get("resource").asText();
                     break;
                 } else if (node.get("type").asText().toString().contains(wikidata)) {
                     String wikiData = node.get("url").get("resource").asText().toString();
                     String wikiDataTerm = wikiData.replaceAll("^.*?/(Q\\d+)$", "$1");
-                    result.put("wikidataSearchTerm", wikiDataTerm);
+                    wikidataResult = wikiDataTerm;
                 }
             }
         }
-        return result;
+        return new WikiInfo(wikidataResult, wikipediaResult);
     }
 
-    private Map<String, String> extractCoverIdAndTitle(JsonNode rootNode) {
-        Map<String, String> result = new HashMap<>();
+    private List<AlbumInfo> extractCoverAlbumData(JsonNode rootNode) {
+        // Add coverAlbumData
+        return extractCoverIdAndTitle(rootNode);
+    }
+
+    private List<AlbumInfo> extractCoverIdAndTitle(JsonNode rootNode) {
+        List<AlbumInfo> albums = new ArrayList<>();
         JsonNode relations = rootNode.get("release-groups");
         for (JsonNode node : relations) {
             if (!node.isNull() || !node.isEmpty()) {
                 if (node.path("primary-type").asText().equals("Album")) {
-                    result.put(node.get("title").asText(), node.get("id").asText());
+                    AlbumInfo album = new AlbumInfo(node.get("id").asText(), node.get("title").asText(), null);
+                    albums.add(album);
                 }
             }
         }
-        return result;
+        return albums;
     }
 }

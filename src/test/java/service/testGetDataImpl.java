@@ -124,7 +124,7 @@ public class testGetDataImpl {
         // Assert
         // Verify that mBID is set to expected value when the ARTIST case is executed
         // You might need to add a getter for mBID in GetDataImpl class for this assertion
-        Mockito.verify(musicBrainzNameSearchRouteMock).getMBID(any(Map.class)); // Verify that getMBID method is called
+        Mockito.verify(musicBrainzNameSearchRouteMock).getArtistInfo(any(Map.class)); // Verify that getMBID method is called
         // Add more assertions as needed
 
 

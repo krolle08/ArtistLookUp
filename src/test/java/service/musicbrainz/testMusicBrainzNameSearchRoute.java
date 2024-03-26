@@ -12,8 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -46,7 +45,7 @@ public class testMusicBrainzNameSearchRoute {
         nirvana.put(TypeOfSearchEnum.ARTIST.getSearchType(), "Nirvana");
         String MBID = "5b11f4ce-a62d-471e-81fc-a69a8278c7da";
         //When
-        Map<String, Object> result = musicBrainzNameSearchRoute.getMBID(nirvana);
+        Map<String, Object> result = musicBrainzNameSearchRoute.getArtistInfo(nirvana);
 
         //Then
         assertThat(result.get(TypeOfSearchEnum.ARTIST.getSearchType())).isEqualTo("Nirvana");
@@ -62,7 +61,7 @@ public class testMusicBrainzNameSearchRoute {
         String MBID = "a466c2a2-6517-42fb-a160-1087c3bafd9f";
 
         //When
-        Map<String, Object> result = musicBrainzNameSearchRoute.getMBID(slipknot);
+        Map<String, Object> result = musicBrainzNameSearchRoute.getArtistInfo(slipknot);
 
         //Then
         assertThat(result.get(TypeOfSearchEnum.ARTIST.getSearchType())).isEqualTo("Slipknot");
@@ -84,7 +83,7 @@ public class testMusicBrainzNameSearchRoute {
         classicLogger.addAppender(listAppender);
 
         //When
-        Map<String, Object> result = musicBrainzNameSearchRoute.getMBID(ErrorInSearch);
+        Map<String, Object> result = musicBrainzNameSearchRoute.getArtistInfo(ErrorInSearch);
 
         //Then
         assertEquals(1, listAppender.list.size()); // Assuming only one log message is expected

@@ -48,7 +48,7 @@ public class GetDataImpl {
         searchTypes.put("11", "Work");
     }
 
-    public String run() {
+    public void run() {
         do {
             Map<String, String> searchParam = getTypeOfSearch();
             Map.Entry<String, String> entry = searchParam.entrySet().iterator().next();
@@ -58,15 +58,18 @@ public class GetDataImpl {
                     case AREA:
                         break;
                     case ARTIST:
-                        response = musicBrainzNameSearchRoute.getMBID(searchParam);
-                        if (!response.containsKey("MBID")) {
-                            response.putAll(musicBrainzIDSearchRoute.getDataFromArtist(searchParam.get(TypeOfSearchEnum.ARTIST).toString()));
+                        MusicEntity entity = new MusicEntity();
+                        entity.setArtistInfo(musicBrainzNameSearchRoute.getArtistInfo(searchParam));
+//                        response = musicBrainzNameSearchRoute.getArtistInfo(searchParam);
+                        if (entity.getArtistInfo() == null || entity.getArtistInfo().getmBID().isEmpty())
+                        {
+                            musicBrainzIDSearchRoute.getDataWithMBID(searchParam.get(TypeOfSearchEnum.ARTIST).toString(), entity.getArtistInfo());
                         } else {
-                            response.putAll(musicBrainzIDSearchRoute.getDataFromArtist(response.get("MBID").toString()));
+                            musicBrainzIDSearchRoute.getDataWithMBID(response.get("MBID").toString(), entity.getArtistInfo());
                         }
                         if (!response.containsKey("name")) {
                             log.info("No information available for the provided input neither as an Artist or Music Brainz ID:" + searchParam.get(TypeOfSearchEnum.ARTIST.toString()));
-                            return null;
+                            return;
                         }
                         if (response.containsKey("wikidataSearchTerm") && !response.containsKey("wikipedia")) {
                             response.putAll(wikidataSearchRoute.getWikidataFromArtist(response.get("wikidataSearchTerm").toString()));
@@ -101,7 +104,6 @@ public class GetDataImpl {
             }
             displayData();
         } while (endSearch());
-        return null;
     }
 
     public Map<String, String> getTypeOfSearch() {

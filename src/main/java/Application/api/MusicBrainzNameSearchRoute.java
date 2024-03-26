@@ -1,17 +1,14 @@
 package Application.api;
 
+import Application.features.RestTemp;
+import Application.service.ArtistInfo;
 import Application.service.TypeOfSearchEnum;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.http.HttpHost;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.juli.logging.Log;
 import org.apache.juli.logging.LogFactory;
-import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
@@ -35,94 +32,47 @@ public class MusicBrainzNameSearchRoute {
       @Value("${musicBrainz.servicePath}")
 
      */
-    private Log log = LogFactory.getLog(MusicBrainzNameSearchRoute.class);
-    private String protocol = "http";
-    private String schemeDelimiter = "://";
-    private String host = "musicbrainz.org";
-    private Integer port = 80;
-    private String pathPrefix = "/ws";
-    private String version = "/2";
-    private String annotation = "/artist";
-    private String query = "/?query=";
-    private String json = "fmt=json";
+    private final Log log = LogFactory.getLog(MusicBrainzNameSearchRoute.class);
+    private final String protocol = "http";
+    private final String schemeDelimiter = "://";
+    private final String host = "musicbrainz.org";
+    private final Integer port = 80;
+    private final String pathPrefix = "/ws";
+    private final String version = "/2";
+    private final String annotation = "/artist";
+    private final String query = "/?query=";
+    private final String json = "fmt=json";
 
-    public Map<String, Object> getMBID(Map<String, String> filterParams) {
-        Map<String, Object> result = new HashMap<>();
-        URI uri = null;
-        try {
-            uri = new URI(constructUrl(filterParams).toString());
-        } catch (URISyntaxException e) {
-            throw new RuntimeException(e);
+    public ArtistInfo getArtistInfo(Map<String, String> filterParams) throws URISyntaxException, JsonProcessingException {
+        URI uri = createURI(filterParams);
+        ResponseEntity<String> responseEntity = getResponse(uri);
+        if (RestTemp.isBodyEmpty(responseEntity)) {
+            log.warn("No response was given on the provided URI: " + uri + " make sure that the search type and criteria are correct");
+            return null;
         }
-        RestTemplate restTemplate = restTemplate();
-        ResponseEntity<String> responseEntity = restTemplate.getForEntity(uri, String.class);
-        if (isBodyEmpty(responseEntity)) {
-            log.info("No response was given");
-            return result;
+            return extractData(responseEntity, filterParams, uri);
         }
-        try {
-            return extractMBData(responseEntity, filterParams, result);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+
+    private URI createURI(Map<String, String> filterParams) throws URISyntaxException {
+            return new URI(RestTemp.constructUrl(filterParams, query, protocol, annotation, schemeDelimiter, host,
+                    port, pathPrefix, version, json).toString());
         }
+
+    private ResponseEntity getResponse(URI uri) {
+        RestTemplate restTemplate = RestTemp.restTemplate(host, port);
+        return restTemplate.getForEntity(uri, String.class);
     }
 
-    private boolean isBodyEmpty(ResponseEntity responseEntity) {
-        ObjectMapper mapper = new ObjectMapper();
-        try {
-            JsonNode rootNode = mapper.readTree(responseEntity.getBody().toString());
-            if (rootNode.path("artists").isEmpty()) {
-                return true;
-            }
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-        }
-        return false;
-    }
-
-    private StringBuffer constructUrl(Map<String, String> filterParams) {
-        StringBuffer url = new StringBuffer();
-        url.append(protocol).append(schemeDelimiter).append(host);
-        if (port != null) {
-            url.append(":").append(port);
-        }
-        url.append(pathPrefix).append(version).append(annotation).append(query);
-        if (filterParams.isEmpty()) {
-            log.info("No parameter for the search has been provided");
-            return new StringBuffer();
-        } else {
-            // Append each parameter from filterParams
-            for (Map.Entry<String, String> entry : filterParams.entrySet()) {
-                String paramName = entry.getKey().toLowerCase();
-                String paramValue = entry.getValue();
-                // Append parameter name and value to URL
-                url.append(paramName).append(":").append(paramValue);
-            }
-        }
-        url.append("&").append(json);
-        return url;
-    }
-
-    public RestTemplate restTemplate() {
-        HttpHost proxy = new HttpHost(host, port);
-        RequestConfig config = RequestConfig.custom().setProxy(proxy).build();
-        return new RestTemplateBuilder().requestFactory(() -> new HttpComponentsClientHttpRequestFactory(HttpClientBuilder.create().setDefaultRequestConfig(config).build())).build();
-    }
-
-    private Map<String, Object> extractMBData(ResponseEntity responseEntity, Map<String, String> filterParams, Map<String, Object> extractedData) throws JsonProcessingException {
-        extractedData.put("MBstatuscode", String.valueOf(responseEntity.getStatusCodeValue()));
-        extractedData.putAll(filterParams);
+    private ArtistInfo extractData(ResponseEntity responseEntity, Map<String, String> filterParams, URI uri) throws JsonProcessingException {
         ObjectMapper mapper = new ObjectMapper();
         JsonNode rootNode = mapper.readTree(responseEntity.getBody().toString());
-        if (rootNode.path("artists").isEmpty()) {
-            return extractedData;
-        }
         try {
             String artist = filterParams.get(TypeOfSearchEnum.ARTIST.getSearchType());
             Iterator<JsonNode> annotationIterator = rootNode.path("artists").elements();
             // Flag variable to indicate whether the desired ID has been found
             int highestScore = Integer.MIN_VALUE;
             String highestScoreId = null;
+            String artistName = null;
 
             // Iterate through the annotations
             while (annotationIterator.hasNext()) {
@@ -133,13 +83,16 @@ public class MusicBrainzNameSearchRoute {
                 if (artist.equalsIgnoreCase(type) && score > highestScore) {
                     highestScore = score;
                     highestScoreId = annotation.path("id").asText();
+                    artistName = type;
                 }
             }
-            extractedData.put("MBID", highestScoreId);
+            ArtistInfo artistInfo = new ArtistInfo(artistName, highestScoreId, uri);
+            artistInfo.setmBStatusCode(String.valueOf(responseEntity.getStatusCodeValue()));
+            return artistInfo;
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return extractedData;
+        return new ArtistInfo();
     }
 
     private String extractMBIdFromText(String text, String searchTerm) {
