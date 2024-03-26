@@ -1,6 +1,7 @@
 package Application.api;
 
 import Application.features.CustomRetryTemplate;
+import Application.service.WikiInfo;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.juli.logging.Log;
@@ -14,8 +15,6 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Wikidata dokumentation and requirements:
@@ -32,55 +31,59 @@ public class WikidataSearchRoute {
     private final String host = "wikidata.org";
     private final String pathPrefix = "/w";
     private final String api = "/api.php";
-    public Map<String, Object> getWikidataFromArtist(String searchTerm) throws URISyntaxException {
-        Map<String, Object> result = new HashMap<>();
-        if (searchTerm.isEmpty()) {
-            log.info("No searchterm was provided:" + searchTerm);
-            return result;
-        }
-        String apiUrl = UriComponentsBuilder.fromHttpUrl(protocol + schemeDelimiter + host + pathPrefix + api)
+
+    public void getWikidataForArtist(WikiInfo wikiInfo) throws URISyntaxException {
+        String apiUrl = getWikiDataUri(wikiInfo.getWikidata());
+        ResponseEntity<String> response = getResponse(apiUrl);
+
+        // Extract HTTP status code
+        wikiInfo.setWikiDataStatuccode(String.valueOf(response.getStatusCodeValue()));
+        extractData(response, wikiInfo);
+    }
+
+    private String getWikiDataUri(String wikiDataSearchTerm) {
+        return UriComponentsBuilder.fromHttpUrl(protocol + schemeDelimiter + host + pathPrefix + api)
                 .queryParam("action", "wbgetentities")
                 .queryParam("format", "json")
-                .queryParam("ids", searchTerm)
+                .queryParam("ids", wikiDataSearchTerm)
                 .queryParam("props", "sitelinks")
                 .build()
                 .toUriString();
+    }
+
+    private ResponseEntity getResponse(String apiUrl) {
         RestTemplate restTemplate = new RestTemplate();
         ResponseEntity<String> response = restTemplate.getForEntity(apiUrl, String.class);
         if (response.getBody().contains("ratelimited")) {
             handleRateLimitations(apiUrl);
         } else if (response.getBody().contains("no-such-entity")) {
             log.info("The request on uri:" + apiUrl + "did not match any data on Wikidata");
-            return result;
         }
-
-        // Extract HTTP status code
-        result.put("wikidataStatusCode", String.valueOf(response.getStatusCodeValue()));
-        result.putAll(extractData(response, searchTerm));
-        return result;
+        return response;
     }
+
     private void processResponse(ResponseEntity<String> response, String uri) {
         if (response.getBody().isEmpty()) {
             log.info("The request on uri:" + uri + "did not match any data in Wikidata");
         }
     }
-    private Map<String, String> extractData(ResponseEntity response, String searchTerm) {
-        Map<String, String> result = new HashMap<>();
+
+    private void extractData(ResponseEntity response, WikiInfo wikiInfo) {
         try {
             ObjectMapper mapper = new ObjectMapper();
             JsonNode rootNode = mapper.readTree(response.getBody().toString());
-            String wikipediaSearchTerm = rootNode.path("entities").path(searchTerm.toUpperCase())
+            String wikipediaSearchTerm = rootNode.path("entities").path(wikiInfo.getWikidata().toUpperCase())
                     .path("sitelinks").path("enwiki").get("title").asText();
             if (wikipediaSearchTerm.isEmpty()) {
-                log.info("No word for searching on wikipedia was found in the response for:" + searchTerm);
-                return result;
+                log.info("No word for searching on wikipedia was found in the wikidata response for:" + wikiInfo.getWikidata());
+                return;
             }
-            result.put("wikipediaSearchTerm", encodeString(wikipediaSearchTerm));
+            wikiInfo.setWikipediaSearchTerm(encodeString(wikipediaSearchTerm));
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return result;
     }
+
     private void handleRateLimitations(String apiUrl) {
         log.warn("Rate limits detected. Retrying...");
         // Construct RetryTemplate
@@ -100,6 +103,7 @@ public class WikidataSearchRoute {
         // Handle the response after retry
         processResponse(newResponse, apiUrl);
     }
+
     public static String encodeString(String input) {
         try {
             return URLEncoder.encode(input, "UTF-8");

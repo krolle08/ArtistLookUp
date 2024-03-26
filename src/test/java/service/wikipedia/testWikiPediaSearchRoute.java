@@ -27,7 +27,7 @@ public class testWikiPediaSearchRoute {
         String nirvanaURL = "Nirvana%20(band)";
 
         //When
-        Map<String, Object> rest = wikipediaSearchRoute.getWikipediadataFromArtist(nirvanaURL);
+        Map<String, Object> rest = wikipediaSearchRoute.wikipediaService(nirvanaURL);
 
         //Then
         assertThat(rest.get("wikidatastatusCode")).isEqualTo("200");

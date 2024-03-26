@@ -32,7 +32,7 @@ public class testWikiDataSearchRoute {
         String succescriteria = "Nirvana (band)";
 
         //When
-        Map<String, Object> rest = wikidataSearchRoute.getWikidataFromArtist(nirvanaTerm);
+        Map<String, Object> rest = wikidataSearchRoute.getWikidataForArtist(nirvanaTerm);
 
         //Then
         assertThat(decodeString((String) rest.get("wikipediaSearchTerm"))).isEqualTo(succescriteria);

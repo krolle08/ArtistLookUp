@@ -1,6 +1,5 @@
-package Application.features;
+package Application.api;
 
-import Application.api.MusicBrainzNameSearchRoute;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -64,6 +63,18 @@ public class RestTemp {
         }
         url.append("&").append(json);
         return url;
+    }
+
+    public static String constructUrl(String searchTerm, String protocol, String schemeDelimiter, String host,
+                                            String pathPrefix, String api, String postPreFix) {
+        StringBuffer url = new StringBuffer();
+        url.append(protocol).append(schemeDelimiter).append(host);
+        if (searchTerm.isEmpty()) {
+            log.info("No search term was given for the search:" + searchTerm);
+        }
+        url.append(pathPrefix).append(api).append(postPreFix);
+        url.append(searchTerm);
+        return url.toString();
     }
 
     public static boolean isBodyEmpty(ResponseEntity responseEntity) {

@@ -2,6 +2,7 @@ package Application.service;
 
 import Application.api.*;
 import Application.utils.ScannerWrapper;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.apache.juli.logging.Log;
 import org.apache.juli.logging.LogFactory;
 
@@ -63,18 +64,22 @@ public class GetDataImpl {
 //                        response = musicBrainzNameSearchRoute.getArtistInfo(searchParam);
                         if (entity.getArtistInfo() == null || entity.getArtistInfo().getmBID().isEmpty())
                         {
-                            musicBrainzIDSearchRoute.getDataWithMBID(searchParam.get(TypeOfSearchEnum.ARTIST).toString(), entity.getArtistInfo());
+                            musicBrainzIDSearchRoute.getDataWithMBID(searchParam.get(TypeOfSearchEnum.ARTIST),
+                                    entity.getArtistInfo());
                         } else {
-                            musicBrainzIDSearchRoute.getDataWithMBID(response.get("MBID").toString(), entity.getArtistInfo());
+                            musicBrainzIDSearchRoute.getDataWithMBID(entity.getArtistInfo().getmBID(),
+                                    entity.getArtistInfo());
                         }
-                        if (!response.containsKey("name")) {
-                            log.info("No information available for the provided input neither as an Artist or Music Brainz ID:" + searchParam.get(TypeOfSearchEnum.ARTIST.toString()));
+                        if (!entity.getArtistInfo().getName().isEmpty()){
+                            log.warn("No information available for the provided input neither as an Artist or Music " +
+                                    "Brainz ID:" + searchParam.get(TypeOfSearchEnum.ARTIST.toString()));
                             return;
                         }
-                        if (response.containsKey("wikidataSearchTerm") && !response.containsKey("wikipedia")) {
-                            response.putAll(wikidataSearchRoute.getWikidataFromArtist(response.get("wikidataSearchTerm").toString()));
+                        if (!entity.getArtistInfo().getWikiInfo().getWikidata().isEmpty() && entity.getArtistInfo()
+                                .getWikiInfo().getWikipedia().isEmpty()) {
+                            wikidataSearchRoute.getWikidataForArtist(entity.getArtistInfo().getWikiInfo());
                         }
-                        response.putAll(wikipediaSearchRoute.getWikipediadataFromArtist(response.get("wikipediaSearchTerm").toString()));
+                        wikipediaSearchRoute.wikipediaService(entity.getArtistInfo().getWikiInfo());
                         // Extract covers map from the response
                         covers.putAll(coverArtArchiveService.getCovers((Map<String, String>) response.get("Covers")));
                         break;
@@ -99,8 +104,10 @@ public class GetDataImpl {
                     default:
                         break;
                 }
-            } catch (RuntimeException | URISyntaxException e) {
+            } catch (JsonProcessingException | URISyntaxException e) {
                 throw new RuntimeException("An internal error occured, please try again. Sorry for the inconvenience");
+            } catch (RuntimeException e) {
+                throw new RuntimeException(e);
             }
             displayData();
         } while (endSearch());

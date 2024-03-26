@@ -1,5 +1,6 @@
 package Application.api;
 
+import Application.service.WikiInfo;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.juli.logging.Log;
@@ -10,9 +11,6 @@ import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
 
 
 @RestController
@@ -23,52 +21,45 @@ public class WikipediaSearchRoute {
     private final String host = "en.wikipedia.org";
     private final String pathPrefix = "/w";
     private final String api = "/api.php";
-    private final String pathPreFix = "?action=query&format=json&prop=extracts&exintro=true&redirects=true&titles=";
+    private final String postPreFix = "?action=query&format=json&prop=extracts&exintro=true&redirects=true&titles=";
 
-    public Map<String, Object> getWikipediadataFromArtist(String searchTerm) throws URISyntaxException {
-        if (searchTerm.isEmpty()) {
-            log.info("No search term was given:" + searchTerm);
-            return null;
-        }
-        Map<String, Object> result = new HashMap<>();
-        String fullPath = constructUrl(searchTerm).toString();
+    public void wikipediaService(WikiInfo wikiInfo) throws URISyntaxException {
+        String fullPath = constructUrl(wikiInfo.getWikipedia());
         URI uri = new URI(fullPath);
+        ResponseEntity<String> response = getResponse(String.valueOf(uri));
+
+        wikiInfo.setWikiPediaStatuccode(String.valueOf(response.getStatusCodeValue()));
+        wikiInfo.setDescription(extractDescription(response));
+        if(wikiInfo.getDescription().isEmpty()){
+            log.warn("No description was found for: " + wikiInfo.getWikipedia());
+        }
+    }
+
+    private String constructUrl(String searchTerm){
+       return RestTemp.constructUrl(searchTerm,  protocol,  schemeDelimiter,  host,
+                pathPrefix,  api,  postPreFix);
+    }
+
+    private ResponseEntity getResponse(String uri) {
         RestTemplate restTemplate = new RestTemplate();
         ResponseEntity<String> response = restTemplate.getForEntity(uri, String.class);
         if (response.getBody().isEmpty()) {
-            log.info("No results on provided searchterm");
-            return null;
+            log.warn("No results on provided uri: " + uri);
         }
-        // Extract HTTP status code
-        result.put("wikidatastatusCode", String.valueOf(response.getStatusCodeValue()));
-        result.putAll(extractData(response));
-        return result;
+        return response;
     }
 
-    private StringBuffer constructUrl(String searchTerm) {
-        StringBuffer url = new StringBuffer();
-        url.append(protocol).append(schemeDelimiter).append(host);
-        if (searchTerm.isEmpty()) {
-            log.info("No search term was given for the search:" + searchTerm);
-        }
-        url.append(pathPrefix).append(api).append(pathPreFix);
-        url.append(searchTerm);
-        return url;
-    }
-
-    private Map<String, String> extractData(ResponseEntity response) {
-        Map<String, String> extractedData = new HashMap<>();
+    private String extractDescription(ResponseEntity response) {
         try {
             ObjectMapper mapper = new ObjectMapper();
             JsonNode rootNode = mapper.readTree(String.valueOf(response.getBody()));
-            extractedData.put("description", Objects.requireNonNull(rootNode.path("query").path("pages").elements().next().get("extract").asText()));
             JsonNode extractNode = rootNode.path("query").path("pages").elements().next().get("extract");
             if (extractNode != null && !extractNode.isNull()) {
-                extractedData.put("description", extractNode.asText());
+                return rootNode.path("query").path("pages").elements().next().get("extract").asText();
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return extractedData;
+        return null;
     }
 }

@@ -1,6 +1,5 @@
 package Application.api;
 
-import Application.features.RestTemp;
 import Application.service.AlbumInfo;
 import Application.service.ArtistInfo;
 import Application.service.WikiInfo;
@@ -45,15 +44,15 @@ public class MusicBrainzIDSearchRoute {
     private static final String pathPostFix = "?fmt=json&inc=url-rels+release-groups";
 
     @GetMapping("/MBArtist/{Id}")
-    public void getDataWithMBID(@PathVariable String Id, ArtistInfo artistInfo) throws URISyntaxException {
+    public ArtistInfo  getDataWithMBID(@PathVariable String Id, ArtistInfo artistInfo) throws URISyntaxException {
         URI uri = createURI(artistInfo.getmBID().toString(), Id);
         ResponseEntity<String> response = getResponse(uri);
-        artistInfo.setmBStatusCode(String.valueOf(response.getStatusCodeValue()));
+       // artistInfo.setmBStatusCode(String.valueOf(response.getStatusCodeValue()));
         if (RestTemp.isBodyEmpty(response)) {
             log.info("No response was given on the provided URI: " + uri + " make sure that the search type and criteria are correct");
-            return;
+            return null;
         }
-        extractData(response, artistInfo);
+        return extractData(response, artistInfo);
     }
 
     private URI createURI(String mBID, String iD) throws URISyntaxException {
@@ -91,6 +90,7 @@ public class MusicBrainzIDSearchRoute {
         if (!rootNode.get("name").isNull()) {
             return rootNode.get("name").asText();
         }
+        log.warn("No name was found for artist");
         return null;
     }
 

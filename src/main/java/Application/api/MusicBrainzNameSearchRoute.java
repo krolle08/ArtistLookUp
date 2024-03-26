@@ -1,6 +1,5 @@
 package Application.api;
 
-import Application.features.RestTemp;
 import Application.service.ArtistInfo;
 import Application.service.TypeOfSearchEnum;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -14,7 +13,6 @@ import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -42,6 +40,7 @@ public class MusicBrainzNameSearchRoute {
     private final String annotation = "/artist";
     private final String query = "/?query=";
     private final String json = "fmt=json";
+    private ArtistInfo artistInfo = new ArtistInfo();
 
     public ArtistInfo getArtistInfo(Map<String, String> filterParams) throws URISyntaxException, JsonProcessingException {
         URI uri = createURI(filterParams);

@@ -1,12 +1,7 @@
 package Application.service;
 
-import org.springframework.web.client.RestTemplate;
-
 import java.net.URI;
-import java.net.URL;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 public class ArtistInfo {
@@ -45,13 +40,6 @@ public class ArtistInfo {
     public String getmBStatusCode() {
         return mBStatusCode;
     }
-
-    public Map<String, AlbumInfo> getAlbums() {
-        return albums;
-    }
-
-    private Map<String, AlbumInfo> albums = new HashMap<>();
-
     public void setiD(String iD) {
         this.iD = iD;
     }
@@ -91,13 +79,5 @@ public class ArtistInfo {
 
     public URI getUri() {
         return uri;
-    }
-
-    public String getWikidata() {
-        return wikidata;
-    }
-
-    public String getWikipedia() {
-        return wikipedia;
     }
 }
