@@ -4,10 +4,12 @@ import Application.api.*;
 import Application.utils.ScannerWrapper;
 import org.apache.juli.logging.Log;
 import org.apache.juli.logging.LogFactory;
-import org.springframework.http.ResponseEntity;
 
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
+
+import static Application.utils.Json.createJsonResponse;
 
 /**
  * I include the Scanner in the constructor when the class relies on user input and it is unlikely that
@@ -24,10 +26,10 @@ public class GetDataImpl {
     private final WikipediaSearchRoute wikipediaSearchRoute = new WikipediaSearchRoute();
     int typoLimit = 10;
     int consecutiveTypoMistakes = 0;
-
     int typos = 0;
     private final ScannerWrapper scannerWrapper;
-
+    private Map<String, String> covers = new HashMap<>();
+    private Map<String, Object> response = new HashMap<>();
 
     public GetDataImpl(ScannerWrapper scannerWrapper) {
         this.scannerWrapper = scannerWrapper;
@@ -46,31 +48,32 @@ public class GetDataImpl {
         searchTypes.put("11", "Work");
     }
 
-    public void run() throws Exception {
+    public String run() {
         do {
-            Map<String, Object> searchParam = getTypeOfSearch();
-            Map.Entry<String, Object> entry = searchParam.entrySet().iterator().next();
+            Map<String, String> searchParam = getTypeOfSearch();
+            Map.Entry<String, String> entry = searchParam.entrySet().iterator().next();
             TypeOfSearchEnum typeOfSearch = TypeOfSearchEnum.convertToEnum(entry.getKey());
             try {
                 switch (typeOfSearch) {
                     case AREA:
                         break;
                     case ARTIST:
-                        Map<String, Object> response = musicBrainzNameSearchRoute.getMBID(searchParam);
+                        response = musicBrainzNameSearchRoute.getMBID(searchParam);
                         if (!response.containsKey("MBID")) {
                             response.putAll(musicBrainzIDSearchRoute.getDataFromArtist(searchParam.get(TypeOfSearchEnum.ARTIST).toString()));
+                        } else {
+                            response.putAll(musicBrainzIDSearchRoute.getDataFromArtist(response.get("MBID").toString()));
                         }
-                        response.putAll(musicBrainzIDSearchRoute.getDataFromArtist(response.get("MBID").toString()));
                         if (!response.containsKey("name")) {
                             log.info("No information available for the provided input neither as an Artist or Music Brainz ID:" + searchParam.get(TypeOfSearchEnum.ARTIST.toString()));
-                            return;
+                            return null;
                         }
-                        if (response.containsKey("wikidata") && !response.containsKey("wikipedia")) {
+                        if (response.containsKey("wikidataSearchTerm") && !response.containsKey("wikipedia")) {
                             response.putAll(wikidataSearchRoute.getWikidataFromArtist(response.get("wikidataSearchTerm").toString()));
                         }
-                        response.putAll(wikipediaSearchRoute.getWikipediadataFromArtist(response.get("enwiki").toString()));
-                        response.putAll(coverArtArchiveService.getCovers(response.get("MBID").toString()));
-                        response.put("test","test");
+                        response.putAll(wikipediaSearchRoute.getWikipediadataFromArtist(response.get("wikipediaSearchTerm").toString()));
+                        // Extract covers map from the response
+                        covers.putAll(coverArtArchiveService.getCovers((Map<String, String>) response.get("Covers")));
                         break;
                     case EVENT:
                         break;
@@ -91,26 +94,18 @@ public class GetDataImpl {
                     case WORK:
                         break;
                     default:
+                        break;
                 }
-            } catch (Exception e) {
-                throw new Exception("An internal error occured, please try again. Sorry for the inconvenience");
+            } catch (RuntimeException | URISyntaxException e) {
+                throw new RuntimeException("An internal error occured, please try again. Sorry for the inconvenience");
             }
+            displayData();
         } while (endSearch());
+        return null;
     }
 
-    public Map<String, Object> getTypeOfSearch() throws Exception {
-        System.out.println("Type in the number corresponding to the type of search you want to perform:\n" +
-                "1 Area\n" +
-                "2 Artist\n" +
-                "3 Event\n" +
-                "4 Genre\n" +
-                "5 Instrument\n" +
-                "6 Label\n" +
-                "7 Place\n" +
-                "8 Recording\n" +
-                "9 Relase Group\n" +
-                "10 URL\n" +
-                "11 Work\n");
+    public Map<String, String> getTypeOfSearch() {
+        System.out.println("Type in the number corresponding to the type of search you want to perform:\n" + "1 Area\n" + "2 Artist\n" + "3 Event\n" + "4 Genre\n" + "5 Instrument\n" + "6 Label\n" + "7 Place\n" + "8 Recording\n" + "9 Relase Group\n" + "10 URL\n" + "11 Work\n");
 
         // Get user input
         String userInputType = scannerWrapper.nextLine().trim();
@@ -128,31 +123,9 @@ public class GetDataImpl {
         String userInputValue = scannerWrapper.nextLine().trim();
 
         // Return the corresponding search type
-        Map<String, Object> result = new HashMap<>();
+        Map<String, String> result = new HashMap<>();
         result.put(searchTypes.get(userInputType), userInputValue);
         return result;
-    }
-
-    private String extractMBID(ResponseEntity response) {
-        String artistIdSubstring = "";
-        // Find the start index of "[artist:"
-        int startIndex = response.toString().indexOf("[artist:");
-        if (startIndex != -1) {
-            // Find the end index of "]"
-            int endIndex = response.toString().indexOf("|", startIndex);
-            if (endIndex != -1) {
-                // Extract the substring between "[artist:" and "]"
-                artistIdSubstring = response.toString().substring(startIndex + "[artist:".length(), endIndex);
-                // Now artistIdSubstring should contain "5b11f4ce-a62d-471e-81fc-a69a8278c7da"
-            } else {
-                // Handle case where "|" is not found
-                System.out.println("Closing bracket '|' not found");
-            }
-        } else {
-            // Handle case where "[artist:" is not found
-            System.out.println("Substring '[artist:' not found");
-        }
-        return artistIdSubstring;
     }
 
     public boolean endSearch() {
@@ -174,6 +147,19 @@ public class GetDataImpl {
     private void terminate() {
         System.out.println("Too many consecutive typos. Restarting search engine.");
         scannerWrapper.close();
+    }
+
+    public void displayData() {
+        String jsonResponse = createJsonResponse(response, covers);
+        System.out.println(jsonResponse);
+    }
+
+    public void setResponse(Map<String, Object> response) {
+        this.response = response;
+    }
+
+    public void setCovers(Map<String, String> covers) {
+        this.covers = covers;
     }
 }
 

@@ -12,9 +12,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.boot.web.server.LocalServerPort;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -23,12 +22,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest(classes = YourApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class testMusicBrainzNameSearchRoute {
-    String cdkey = "VHVQX-NNDCE-G08DB"; //Helldivers
-    //"Q11649"
-    @LocalServerPort
-    private int port;
-    @Autowired
-    private TestRestTemplate restTemplate;
     @Autowired
     private MusicBrainzNameSearchRoute musicBrainzNameSearchRoute;
     private static Logger log;
@@ -53,7 +46,7 @@ public class testMusicBrainzNameSearchRoute {
         nirvana.put(TypeOfSearchEnum.ARTIST.getSearchType(), "Nirvana");
         String MBID = "5b11f4ce-a62d-471e-81fc-a69a8278c7da";
         //When
-        Map<String, String> result = musicBrainzNameSearchRoute.getMBID(nirvana);
+        Map<String, Object> result = musicBrainzNameSearchRoute.getMBID(nirvana);
 
         //Then
         assertThat(result.get(TypeOfSearchEnum.ARTIST.getSearchType())).isEqualTo("Nirvana");
@@ -69,7 +62,7 @@ public class testMusicBrainzNameSearchRoute {
         String MBID = "a466c2a2-6517-42fb-a160-1087c3bafd9f";
 
         //When
-        Map<String, String> result = musicBrainzNameSearchRoute.getMBID(slipknot);
+        Map<String, Object> result = musicBrainzNameSearchRoute.getMBID(slipknot);
 
         //Then
         assertThat(result.get(TypeOfSearchEnum.ARTIST.getSearchType())).isEqualTo("Slipknot");
@@ -82,8 +75,16 @@ public class testMusicBrainzNameSearchRoute {
         //Given
         Map<String, String> ErrorInSearch = new HashMap<>();
         ErrorInSearch.put(TypeOfSearchEnum.ARTIST.getSearchType(), "ErrorInSearch");
+
+        // Create a list appender to capture log messages
+        ListAppender<ILoggingEvent> listAppender = new ListAppender<>();
+        listAppender.start();
+        Logger logger = (Logger) LoggerFactory.getLogger(MusicBrainzNameSearchRoute.class);
+        ch.qos.logback.classic.Logger classicLogger = (ch.qos.logback.classic.Logger) logger;
+        classicLogger.addAppender(listAppender);
+
         //When
-        Map<String, String> result = musicBrainzNameSearchRoute.getMBID(ErrorInSearch);
+        Map<String, Object> result = musicBrainzNameSearchRoute.getMBID(ErrorInSearch);
 
         //Then
         assertEquals(1, listAppender.list.size()); // Assuming only one log message is expected
@@ -91,6 +92,5 @@ public class testMusicBrainzNameSearchRoute {
         // Get the logged event
         ILoggingEvent logEvent = listAppender.list.get(0);
         assertEquals("No response was given", logEvent.getMessage()); // Example assertion for log message
-
     }
 }

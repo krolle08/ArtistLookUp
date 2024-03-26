@@ -47,7 +47,7 @@ public class MusicBrainzNameSearchRoute {
     private String json = "fmt=json";
 
     public Map<String, Object> getMBID(Map<String, String> filterParams) {
-        Map<String, Object> extractedData = new HashMap<>();
+        Map<String, Object> result = new HashMap<>();
         URI uri = null;
         try {
             uri = new URI(constructUrl(filterParams).toString());
@@ -58,10 +58,10 @@ public class MusicBrainzNameSearchRoute {
         ResponseEntity<String> responseEntity = restTemplate.getForEntity(uri, String.class);
         if (isBodyEmpty(responseEntity)) {
             log.info("No response was given");
-            return extractedData;
+            return result;
         }
         try {
-            return extractMBID(responseEntity, filterParams, extractedData);
+            return extractMBData(responseEntity, filterParams, result);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -109,7 +109,7 @@ public class MusicBrainzNameSearchRoute {
         return new RestTemplateBuilder().requestFactory(() -> new HttpComponentsClientHttpRequestFactory(HttpClientBuilder.create().setDefaultRequestConfig(config).build())).build();
     }
 
-    private Map<String, Object> extractMBID(ResponseEntity responseEntity, Map<String, String> filterParams, Map<String, Object> extractedData) throws JsonProcessingException {
+    private Map<String, Object> extractMBData(ResponseEntity responseEntity, Map<String, String> filterParams, Map<String, Object> extractedData) throws JsonProcessingException {
         extractedData.put("MBstatuscode", String.valueOf(responseEntity.getStatusCodeValue()));
         extractedData.putAll(filterParams);
         ObjectMapper mapper = new ObjectMapper();

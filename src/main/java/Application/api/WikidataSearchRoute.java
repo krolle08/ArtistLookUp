@@ -32,9 +32,8 @@ public class WikidataSearchRoute {
     private final String host = "wikidata.org";
     private final String pathPrefix = "/w";
     private final String api = "/api.php";
-    private final String enwiki = "enwiki";
-    public Map<String, String> getWikidataFromArtist(String searchTerm) throws URISyntaxException {
-        Map<String, String> result = new HashMap<>();
+    public Map<String, Object> getWikidataFromArtist(String searchTerm) throws URISyntaxException {
+        Map<String, Object> result = new HashMap<>();
         if (searchTerm.isEmpty()) {
             log.info("No searchterm was provided:" + searchTerm);
             return result;
@@ -50,11 +49,11 @@ public class WikidataSearchRoute {
         ResponseEntity<String> response = restTemplate.getForEntity(apiUrl, String.class);
         if (response.getBody().contains("ratelimited")) {
             handleRateLimitations(apiUrl);
-        } else if (response.getBody().contains("no-such-entity")) { //CREATE ANOTHER FIX FOR THIS!!!
+        } else if (response.getBody().contains("no-such-entity")) {
             log.info("The request on uri:" + apiUrl + "did not match any data on Wikidata");
             return result;
         }
-        // Handle the original response
+
         // Extract HTTP status code
         result.put("wikidataStatusCode", String.valueOf(response.getStatusCodeValue()));
         result.putAll(extractData(response, searchTerm));
@@ -66,21 +65,21 @@ public class WikidataSearchRoute {
         }
     }
     private Map<String, String> extractData(ResponseEntity response, String searchTerm) {
-        Map<String, String> extractedData = new HashMap<>();
+        Map<String, String> result = new HashMap<>();
         try {
-            // Extract HTTP status code
             ObjectMapper mapper = new ObjectMapper();
             JsonNode rootNode = mapper.readTree(response.getBody().toString());
-            String wikipediaSearchTerm = rootNode.path("entities").path(searchTerm.toUpperCase()).path("sitelinks").path(enwiki).get("title").asText();
+            String wikipediaSearchTerm = rootNode.path("entities").path(searchTerm.toUpperCase())
+                    .path("sitelinks").path("enwiki").get("title").asText();
             if (wikipediaSearchTerm.isEmpty()) {
-                log.info("No description in the response for:" + searchTerm);
-                return extractedData;
+                log.info("No word for searching on wikipedia was found in the response for:" + searchTerm);
+                return result;
             }
-            extractedData.put("wikipediaSearchTerm", encodeString(wikipediaSearchTerm));
+            result.put("wikipediaSearchTerm", encodeString(wikipediaSearchTerm));
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return extractedData;
+        return result;
     }
     private void handleRateLimitations(String apiUrl) {
         log.warn("Rate limits detected. Retrying...");

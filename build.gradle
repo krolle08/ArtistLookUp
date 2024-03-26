@@ -30,10 +30,15 @@ dependencies {
 //    implementation 'com.github.metabrainz:libmusicbrainz:5.1.0'
 }
 
+tasks.withType(JavaCompile) {
+    options.compilerArgs << "-Xlint:unchecked"
+}
+
 test {
     useJUnitPlatform()
     testLogging {
         events "passed", "skipped", "failed"
+        exceptionFormat = 'full' // To show full stack traces
     }
 }
 

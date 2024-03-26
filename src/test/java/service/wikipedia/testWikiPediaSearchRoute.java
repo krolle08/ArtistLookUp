@@ -15,7 +15,6 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @SpringBootTest(classes = YourApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class testWikiPediaSearchRoute {
-    String cdkey = "VHVQX-NNDCE-G08DB";
     @LocalServerPort
     private int port;
     @Autowired
@@ -28,7 +27,7 @@ public class testWikiPediaSearchRoute {
         String nirvanaURL = "Nirvana%20(band)";
 
         //When
-        Map<String, String> rest = wikipediaSearchRoute.getWikipediadataFromArtist(nirvanaURL);
+        Map<String, Object> rest = wikipediaSearchRoute.getWikipediadataFromArtist(nirvanaURL);
 
         //Then
         assertThat(rest.get("wikidatastatusCode")).isEqualTo("200");

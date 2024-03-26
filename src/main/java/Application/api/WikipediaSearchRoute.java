@@ -25,12 +25,12 @@ public class WikipediaSearchRoute {
     private final String api = "/api.php";
     private final String pathPreFix = "?action=query&format=json&prop=extracts&exintro=true&redirects=true&titles=";
 
-    public Map<String, String> getWikipediadataFromArtist(String searchTerm) throws URISyntaxException {
+    public Map<String, Object> getWikipediadataFromArtist(String searchTerm) throws URISyntaxException {
         if (searchTerm.isEmpty()) {
             log.info("No search term was given:" + searchTerm);
             return null;
         }
-        Map<String, String> result = new HashMap<>();
+        Map<String, Object> result = new HashMap<>();
         String fullPath = constructUrl(searchTerm).toString();
         URI uri = new URI(fullPath);
         RestTemplate restTemplate = new RestTemplate();

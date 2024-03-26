@@ -17,7 +17,7 @@ public class YourApplication {
             scanner = new ScannerWrapper();
             GetDataImpl getData = new GetDataImpl(scanner);
             try {
-                getData.run();
+                String test = getData.run();
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }

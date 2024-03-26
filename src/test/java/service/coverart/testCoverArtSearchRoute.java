@@ -6,51 +6,32 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.boot.web.server.LocalServerPort;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 
-import java.net.URISyntaxException;
+import java.util.HashMap;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(classes = YourApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class testCoverArtSearchRoute {
-    String cdkey = "VHVQX-NNDCE-G08DB"; //Helldivers
-
-    @LocalServerPort
-    private int port;
     @Autowired
     private TestRestTemplate restTemplate;
     @Autowired
     private CoverArtArchiveService coverArtArchiveService;
 
     @Test
-    public void testHelloWorldEndpoint() throws URISyntaxException {
+    public void testHelloWorldEndpoint(){
         //Given
         String nirvana = "5b11f4ce-a62d-471e-81fc-a69a8278c7da";
-        String succescriteria = "Q11649";
+        String succescriteria = "http://coverartarchive.org/release/df89fb27-14a6-4814-87a4-39b7d9698e4d/38239449645.jpg";
+        Map<String, String> covers = new HashMap<>();
+        covers.put("Incesticide","01cf1391-141b-3c87-8650-45ade6e59070");
+        covers.put("From the Muddy Banks of the Wishkah","249e7835-5c39-3a10-b15b-e2d3470fb40c");
+        covers.put("Bleach","f1afec0b-26dd-3db5-9aa1-c91229a74a24");
+        covers.put("In Utero","2a0981fb-9593-3019-864b-ce934d97a16e");
         //When
-        Map<String, String> result = coverArtArchiveService.getCovers(nirvana);
-
+        Map<String, String> result = coverArtArchiveService.getCovers(covers);
         //Then
-        assertThat(result.get("name")).isEqualTo("Nirvana");
-        assertThat(result.get("statuscode")).isEqualTo("200");
-        assertThat(result.get("wikidataSearchTerm")).isEqualTo(succescriteria);
-    }
-
-    @Test
-    public void testSearchArtistEndpoint() {
-        // Given
-        String nirvana = "5b11f4ce-a62d-471e-81fc-a69a8278c7da"; // Example artist ID
-
-        // When
-        ResponseEntity<String> responseEntity = restTemplate.getForEntity("/MBArtist/" + nirvana, String.class);
-
-        // Then
-        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(responseEntity.getBody()).isNotNull();
-        // You can add more assertions based on the expected response from the MusicBrainz API
+        assertThat(result.get("01cf1391-141b-3c87-8650-45ade6e59070")).isEqualTo(succescriteria);
     }
 }

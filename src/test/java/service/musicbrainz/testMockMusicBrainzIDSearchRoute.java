@@ -5,13 +5,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Map;
 
@@ -25,10 +23,12 @@ public class testMockMusicBrainzIDSearchRoute {
     private MusicBrainzIDSearchRoute musicBrainzIDSearchRoute;
     @Test
     public void testSearchArtist() throws URISyntaxException {
+        //Given
         // Mock the response from the external service
         String artistId = "5b11f4ce-a62d-471e-81fc-a69a8278c7da";
         String responseBody = "Nirvana";
 
+        //When
         // Create a mock ResponseEntity
         ResponseEntity<String> responseEntity = new ResponseEntity<>(responseBody, HttpStatus.OK);
 
@@ -37,12 +37,10 @@ public class testMockMusicBrainzIDSearchRoute {
                 .thenReturn(responseEntity);
 
        */
-
-
         // Create a mock ResponseEntity
-        Map<String, String> rest = musicBrainzIDSearchRoute.getDataFromArtist("5b11f4ce-a62d-471e-81fc-a69a8278c7da");
+        Map<String, Object> rest = musicBrainzIDSearchRoute.getDataFromArtist("5b11f4ce-a62d-471e-81fc-a69a8278c7da");
 
-        // Verify the result
+        //Then
         assertThat(rest.get("name").toString()).contains(responseBody);
     }
 

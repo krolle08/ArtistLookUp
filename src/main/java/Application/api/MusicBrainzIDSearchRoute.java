@@ -43,53 +43,19 @@ public class MusicBrainzIDSearchRoute {
     private static final String pathPostFix = "?fmt=json&inc=url-rels+release-groups";
     private Map<String, Object> result = new HashMap<>();
 
-    //@GetMapping("/MBArtist/{Id}")
-    public Map<String, Object> getDataFromArtist(String Id) throws URISyntaxException {
+    @GetMapping("/MBArtist/{Id}")
+    public Map<String, Object> getDataFromArtist(@PathVariable String Id) throws URISyntaxException {
         String fullPath = constructUrl(Id, queryTypeArtist).toString();
         RestTemplate restTemplate = restTemplate();
         URI uri = new URI(fullPath);
         ResponseEntity<String> response = restTemplate.getForEntity(uri, String.class);
-        result.put("statuscode", String.valueOf(response.getStatusCodeValue()));
+        result.put("MBstatuscode", String.valueOf(response.getStatusCodeValue()));
         if (response.getBody().isEmpty()) {
             log.info("No body was given with the provided search parameters");
             return result;
         }
         result.putAll(extractData(response.getBody()));
         return result;
-    }
-
-    @GetMapping("/MBgenre/{Id}")
-    public ResponseEntity<String> getGenre(@PathVariable String Id) throws URISyntaxException {
-        String fullPath = constructUrl(Id, queryTypeArtist).toString();
-        RestTemplate restTemplate = restTemplate();
-        URI uri = new URI(fullPath);
-        return restTemplate.getForEntity(uri, String.class);
-    }
-
-    @GetMapping("/MBcover/{Id}")
-    public ResponseEntity<String> getCover(@PathVariable String Id) throws URISyntaxException {
-        String fullPath = constructUrl(Id, queryTypeArtist).toString();
-        RestTemplate restTemplate = restTemplate();
-        URI uri = new URI(fullPath);
-        return restTemplate.getForEntity(uri, String.class);
-    }
-
-
-    public Map<String, String> getRelease(@PathVariable String Id) throws URISyntaxException {
-        String fullPath = constructUrl(Id, queryTypeArtist).toString();
-        RestTemplate restTemplate = restTemplate();
-        URI uri = new URI(fullPath);
-        ResponseEntity<String> response = restTemplate.getForEntity(uri, String.class);
-        String responseBody = response.getBody();
-        return extractData(responseBody);
-    }
-
-    @GetMapping("/MBreleaseGroup/{Id}")
-    public ResponseEntity<String> getReleaseGroup(@PathVariable String Id) throws URISyntaxException {
-        String fullPath = constructUrl(Id, queryTypeArtist).toString();
-        RestTemplate restTemplate = restTemplate();
-        URI uri = new URI(fullPath);
-        return restTemplate.getForEntity(uri, String.class);
     }
 
     private StringBuffer constructUrl(String iD, String queryType) {
@@ -114,8 +80,8 @@ public class MusicBrainzIDSearchRoute {
         return new RestTemplateBuilder().requestFactory(() -> new HttpComponentsClientHttpRequestFactory(HttpClientBuilder.create().setDefaultRequestConfig(config).build())).build();
     }
 
-    private Map<String, String> extractData(String response) {
-        Map<String, String> extractedData = new HashMap<>();
+    private Map<String, Object> extractData(String response) {
+        Map<String, Object> extractedData = new HashMap<>();
         try {
             // Extract response body
             ObjectMapper mapper = new ObjectMapper();
@@ -125,7 +91,7 @@ public class MusicBrainzIDSearchRoute {
 
             // Add coverData map directly to extractedData
             Map<String, String> coverData = extractCoverIdAndTitle(rootNode);
-            extractedData.put("Covers",coverData.toString());
+            extractedData.put("Covers", coverData);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -159,10 +125,11 @@ public class MusicBrainzIDSearchRoute {
         JsonNode relations = rootNode.get("release-groups");
         for (JsonNode node : relations) {
             if (!node.isNull() || !node.isEmpty()) {
-                result.put(node.get("title").asText(), node.get("id").asText());
+                if (node.path("primary-type").asText().equals("Album")) {
+                    result.put(node.get("title").asText(), node.get("id").asText());
+                }
             }
         }
         return result;
     }
-
 }
