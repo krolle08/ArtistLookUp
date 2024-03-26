@@ -4,54 +4,48 @@ import fm.last.musicbrainz.coverart.CoverArt;
 import fm.last.musicbrainz.coverart.CoverArtArchiveClient;
 import fm.last.musicbrainz.coverart.CoverArtImage;
 import fm.last.musicbrainz.coverart.impl.DefaultCoverArtArchiveClient;
-import org.apache.commons.io.FileUtils;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.client.RestTemplate;
+import org.apache.juli.logging.Log;
+import org.apache.juli.logging.LogFactory;
+import org.springframework.web.bind.annotation.RestController;
 
-
-import java.io.File;
-import java.util.Scanner;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
+@RestController
 public class CoverArtArchiveService {
+
+    private Log log = LogFactory.getLog(MusicBrainzIDSearchRoute.class);
+    private final String protocol = "http";
+    private final String schemeDelimiter = "://";
+    private final String host = "musicbrainz.org";
+    private final Integer port = 80;
+    private final String pathPrefix = "/ws";
+    private final String version = "/2";
+    private final String queryTypeArtist = "/artist/";
+    private static final String pathPostFix = "?fmt=json&inc=url-rels+release-groups";
+    private Map<String, String> result = new HashMap<>();
     DefaultCoverArtArchiveClient defaultCoverArtArchiveClient = new DefaultCoverArtArchiveClient();
     CoverArtArchiveClient client = new DefaultCoverArtArchiveClient();
-    public void runApplication(String artist) {
-        UUID mbid = UUID.fromString("76df3287-6cda-33eb-8e9a-044b5e15ffdd");
-        defaultCoverArtArchiveClient.getByMbid(mbid);
 
-        CoverArt coverArt = null;
+    public Map<String, String> getCovers(Map<String, String> covers) {
+        Map<String, String> imageURLAndId = new HashMap<>();
         try {
-            coverArt = client.getByMbid(mbid);
-            //coverArt = client.getReleaseGroupByMbid(mbid);
-            if (coverArt != null) {
-                for (CoverArtImage coverArtImage : coverArt.getImages()) {
-                    File output = new File(mbid.toString() + "_" + coverArtImage.getId() + ".jpg");
-                    FileUtils.copyInputStreamToFile(coverArtImage.getImage(), output);
+            covers.forEach((title, id) -> {
+                UUID coverId = UUID.fromString(id);
+                Map<String, Object> extractedData = new HashMap<>();
+                CoverArt coverArt = null;
+                coverArt = client.getByMbid(coverId);
+                coverArt = client.getReleaseGroupByMbid(coverId);
+                if (coverArt != null) {
+                    for (CoverArtImage coverArtImage : coverArt.getImages()) {
+                        imageURLAndId.put(id,coverArtImage.getImageUrl());
+                    }
                 }
-            }
+            });
         } catch (Exception e) {
-            // ...
+            e.printStackTrace();
         }
-
-        final boolean useHttps = true;
-        CoverArtArchiveClient clients = new DefaultCoverArtArchiveClient(useHttps);
-    }
-
-    public void test(String test) {
-
-
-        Scanner scanner = new Scanner(System.in);
-
-        // Create a RestTemplate instance
-        RestTemplate restTemplate = new RestTemplate();
-
-        // Make a GET request to /hello endpoint
-        ResponseEntity<String> helloResponse = restTemplate.getForEntity("http://localhost:8080/hello", String.class);
-        System.out.println("Response from /hello endpoint: " + helloResponse.getBody());
-
-        // Make a GET request to /farvel endpoint
-        ResponseEntity<String> farvelResponse = restTemplate.getForEntity("http://localhost:8080/farvel", String.class);
-        System.out.println("Response from /farvel endpoint: " + farvelResponse.getBody());
+        return imageURLAndId;
     }
 }

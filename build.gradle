@@ -16,17 +16,29 @@ repositories {
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web:2.5.4'
     testImplementation 'org.springframework.boot:spring-boot-starter-test:2.5.4'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
     implementation group: 'fm.last', name: 'coverartarchive-api', version: '2.1.1'
     implementation 'org.apache.httpcomponents:httpclient:4.5.13' // Use the appropriate version
     implementation 'org.apache.camel:camel-core:3.14.0' //Core apache camel library
     implementation 'org.apache.camel:camel-rest:3.14.0' // Apache rest service
+    implementation 'org.springframework.retry:spring-retry:1.3.1'
     implementation 'org.springframework.boot:spring-boot-starter-tomcat'
+    implementation files('D:\\Projekter\\libmusicbrainz-5.1.0')
+    implementation 'org.slf4j:slf4j-api:1.7.32'
+    implementation 'ch.qos.logback:logback-classic:1.2.6' // Example: Logback implementation
+//    implementation 'com.github.metabrainz:libcoverart:1.0.0'
+//    implementation 'com.github.metabrainz:libmusicbrainz:5.1.0'
+}
+
+tasks.withType(JavaCompile) {
+    options.compilerArgs << "-Xlint:unchecked"
 }
 
 test {
     useJUnitPlatform()
     testLogging {
         events "passed", "skipped", "failed"
+        exceptionFormat = 'full' // To show full stack traces
     }
 }
 
