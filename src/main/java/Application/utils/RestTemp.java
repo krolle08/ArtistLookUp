@@ -1,4 +1,4 @@
-package Application.api;
+package Application.utils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -13,6 +13,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 
@@ -25,22 +28,27 @@ public class RestTemp {
         return new RestTemplateBuilder().requestFactory(() -> new HttpComponentsClientHttpRequestFactory(HttpClientBuilder.create().setDefaultRequestConfig(config).build())).build();
     }
 
-    public static StringBuffer constructUrl(String iD, String queryType, String protocol, String schemeDelimiter, String host, int port, String pathPrefix, String version , String pathPostFix) {
+    public static StringBuffer constructUri(String id, String queryType, String protocol, String schemeDelimiter, String host, int port, String pathPrefix, String version , String pathPostFix) {
         StringBuffer url = new StringBuffer();
         url.append(protocol).append(schemeDelimiter).append(host);
+        String queryterm;
         if (port != 0) {
             url.append(":").append(port);
         }
-        if (iD.isEmpty()) {
-            log.info("No ID was given for the search:" + iD);
-
+        if (id.isEmpty()) {
+            log.info("No ID was given for the search:" + id);
+        }
+        if(id.contains(" ")){
+            queryterm = encodeString(id);
+        } else {
+            queryterm = id;
         }
 
-        url.append(pathPrefix).append(version).append(queryType).append(iD);
+        url.append(pathPrefix).append(version).append(queryType).append(queryterm);
         url.append(pathPostFix);
         return url;
     }
-    public static StringBuffer constructUrl(Map<String, String> filterParams, String query, String protocol,
+    public static StringBuffer constructUri(Map<String, String> filterParams, String query, String protocol,
                                             String annotation, String schemeDelimiter, String host, int port,
                                             String pathPrefix, String version, String json) {
         StringBuffer url = new StringBuffer();
@@ -56,7 +64,12 @@ public class RestTemp {
             // Append each parameter from filterParams
             for (Map.Entry<String, String> entry : filterParams.entrySet()) {
                 String paramName = entry.getKey().toLowerCase();
-                String paramValue = entry.getValue();
+                String paramValue;
+                if(entry.getValue().contains(" ")){
+                    paramValue= RestTemp.encodeString(entry.getValue());
+                } else {
+                    paramValue = entry.getValue();
+                }
                 // Append parameter name and value to URL
                 url.append(paramName).append(":").append(paramValue);
             }
@@ -65,8 +78,8 @@ public class RestTemp {
         return url;
     }
 
-    public static String constructUrl(String searchTerm, String protocol, String schemeDelimiter, String host,
-                                            String pathPrefix, String api, String postPreFix) {
+    public static String constructUri(String searchTerm, String protocol, String schemeDelimiter, String host,
+                                      String pathPrefix, String api, String postPreFix) {
         StringBuffer url = new StringBuffer();
         url.append(protocol).append(schemeDelimiter).append(host);
         if (searchTerm.isEmpty()) {
@@ -77,17 +90,28 @@ public class RestTemp {
         return url.toString();
     }
 
-    public static boolean isBodyEmpty(ResponseEntity responseEntity) {
+    public static boolean isBodyEmpty(ResponseEntity responseEntity, String criteria) {
         ObjectMapper mapper = new ObjectMapper();
         try {
             JsonNode rootNode = mapper.readTree(responseEntity.getBody().toString());
-            if (rootNode.path("artists").isEmpty()) {
+            if(criteria == null && !rootNode.isEmpty()){
+                return false;
+            }
+            if (rootNode.path(criteria).isEmpty()) {
                 return true;
             }
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
         return false;
+    }
+
+    public static String encodeString(String input) {
+        try {
+            return URLEncoder.encode(input, StandardCharsets.UTF_8.name());
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }

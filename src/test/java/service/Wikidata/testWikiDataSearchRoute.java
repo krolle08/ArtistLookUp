@@ -2,6 +2,7 @@ package service.Wikidata;
 
 import Application.YourApplication;
 import Application.api.WikidataSearchRoute;
+import Application.service.WikiInfo;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -31,12 +32,14 @@ public class testWikiDataSearchRoute {
         String nirvanaTerm = "Q11649";
         String succescriteria = "Nirvana (band)";
 
+        WikiInfo wikiInfo = new WikiInfo(nirvanaTerm, null);
+
         //When
-        Map<String, Object> rest = wikidataSearchRoute.getWikidataForArtist(nirvanaTerm);
+       wikidataSearchRoute.getWikidataForArtist(wikiInfo);
 
         //Then
-        assertThat(decodeString((String) rest.get("wikipediaSearchTerm"))).isEqualTo(succescriteria);
-        assertThat(rest.get("wikidataStatusCode")).isEqualTo("200");
+        assertThat(decodeString(wikiInfo.getWikipedia())).isEqualTo(succescriteria);
+        assertThat(wikiInfo.getWikiDataStatuccode()).isEqualTo("200");
     }
     public static String decodeString(String input) {
         try {

@@ -27,10 +27,6 @@ public class MusicEntity {
         this.artistInfo = artistInfo;
     }
 
-    public void setArtistInfo(String name, String mBID, URI url) {
-        this.artistInfo = new ArtistInfo(name, mBID, url);
-    }
-
     public String getiD() {
         return iD;
     }

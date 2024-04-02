@@ -9,17 +9,25 @@ public class ArtistInfo {
     private String iD;
     private String name;
     private String mBID;
-    private URI uri;
     private WikiInfo wikiInfo;
 
     private String mBStatusCode;
     private List<AlbumInfo> albums;
 
-    public ArtistInfo(String name, String mBID, URI uri) {
+    public ArtistInfo(String name, String mBID) {
+        this(name, mBID, null, null);
+    }
+
+    public ArtistInfo(String name, String mBid, WikiInfo wikiInfo, List<AlbumInfo> albums) {
         this.iD = UUID.randomUUID().toString();
         this.name = name;
-        this.mBID = mBID;
-        this.uri = uri;
+        this.mBID = mBid;
+        this.wikiInfo = wikiInfo;
+        this.albums = albums;
+    }
+
+    public List<AlbumInfo> getAlbums() {
+        return albums;
     }
 
     public ArtistInfo(){
@@ -52,10 +60,6 @@ public class ArtistInfo {
         this.mBID = mBID;
     }
 
-    public void setUri(URI uri) {
-        this.uri = uri;
-    }
-
     public void setWikiInfo(WikiInfo wikiInfo) {
         this.wikiInfo = wikiInfo;
     }
@@ -75,9 +79,5 @@ public class ArtistInfo {
 
     public String getmBID() {
         return mBID;
-    }
-
-    public URI getUri() {
-        return uri;
     }
 }

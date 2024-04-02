@@ -2,6 +2,7 @@ package service.musicbrainz;
 
 import Application.YourApplication;
 import Application.api.MusicBrainzIDSearchRoute;
+import Application.service.ArtistInfo;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -27,16 +28,14 @@ public class testMusicBrainzIDSearchRoute {
         String nirvana = "5b11f4ce-a62d-471e-81fc-a69a8278c7da";
         String succescriteria = "Q11649";
         //When
-        Map<String, Object> result = musicBrainzIDSearchRoute.getDataWithMBID(nirvana);
+        ArtistInfo artistInfo = musicBrainzIDSearchRoute.getDataWithMBID(nirvana);
 
         //Then
-        assertThat(result.get("name")).isEqualTo("Nirvana");
-        assertThat(result.get("MBstatuscode")).isEqualTo("200");
-        assertThat(result.get("wikidataSearchTerm")).isEqualTo(succescriteria);
-        assertThat(result).containsKey("Covers");
-        Map<String, String> covers = (Map<String, String>) result.get("Covers");
-        assertThat(covers).isNotEmpty(); // Check if it's not empty
-        assertThat(covers.size()).isEqualTo(17); // Check if it has a size of 17
+        assertThat(artistInfo.getName()).isEqualTo("Nirvana");
+        assertThat(artistInfo.getmBStatusCode()).isEqualTo("200");
+        assertThat(artistInfo.getWikiInfo().getWikidata()).isEqualTo(succescriteria);
+        assertThat(!artistInfo.getAlbums().isEmpty());
+        assertThat(artistInfo.getAlbums().size()).isEqualTo(17); // Check if it has a size of 17
     }
 
 

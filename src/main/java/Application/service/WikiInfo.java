@@ -12,7 +12,7 @@ public class WikiInfo {
     private String wikiDataStatuccode;
 
     //HTTP code for response
-    private String wikiPediaStatuccode;
+    private String wikiPediaStatuscode;
 
     private String description;
 
@@ -32,12 +32,8 @@ public class WikiInfo {
         this.wikiDataStatuccode = wikiDataStatuccode;
     }
 
-    public String getWikiPediaStatuccode() {
-        return wikiPediaStatuccode;
-    }
-
-    public void setWikiPediaStatuccode(String wikiPediaStatuccode) {
-        this.wikiPediaStatuccode = wikiPediaStatuccode;
+    public void setWikiPediaStatuscode(String wikiPediaStatuscode) {
+        this.wikiPediaStatuscode = wikiPediaStatuscode;
     }
 
     public WikiInfo(String wikidata, String wikipedia) {
@@ -45,13 +41,8 @@ public class WikiInfo {
         this.wikidata = wikidata;
         this.wikipedia = wikipedia;
     }
-
     public String getiD() {
         return iD;
-    }
-
-    public void setWikidata(String wikidata) {
-        this.wikidata = wikidata;
     }
 
     public void setWikipediaSearchTerm(String wikipedia) {

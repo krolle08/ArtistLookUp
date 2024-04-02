@@ -16,6 +16,18 @@ public class AlbumInfo {
         this.imageURL = imageURL;
     }
 
+    public void setAlbumId(String albumId) {
+        this.albumId = albumId;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public void setImageURL(String imageURL) {
+        this.imageURL = imageURL;
+    }
+
     public String getiD() {
         return iD;
     }

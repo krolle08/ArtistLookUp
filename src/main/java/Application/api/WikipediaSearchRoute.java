@@ -1,6 +1,7 @@
 package Application.api;
 
 import Application.service.WikiInfo;
+import Application.utils.RestTemp;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.juli.logging.Log;
@@ -24,26 +25,26 @@ public class WikipediaSearchRoute {
     private final String postPreFix = "?action=query&format=json&prop=extracts&exintro=true&redirects=true&titles=";
 
     public void wikipediaService(WikiInfo wikiInfo) throws URISyntaxException {
-        String fullPath = constructUrl(wikiInfo.getWikipedia());
-        URI uri = new URI(fullPath);
-        ResponseEntity<String> response = getResponse(String.valueOf(uri));
+        URI uri = buildWikiPediaUri(wikiInfo.getWikipedia());
+        ResponseEntity<String> response = getResponse(uri);
 
-        wikiInfo.setWikiPediaStatuccode(String.valueOf(response.getStatusCodeValue()));
+        wikiInfo.setWikiPediaStatuscode(String.valueOf(response.getStatusCodeValue()));
         wikiInfo.setDescription(extractDescription(response));
-        if(wikiInfo.getDescription().isEmpty()){
+        if(wikiInfo == null || wikiInfo.getDescription().isEmpty()){
             log.warn("No description was found for: " + wikiInfo.getWikipedia());
         }
     }
 
-    private String constructUrl(String searchTerm){
-       return RestTemp.constructUrl(searchTerm,  protocol,  schemeDelimiter,  host,
+    private URI buildWikiPediaUri(String searchTerm) throws URISyntaxException {
+       String fullpath = RestTemp.constructUri(searchTerm,  protocol,  schemeDelimiter,  host,
                 pathPrefix,  api,  postPreFix);
+       return new URI(fullpath);
     }
 
-    private ResponseEntity getResponse(String uri) {
+    private ResponseEntity<String> getResponse(URI uri) {
         RestTemplate restTemplate = new RestTemplate();
         ResponseEntity<String> response = restTemplate.getForEntity(uri, String.class);
-        if (response.getBody().isEmpty()) {
+        if (response.getBody() == null || response.getBody().isEmpty()) {
             log.warn("No results on provided uri: " + uri);
         }
         return response;
@@ -55,9 +56,10 @@ public class WikipediaSearchRoute {
             JsonNode rootNode = mapper.readTree(String.valueOf(response.getBody()));
             JsonNode extractNode = rootNode.path("query").path("pages").elements().next().get("extract");
             if (extractNode != null && !extractNode.isNull()) {
-                return rootNode.path("query").path("pages").elements().next().get("extract").asText();
+                return extractNode.asText();
             }
         } catch (Exception e) {
+            log.error("Error occurred while extracting description from Wikipedia response", e);
             e.printStackTrace();
         }
         return null;

@@ -2,6 +2,7 @@ package Application.api;
 
 import Application.features.CustomRetryTemplate;
 import Application.service.WikiInfo;
+import Application.utils.RestTemp;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.juli.logging.Log;
@@ -15,6 +16,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Wikidata dokumentation and requirements:
@@ -32,17 +34,14 @@ public class WikidataSearchRoute {
     private final String pathPrefix = "/w";
     private final String api = "/api.php";
 
-    public void getWikidataForArtist(WikiInfo wikiInfo) throws URISyntaxException {
-        String apiUrl = getWikiDataUri(wikiInfo.getWikidata());
+    public void getWikidataForArtist(WikiInfo wikiInfo){
+        String apiUrl = buildWikiDataUri(wikiInfo.getWikidata());
         ResponseEntity<String> response = getResponse(apiUrl);
-
-        // Extract HTTP status code
-        wikiInfo.setWikiDataStatuccode(String.valueOf(response.getStatusCodeValue()));
         extractData(response, wikiInfo);
     }
 
-    private String getWikiDataUri(String wikiDataSearchTerm) {
-        return UriComponentsBuilder.fromHttpUrl(protocol + schemeDelimiter + host + pathPrefix + api)
+    private String buildWikiDataUri(String wikiDataSearchTerm) {
+        return UriComponentsBuilder.fromUriString(protocol + schemeDelimiter + host + pathPrefix + api)
                 .queryParam("action", "wbgetentities")
                 .queryParam("format", "json")
                 .queryParam("ids", wikiDataSearchTerm)
@@ -51,9 +50,10 @@ public class WikidataSearchRoute {
                 .toUriString();
     }
 
-    private ResponseEntity getResponse(String apiUrl) {
+    private ResponseEntity<String> getResponse(String apiUrl) {
         RestTemplate restTemplate = new RestTemplate();
         ResponseEntity<String> response = restTemplate.getForEntity(apiUrl, String.class);
+        handleResponse(response, apiUrl);
         if (response.getBody().contains("ratelimited")) {
             handleRateLimitations(apiUrl);
         } else if (response.getBody().contains("no-such-entity")) {
@@ -62,25 +62,11 @@ public class WikidataSearchRoute {
         return response;
     }
 
-    private void processResponse(ResponseEntity<String> response, String uri) {
-        if (response.getBody().isEmpty()) {
-            log.info("The request on uri:" + uri + "did not match any data in Wikidata");
-        }
-    }
-
-    private void extractData(ResponseEntity response, WikiInfo wikiInfo) {
-        try {
-            ObjectMapper mapper = new ObjectMapper();
-            JsonNode rootNode = mapper.readTree(response.getBody().toString());
-            String wikipediaSearchTerm = rootNode.path("entities").path(wikiInfo.getWikidata().toUpperCase())
-                    .path("sitelinks").path("enwiki").get("title").asText();
-            if (wikipediaSearchTerm.isEmpty()) {
-                log.info("No word for searching on wikipedia was found in the wikidata response for:" + wikiInfo.getWikidata());
-                return;
-            }
-            wikiInfo.setWikipediaSearchTerm(encodeString(wikipediaSearchTerm));
-        } catch (Exception e) {
-            e.printStackTrace();
+    private void handleResponse(ResponseEntity<String> response, String apiUrl) {
+        if (response.getBody().contains("ratelimited")) {
+            handleRateLimitations(apiUrl);
+        } else if (response.getBody().contains("no-such-entity")) {
+            log.info("The request on uri:" + apiUrl + " did not match any data on Wikidata");
         }
     }
 
@@ -92,25 +78,40 @@ public class WikidataSearchRoute {
             RestTemplate restTemplate = new RestTemplate();
             return restTemplate.getForEntity(apiUrl, String.class);
         };
-        // Execute with RetryTemplate
-        ResponseEntity<String> newResponse = null;
+
         try {
-            newResponse = retryTemplate.execute(retryCallback);
+            // Execute with RetryTemplate
+            ResponseEntity<String> newResponse = retryTemplate.execute(retryCallback);
+            processResponse(newResponse, apiUrl);
         } catch (URISyntaxException e) {
             log.error("Error occurred while executing request", e);
-            return;
         }
-        // Handle the response after retry
-        processResponse(newResponse, apiUrl);
     }
 
-    public static String encodeString(String input) {
+    private void processResponse(ResponseEntity<String> response, String apiUrl) {
+        if (response.getBody().isEmpty()) {
+            log.info("The request on uri:" + apiUrl + " did not match any data in Wikidata");
+        }
+    }
+
+    private void extractData(ResponseEntity response, WikiInfo wikiInfo) {
+        wikiInfo.setWikiDataStatuccode(String.valueOf(response.getStatusCodeValue()));
         try {
-            return URLEncoder.encode(input, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            // Handle encoding exception
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode rootNode = mapper.readTree(response.getBody().toString());
+            String wikipediaSearchTerm = rootNode.path("entities")
+                    .path(wikiInfo.getWikidata().toUpperCase())
+                    .path("sitelinks")
+                    .path("enwiki")
+                    .get("title")
+                    .asText();
+            if (wikipediaSearchTerm.isEmpty()) {
+                log.info("No word for searching on wikipedia was found in the wikidata response for:" + wikiInfo.getWikidata());
+                return;
+            }
+            wikiInfo.setWikipediaSearchTerm(RestTemp.encodeString(wikipediaSearchTerm));
+        } catch (Exception e) {
             e.printStackTrace();
-            return null;
         }
     }
 }

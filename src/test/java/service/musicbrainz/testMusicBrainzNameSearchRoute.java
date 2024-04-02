@@ -2,6 +2,7 @@ package service.musicbrainz;
 
 import Application.YourApplication;
 import Application.api.MusicBrainzNameSearchRoute;
+import Application.service.ArtistInfo;
 import Application.service.TypeOfSearchEnum;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.spi.ILoggingEvent;
@@ -43,14 +44,14 @@ public class testMusicBrainzNameSearchRoute {
         //Given
         Map<String, String> nirvana = new HashMap<>();
         nirvana.put(TypeOfSearchEnum.ARTIST.getSearchType(), "Nirvana");
-        String MBID = "5b11f4ce-a62d-471e-81fc-a69a8278c7da";
+        String mBid = "5b11f4ce-a62d-471e-81fc-a69a8278c7da";
         //When
-        Map<String, Object> result = musicBrainzNameSearchRoute.getArtistInfo(nirvana);
+        ArtistInfo artistInfo = musicBrainzNameSearchRoute.getArtistMBID(nirvana);
 
         //Then
-        assertThat(result.get(TypeOfSearchEnum.ARTIST.getSearchType())).isEqualTo("Nirvana");
-        assertThat(result.get("MBstatuscode")).isEqualTo("200");
-        assertThat(result.get("MBID")).isEqualTo(MBID);
+        assertThat(artistInfo.getName()).isEqualTo("Nirvana");
+        assertThat(artistInfo.getmBStatusCode()).isEqualTo("200");
+        assertThat(artistInfo.getmBID()).isEqualTo(mBid);
     }
 
     @Test
@@ -61,12 +62,12 @@ public class testMusicBrainzNameSearchRoute {
         String MBID = "a466c2a2-6517-42fb-a160-1087c3bafd9f";
 
         //When
-        Map<String, Object> result = musicBrainzNameSearchRoute.getArtistInfo(slipknot);
+        ArtistInfo artistInfo = musicBrainzNameSearchRoute.getArtistMBID(slipknot);
 
         //Then
-        assertThat(result.get(TypeOfSearchEnum.ARTIST.getSearchType())).isEqualTo("Slipknot");
-        assertThat(result.get("MBstatuscode")).isEqualTo("200");
-        assertThat(result.get("MBID")).isEqualTo(MBID);
+        assertThat(artistInfo.getName()).isEqualTo("Slipknot");
+        assertThat(artistInfo.getmBStatusCode()).isEqualTo("200");
+        assertThat(artistInfo.getmBID()).isEqualTo(MBID);
     }
 
     @Test
@@ -83,7 +84,7 @@ public class testMusicBrainzNameSearchRoute {
         classicLogger.addAppender(listAppender);
 
         //When
-        Map<String, Object> result = musicBrainzNameSearchRoute.getArtistInfo(ErrorInSearch);
+        ArtistInfo artistInfo = musicBrainzNameSearchRoute.getArtistMBID(ErrorInSearch);
 
         //Then
         assertEquals(1, listAppender.list.size()); // Assuming only one log message is expected

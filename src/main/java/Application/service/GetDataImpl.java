@@ -1,6 +1,7 @@
 package Application.service;
 
 import Application.api.*;
+import Application.utils.InputSearchType;
 import Application.utils.ScannerWrapper;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.apache.juli.logging.Log;
@@ -12,6 +13,7 @@ import java.util.Map;
 
 import static Application.utils.Json.createJsonResponse;
 
+
 /**
  * I include the Scanner in the constructor when the class relies on user input and it is unlikely that
  * the scanner needs to be swapped out for another Scanner instance during the class's lifetime. It simplifies method
@@ -19,69 +21,49 @@ import static Application.utils.Json.createJsonResponse;
  */
 public class GetDataImpl {
     private Log log = LogFactory.getLog(GetDataImpl.class);
-    private final Map<String, String> searchTypes;
-    private final MusicBrainzNameSearchRoute musicBrainzNameSearchRoute = new MusicBrainzNameSearchRoute(); // Dependency injection for MusicBrainzNameSearchRoute
-    private final MusicBrainzIDSearchRoute musicBrainzIDSearchRoute = new MusicBrainzIDSearchRoute();
-    private final CoverArtArchiveService coverArtArchiveService = new CoverArtArchiveService();
-    private final WikidataSearchRoute wikidataSearchRoute = new WikidataSearchRoute();
-    private final WikipediaSearchRoute wikipediaSearchRoute = new WikipediaSearchRoute();
     int typoLimit = 10;
     int consecutiveTypoMistakes = 0;
     int typos = 0;
     private final ScannerWrapper scannerWrapper;
-    private Map<String, String> covers = new HashMap<>();
-    private Map<String, Object> response = new HashMap<>();
+    private SearchArtistService searchArtistService;
+    private final MusicBrainzNameSearchRoute musicBrainzNameSearchRoute;
+    private final MusicBrainzIDSearchRoute musicBrainzIDSearchRoute;
+    private final CoverArtArchiveService coverArtArchiveService;
+    private final WikidataSearchRoute wikidataSearchRoute;
+    private final WikipediaSearchRoute wikipediaSearchRoute;
+    private static Map<String, String> searchTypes;
 
-    public GetDataImpl(ScannerWrapper scannerWrapper) {
+    public GetDataImpl(ScannerWrapper scannerWrapper,
+                       MusicBrainzNameSearchRoute musicBrainzNameSearchRoute,
+                       MusicBrainzIDSearchRoute musicBrainzIDSearchRoute,
+                       CoverArtArchiveService coverArtArchiveService,
+                       WikidataSearchRoute wikidataSearchRoute,
+                       WikipediaSearchRoute wikipediaSearchRoute) {
         this.scannerWrapper = scannerWrapper;
-        // Initialize the map with mappings from numbers and corresponding search types
-        searchTypes = new HashMap<>();
-        searchTypes.put("1", "Area");
-        searchTypes.put("2", "Artist");
-        searchTypes.put("3", "Event");
-        searchTypes.put("4", "Genre");
-        searchTypes.put("5", "Instrument");
-        searchTypes.put("6", "Label");
-        searchTypes.put("7", "Place");
-        searchTypes.put("8", "Recording");
-        searchTypes.put("9", "Release Group");
-        searchTypes.put("10", "URL");
-        searchTypes.put("11", "Work");
+        this.musicBrainzNameSearchRoute = musicBrainzNameSearchRoute;
+        this.musicBrainzIDSearchRoute = musicBrainzIDSearchRoute;
+        this.coverArtArchiveService = coverArtArchiveService;
+        this.wikidataSearchRoute = wikidataSearchRoute;
+        this.wikipediaSearchRoute = wikipediaSearchRoute;
+        searchTypes = InputSearchType.getInputTypes();
     }
 
     public void run() {
         do {
+            MusicEntity entity = new MusicEntity();
             Map<String, String> searchParam = getTypeOfSearch();
-            Map.Entry<String, String> entry = searchParam.entrySet().iterator().next();
-            TypeOfSearchEnum typeOfSearch = TypeOfSearchEnum.convertToEnum(entry.getKey());
+            if (searchParam.isEmpty()) {
+                return;
+            }
+            String searchType = searchParam.entrySet().iterator().next().getKey();
+            TypeOfSearchEnum typeOfSearch = TypeOfSearchEnum.convertToEnum(searchType);
             try {
                 switch (typeOfSearch) {
                     case AREA:
                         break;
                     case ARTIST:
-                        MusicEntity entity = new MusicEntity();
-                        entity.setArtistInfo(musicBrainzNameSearchRoute.getArtistInfo(searchParam));
-//                        response = musicBrainzNameSearchRoute.getArtistInfo(searchParam);
-                        if (entity.getArtistInfo() == null || entity.getArtistInfo().getmBID().isEmpty())
-                        {
-                            musicBrainzIDSearchRoute.getDataWithMBID(searchParam.get(TypeOfSearchEnum.ARTIST),
-                                    entity.getArtistInfo());
-                        } else {
-                            musicBrainzIDSearchRoute.getDataWithMBID(entity.getArtistInfo().getmBID(),
-                                    entity.getArtistInfo());
-                        }
-                        if (!entity.getArtistInfo().getName().isEmpty()){
-                            log.warn("No information available for the provided input neither as an Artist or Music " +
-                                    "Brainz ID:" + searchParam.get(TypeOfSearchEnum.ARTIST.toString()));
-                            return;
-                        }
-                        if (!entity.getArtistInfo().getWikiInfo().getWikidata().isEmpty() && entity.getArtistInfo()
-                                .getWikiInfo().getWikipedia().isEmpty()) {
-                            wikidataSearchRoute.getWikidataForArtist(entity.getArtistInfo().getWikiInfo());
-                        }
-                        wikipediaSearchRoute.wikipediaService(entity.getArtistInfo().getWikiInfo());
-                        // Extract covers map from the response
-                        covers.putAll(coverArtArchiveService.getCovers((Map<String, String>) response.get("Covers")));
+                        getArtistSearchService();
+                        entity = searchArtistService.searchArtist(searchParam);
                         break;
                     case EVENT:
                         break;
@@ -104,13 +86,26 @@ public class GetDataImpl {
                     default:
                         break;
                 }
-            } catch (JsonProcessingException | URISyntaxException e) {
-                throw new RuntimeException("An internal error occured, please try again. Sorry for the inconvenience");
+                displayData(entity);
+            } catch (URISyntaxException e) {
+                e.getMessage();
+                log.warn("An internal error occurred, please try again. Sorry for the inconvenience.");
             } catch (RuntimeException e) {
-                throw new RuntimeException(e);
+                System.out.println("There was a typo in your search criteria: " + searchParam.get(searchType) + " please try again.");
+                run();
             }
-            displayData();
         } while (endSearch());
+    }
+
+    private SearchArtistService getArtistSearchService() {
+        if (searchArtistService == null) {
+            searchArtistService = new SearchArtistService(musicBrainzNameSearchRoute,
+                    musicBrainzIDSearchRoute,
+                    coverArtArchiveService,
+                    wikidataSearchRoute,
+                    wikipediaSearchRoute);
+        }
+        return searchArtistService;
     }
 
     public Map<String, String> getTypeOfSearch() {
@@ -122,8 +117,9 @@ public class GetDataImpl {
         // Check if the input corresponds to a valid search type
         if (!searchTypes.containsKey(userInputType)) {
             log.info("Invalid search type:" + userInputType);
-            if (++typos > 10) {
-                System.exit(0);
+            ++typos;
+            if (typos > 10) {
+                return null;
             }
             getTypeOfSearch();
         }
@@ -142,15 +138,16 @@ public class GetDataImpl {
             System.out.println("Want to make a new search? (Yes/No)");
             String input = scannerWrapper.nextLine();
             if (input.equals("Yes")) {
-                return false;
-            } else if (input.equals("No")) {
                 return true;
+            } else if (input.equals("No")) {
+                return false;
             } else {
                 consecutiveTypoMistakes++;
+                endSearch();
             }
         }
         terminate();
-        return true;
+        return false;
     }
 
     private void terminate() {
@@ -158,17 +155,9 @@ public class GetDataImpl {
         scannerWrapper.close();
     }
 
-    public void displayData() {
-        String jsonResponse = createJsonResponse(response, covers);
+    public void displayData(MusicEntity entity) {
+        String jsonResponse = createJsonResponse(entity);
         System.out.println(jsonResponse);
-    }
-
-    public void setResponse(Map<String, Object> response) {
-        this.response = response;
-    }
-
-    public void setCovers(Map<String, String> covers) {
-        this.covers = covers;
     }
 }
 
