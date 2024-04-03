@@ -1,10 +1,13 @@
 package Application.utils;
 
+import org.springframework.stereotype.Component;
+
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.Scanner;
 
-public class ScannerWrapper {
+@Component
+public class ScannerWrapper implements UserInputReader {
     private Scanner scanner;
     // Boolean indicating if this scanner has been closed
     private boolean closed = false;
@@ -36,6 +39,11 @@ public class ScannerWrapper {
         sourceClosed = true;
         source = null;
         closed = true;
+    }
+
+    @Override
+    public String getNextLine() {
+        return scanner.nextLine();
     }
     // Other methods from Scanner that you might use
 }

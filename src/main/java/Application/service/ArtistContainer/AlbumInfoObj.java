@@ -1,19 +1,18 @@
-package Application.service;
+package Application.service.ArtistContainer;
 
 import java.util.UUID;
 
-public class AlbumInfo {
+public class AlbumInfoObj {
 
     private String iD;
     private String albumId;
     private String title;
     private String imageURL;
 
-    public AlbumInfo(String albumId, String title, String imageURL){
+    public AlbumInfoObj(String albumId, String title){
         this.iD = UUID.randomUUID().toString();
         this.albumId = albumId;
         this.title = title;
-        this.imageURL = imageURL;
     }
 
     public void setAlbumId(String albumId) {

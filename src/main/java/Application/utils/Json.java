@@ -1,8 +1,8 @@
 package Application.utils;
 
-import Application.service.AlbumInfo;
+import Application.service.ArtistContainer.AlbumInfoObj;
 import Application.service.GetDataImpl;
-import Application.service.MusicEntity;
+import Application.service.MusicEntityObj;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -17,8 +17,7 @@ public class Json {
 
     private static final Log log = LogFactory.getLog(GetDataImpl.class);
     private static final ObjectMapper mapper = new ObjectMapper();
-
-    public static String createJsonResponse(MusicEntity entity) {
+    public static String createJsonResponse(MusicEntityObj entity) {
         // Format the dataContainer data as JSON
         mapper.enable(SerializationFeature.INDENT_OUTPUT);
         ObjectNode rootNode = mapper.createObjectNode();
@@ -29,10 +28,10 @@ public class Json {
         rootNode.put("description", formatDescription(description));
 
         ArrayNode albumsNode = rootNode.putArray("albums");
-        for (AlbumInfo album : entity.getArtistInfo().getAlbums()) {
+        for (AlbumInfoObj album : entity.getArtistInfo().getAlbums()) {
             ObjectNode albumNode = JsonNodeFactory.instance.objectNode();
             albumNode.put("title", album.getTitle());
-            albumNode.put("id", album.getiD());
+            albumNode.put("id", album.getAlbumId());
             albumNode.put("image", album.getImageURL());
             albumsNode.add(albumNode);
         }

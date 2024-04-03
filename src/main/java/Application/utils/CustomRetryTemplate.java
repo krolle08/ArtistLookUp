@@ -1,13 +1,13 @@
-package Application.features;
+package Application.utils;
 
 import org.springframework.context.annotation.Bean;
-import org.springframework.retry.RetryPolicy;
-import org.springframework.retry.backoff.BackOffPolicy;
 import org.springframework.retry.backoff.ExponentialBackOffPolicy;
 import org.springframework.retry.policy.SimpleRetryPolicy;
 import org.springframework.retry.support.RetryTemplate;
 
-
+/**
+ *
+ */
 public class CustomRetryTemplate extends RetryTemplate {
     @Bean
     public CustomRetryTemplate retryTemplate() {

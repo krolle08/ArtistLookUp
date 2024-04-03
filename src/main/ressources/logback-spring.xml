@@ -1,0 +1,5 @@
+<configuration>
+    <springProfile name="default">
+        <logger name="Application" level="INFO" />
+    </springProfile>
+</configuration>

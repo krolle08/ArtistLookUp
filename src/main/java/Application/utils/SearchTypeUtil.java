@@ -3,11 +3,15 @@ package Application.utils;
 import java.util.HashMap;
 import java.util.Map;
 
-public class InputSearchType {
-    private static Map<String, String> searchTypes;
+public class SearchTypeUtil {
+    private static Map<String, String> searchTypes = createMapOfSearchTypes();
 
-    static {
-        searchTypes = new HashMap<>();
+    public static Map<String, String> getInputTypes() {
+        return searchTypes;
+    }
+
+    private static Map<String, String> createMapOfSearchTypes() {
+        Map<String, String> searchTypes = new HashMap<>();
         searchTypes.put("1", "Area");
         searchTypes.put("2", "Artist");
         searchTypes.put("3", "Event");
@@ -19,10 +23,8 @@ public class InputSearchType {
         searchTypes.put("9", "Release Group");
         searchTypes.put("10", "URL");
         searchTypes.put("11", "Work");
-    }
-
-    public static Map<String, String> getInputTypes(){
         return searchTypes;
     }
 }
+
 

@@ -14,14 +14,15 @@ import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 
-public class RestTemp {
+public class RestTempUtil {
 
-    private static final Log log = LogFactory.getLog(RestTemp.class);
+    private static final Log log = LogFactory.getLog(RestTempUtil.class);
     public static RestTemplate restTemplate(String host, int port) {
         HttpHost proxy = new HttpHost(host, port);
         RequestConfig config = RequestConfig.custom().setProxy(proxy).build();
@@ -66,7 +67,7 @@ public class RestTemp {
                 String paramName = entry.getKey().toLowerCase();
                 String paramValue;
                 if(entry.getValue().contains(" ")){
-                    paramValue= RestTemp.encodeString(entry.getValue());
+                    paramValue= RestTempUtil.encodeString(entry.getValue());
                 } else {
                     paramValue = entry.getValue();
                 }
@@ -111,6 +112,15 @@ public class RestTemp {
             return URLEncoder.encode(input, StandardCharsets.UTF_8.name());
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
+        }
+    }
+    public static String decodeString(String input) {
+        try {
+            return URLDecoder.decode(input, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            // Handle decoding exception
+            e.printStackTrace();
+            return null;
         }
     }
 

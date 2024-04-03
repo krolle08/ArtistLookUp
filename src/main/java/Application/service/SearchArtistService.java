@@ -1,75 +1,105 @@
 package Application.service;
 
 import Application.api.*;
-import org.apache.juli.logging.Log;
-import org.apache.juli.logging.LogFactory;
+import Application.service.ArtistContainer.ArtistInfoObj;
+import Application.utils.URIException;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.net.URISyntaxException;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
- * I include the Scanner in the constructor when the class relies on user input and it is unlikely that
- * the scanner needs to be swapped out for another Scanner instance during the class's lifetime. It simplifies method
- * signatures and encapsulates the dependency, resulting in cleaner code.
+ * The service handles the API calls and construction of the MusicEntityObj class that is used to process the final Json Response
+ * being displayed at the end
  */
+@Service
 public class SearchArtistService {
-
-    private Log log = LogFactory.getLog(SearchArtistService.class);
+    private static final Logger logger = LoggerFactory.getLogger(SearchArtistService.class.getName());
+    @Autowired
     private MusicBrainzNameSearchRoute musicBrainzNameSearchRoute;
+
+    @Autowired
     private MusicBrainzIDSearchRoute musicBrainzIDSearchRoute;
+
+    @Autowired
     private CoverArtArchiveService coverArtArchiveService;
+
+    @Autowired
     private WikidataSearchRoute wikidataSearchRoute;
+
+    @Autowired
     private WikipediaSearchRoute wikipediaSearchRoute;
 
-    public SearchArtistService(MusicBrainzNameSearchRoute musicBrainzNameSearchRoute,
-                               MusicBrainzIDSearchRoute musicBrainzIDSearchRoute,
-                               CoverArtArchiveService coverArtArchiveService,
-                               WikidataSearchRoute wikidataSearchRoute,
-                               WikipediaSearchRoute wikipediaSearchRoute) {
-        this.musicBrainzNameSearchRoute = musicBrainzNameSearchRoute;
-        this.musicBrainzIDSearchRoute = musicBrainzIDSearchRoute;
-        this.coverArtArchiveService = coverArtArchiveService;
-        this.wikidataSearchRoute = wikidataSearchRoute;
-        this.wikipediaSearchRoute = wikipediaSearchRoute;
-    }
-
-    public MusicEntity searchArtist(Map<String, String> searchParam) throws URISyntaxException, RuntimeException {
-        MusicEntity entity = new MusicEntity();
-        ArtistInfo artistInfo = (musicBrainzNameSearchRoute.getArtistMBID(searchParam));
-        ArtistInfo newArtistInfo;
-            if (artistInfo == null || artistInfo.getmBID() == null || artistInfo.getmBID().isEmpty()) {
-                // Get the new ArtistInfo from the first search method
-                newArtistInfo = musicBrainzIDSearchRoute.getDataWithMBID(searchParam.get(TypeOfSearchEnum.ARTIST.getSearchType()));
-                updateArtistInfoNameField(artistInfo, newArtistInfo, searchParam.get(TypeOfSearchEnum.ARTIST.getSearchType()));
+    public ArtistInfoObj searchArtist(Map<String, String> searchParam) throws URISyntaxException, JsonProcessingException, URIException {
+        try {
+            ArtistInfoObj entity = musicBrainzNameSearchRoute.getArtistMBID(searchParam);
+            ArtistInfoObj newEntity;
+            if (entity == null || entity.getmBID() == null || entity.getmBID().isEmpty()) {
+                // Get the new ArtistInfoObj from the first search method
+                newEntity = musicBrainzIDSearchRoute.getArtistDataWithmbid(searchParam
+                        .get(TypeOfSearchEnum.ARTIST.getSearchType()));
             } else {
-                newArtistInfo = (musicBrainzIDSearchRoute.getDataWithMBID(artistInfo.getmBID()));
-                updateArtistInfoNameField(artistInfo, newArtistInfo, searchParam.get(TypeOfSearchEnum.ARTIST.toString()));
+                newEntity = (musicBrainzIDSearchRoute.getArtistDataWithmbid(entity.getmBID()));
             }
-            entity.setArtistInfo(artistInfo);
-            if (entity.getArtistInfo().getName().isEmpty()) {
-                log.warn("No information available for the provided input neither as an Artist or Music " +
-                        "Brainz ID:" + searchParam.get(TypeOfSearchEnum.ARTIST.toString()));
-                return entity;
-            }
-            if (entity.getArtistInfo().getWikiInfo().getWikidata() != null) {
-                wikidataSearchRoute.getWikidataForArtist(entity.getArtistInfo().getWikiInfo());
-            }
-            wikipediaSearchRoute.wikipediaService(entity.getArtistInfo().getWikiInfo());
-            // entity.getArtistInfo().setWikiInfo(wikiInfo);
+            updateArtistInfoNameField(entity, newEntity, searchParam.get(TypeOfSearchEnum.ARTIST.toString()));
 
-            // Extract covers map from the response
-            coverArtArchiveService.getCovers(entity.getArtistInfo().getAlbums());
-        return entity;
+            // Executor service with fixed pool size
+            ExecutorService executorService = Executors.newFixedThreadPool(10);
+
+            // Fetch wikidata and wikipedia info concurrently
+            CompletableFuture<Void> wikidataAndWikipediaFuture = CompletableFuture.runAsync(() -> {
+                try {
+                    if (entity.getWikiInfo().getWikidata() != null) {
+                        wikidataSearchRoute.getWikidataForArtist(entity.getWikiInfo());
+                    }
+                    wikipediaSearchRoute.wikipediaService(entity.getWikiInfo());
+                } catch (URISyntaxException | JsonProcessingException e) {
+                    e.printStackTrace();
+                }
+            }, executorService);
+
+            CompletableFuture<Void> coverArtFuture = CompletableFuture.runAsync(() -> {
+                coverArtArchiveService.getCovers(entity.getAlbums());
+            }, executorService);
+
+            // Wait for all tasks to complete
+            CompletableFuture<Void> allOf = CompletableFuture.allOf(wikidataAndWikipediaFuture, coverArtFuture);
+            allOf.join();
+
+
+            /*if (entity.getWikiInfo().getWikidata() != null) {
+                wikidataSearchRoute.getWikidataForArtist(entity.getWikiInfo());
+            }
+            wikipediaSearchRoute.wikipediaService(entity.getWikiInfo());
+           coverArtArchiveService.getCovers(entity.getAlbums());
+            */
+
+            return entity;
+        } catch (JsonProcessingException | URIException e) {
+            logger.error("An error occurred while searching for artist: " + searchParam
+                    .get(TypeOfSearchEnum.ARTIST.getSearchType()) + " " + e.getMessage());
+            return new ArtistInfoObj();
+        }
     }
 
-    private void updateArtistInfoNameField(ArtistInfo existingInfo, ArtistInfo newInfo, String searchParam) {
+    private void updateArtistInfoNameField(ArtistInfoObj existingInfo, ArtistInfoObj newInfo, String searchParam) {
         // Update additional fields if necessary
-        if (existingInfo.getName() == null || existingInfo.getName().isEmpty()) {
+        if (existingInfo.getName() != null || !existingInfo.getName().isEmpty()) {
             if (!existingInfo.getName().equals(newInfo.getName())) {
-                throw new RuntimeException("Different names has been received doing the search input: " + searchParam + " and when searching with the following mbid: " + existingInfo.getmBID());
+                throw new RuntimeException("Different names has been received doing the search of: " + searchParam +
+                        " and when searching with the following mbid: " + existingInfo.getmBID());
             }
+        } else {
+            existingInfo.setName(newInfo.getName());
         }
-        if (existingInfo.getWikiInfo() == null || existingInfo.getWikiInfo().getWikidata() == null) {
+        if (existingInfo.getWikiInfo() == null || existingInfo.getWikiInfo().isEmpty()) {
             existingInfo.setWikiInfo(newInfo.getWikiInfo());
         }
 

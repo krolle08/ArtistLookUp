@@ -1,18 +1,18 @@
-package Application.service;
+package Application.service.ArtistContainer;
 
 import java.util.UUID;
 
-public class WikiInfo {
+public class WikiInfoObj {
 
     private String iD;
     private String wikidata;
     private String wikipedia;
 
     //HTTP code for response
-    private String wikiDataStatuccode;
+    private Integer wikiDataStatuccode;
 
     //HTTP code for response
-    private String wikiPediaStatuscode;
+    private Integer wikiPediaStatuscode;
 
     private String description;
 
@@ -24,19 +24,22 @@ public class WikiInfo {
         this.description = description;
     }
 
-    public String getWikiDataStatuccode() {
+    public Integer getWikiDataStatuccode() {
         return wikiDataStatuccode;
     }
+    public Integer getWikiPediaStatuccode() {
+        return wikiPediaStatuscode;
+    }
 
-    public void setWikiDataStatuccode(String wikiDataStatuccode) {
+    public void setWikiDataStatuccode(Integer wikiDataStatuccode) {
         this.wikiDataStatuccode = wikiDataStatuccode;
     }
 
-    public void setWikiPediaStatuscode(String wikiPediaStatuscode) {
+    public void setWikiPediaStatuscode(Integer wikiPediaStatuscode) {
         this.wikiPediaStatuscode = wikiPediaStatuscode;
     }
 
-    public WikiInfo(String wikidata, String wikipedia) {
+    public WikiInfoObj(String wikidata, String wikipedia) {
         this.iD = UUID.randomUUID().toString();
         this.wikidata = wikidata;
         this.wikipedia = wikipedia;
@@ -55,5 +58,12 @@ public class WikiInfo {
 
     public String getWikipedia() {
         return wikipedia;
+    }
+
+
+    public boolean isEmpty() {
+        return  wikidata == null &&
+                wikipedia == null &&
+                description == null;
     }
 }

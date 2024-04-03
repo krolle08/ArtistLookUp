@@ -1,38 +1,35 @@
 package Application;
 
-import Application.api.*;
 import Application.service.GetDataImpl;
 import Application.utils.ScannerWrapper;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.context.ConfigurableApplicationContext;
 
 @SpringBootApplication
 public class YourApplication {
-    static int typoLimit = 10;
-    static int consecutiveTypoMistakes = 0;
+    private static final Logger logger = LoggerFactory.getLogger(YourApplication.class.getName());
 
     public static void main(String[] args) {
-        SpringApplication.run(YourApplication.class, args);
-        ScannerWrapper scanner;
+        ConfigurableApplicationContext context = SpringApplication.run(YourApplication.class, args);
+        // Retrieve the managed bean from the Spring context
+        SearchEngineManager searchEngineManager = context.getBean(SearchEngineManager.class);
 
-        scanner = new ScannerWrapper();
-        GetDataImpl getData = new GetDataImpl(scanner, new MusicBrainzNameSearchRoute(),
-                new MusicBrainzIDSearchRoute(), new CoverArtArchiveService(), new WikidataSearchRoute(),
-                new WikipediaSearchRoute());
-        try {
-            getData.run();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        // Run the search engine
+        searchEngineManager.runSearchEngine();
+
+        // Close the Spring application context
+        context.close();
 
         //Check if any threads are running that can prevent system shutdown
         Thread[] threads = new Thread[Thread.activeCount()];
         Thread.enumerate(threads);
         for (Thread thread : threads) {
             if (thread != null && thread.isAlive()) {
-                System.out.println("Thread " + thread.getName() + " is running.");
+                logger.info("Thread " + thread.getName() + " is running.");
             }
         }
-        System.exit(1);
     }
 }

@@ -26,9 +26,14 @@ dependencies {
     implementation files('D:\\Projekter\\libmusicbrainz-5.1.0')
     implementation 'org.slf4j:slf4j-api:1.7.32'
     implementation 'ch.qos.logback:logback-classic:1.2.6' // Example: Logback implementation
+    testImplementation 'com.google.code.gson:gson:2.8.8' // Gson for JSON comparison in tests
+    testImplementation 'org.assertj:assertj-core:3.20.2'
 //    implementation 'com.github.metabrainz:libcoverart:1.0.0'
 //    implementation 'com.github.metabrainz:libmusicbrainz:5.1.0'
 }
+
+//Set logging level for the root logger to INFO
+//logging.level.root=INFO
 
 tasks.withType(JavaCompile) {
     options.compilerArgs << "-Xlint:unchecked"
