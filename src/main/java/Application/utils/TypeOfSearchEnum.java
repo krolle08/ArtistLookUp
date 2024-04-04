@@ -1,4 +1,4 @@
-package Application.service;
+package Application.utils;
 
 public enum TypeOfSearchEnum {
     AREA("Area"),
@@ -36,6 +36,7 @@ public enum TypeOfSearchEnum {
         try {
             return TypeOfSearchEnum.valueOf(type.toUpperCase()); // Assuming the input string is in uppercase
         } catch (IllegalArgumentException e) {
+            e.printStackTrace();
             throw new IllegalArgumentException("Invalid search type");
         }
     }
