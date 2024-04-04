@@ -1,13 +1,7 @@
 package utils;
 
-import Application.YourApplication;
-import Application.service.ArtistContainer.AlbumInfoObj;
-import Application.service.ArtistContainer.ArtistInfoObj;
-import Application.service.ArtistContainer.WikiInfoObj;
-import Application.service.MusicEntityObj;
-import Application.utils.Json;
+import Application.Application;
 import Application.utils.RestTempUtil;
-import com.google.gson.JsonParser;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockitoAnnotations;
@@ -15,18 +9,14 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
-@SpringBootTest(classes = YourApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(classes = Application.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class testRestTempUtil {
 
     private Map<String, String> filterParams = new HashMap<>();

@@ -1,4 +1,4 @@
-package Application.service.ArtistContainer;
+package Application.service.Artist;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,16 +1,14 @@
 package utils;
 
-import Application.YourApplication;
-import Application.service.GetDataImpl;
-import Application.service.TypeOfSearchEnum;
+import Application.Application;
+import Application.utils.TypeOfSearchEnum;
 import Application.utils.ScannerWrapper;
 import Application.utils.UserInputUtil;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -19,40 +17,54 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-@SpringBootTest(classes = YourApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(classes = Application.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class testUserInputUtil {
+
+    @MockBean
+    private ScannerWrapper scannerWrapper;
+    @Autowired
+    private UserInputUtil userInputUtil;
     @Test
     public void testTypeOfSearch() {
         // Given
-        Map<String, String> response;
+        Map<String, String> result;
         String searchType = "2";
         String search = "Nirvana";
         String endSearch = "No";
         // Mock dependencies
-        ScannerWrapper scannerWrapper = mock(ScannerWrapper.class);
 
         // Configure behavior of mocks
-        when(scannerWrapper.getNextLine()).thenReturn(searchType, search, endSearch); // Simulate user input
+        when(scannerWrapper.getNextLine()).thenReturn(searchType).thenReturn(search).thenReturn(endSearch); // Simulate user input
 
         // When
-        response = UserInputUtil.getTypeOfSearch(scannerWrapper);
+        result = userInputUtil.getTypeOfSearch();
 
         // Then
-        assertThat(response.get(TypeOfSearchEnum.ARTIST.getSearchType()).equals(search));
-        assertThat(response.containsKey(TypeOfSearchEnum.ARTIST.getSearchType()));
+        assertThat(result.get(TypeOfSearchEnum.ARTIST.getSearchType()).equals(search));
+        assertThat(result.containsKey(TypeOfSearchEnum.ARTIST.getSearchType()));
     }
 
     @Test
     public void testRestartSearchTypoError() {
         // Given
         String restartSearch = "WrongTypo";
+        Map<String, String> result;
         // Mock dependencies
-        ScannerWrapper scannerWrapper = mock(ScannerWrapper.class);
         // Configure behavior of mocks
-        when(scannerWrapper.getNextLine()).thenReturn(restartSearch, restartSearch, restartSearch, restartSearch, restartSearch, restartSearch, restartSearch, restartSearch, restartSearch, restartSearch, restartSearch); // Simulate user input
+        when(scannerWrapper.getNextLine())
+                .thenReturn(restartSearch)
+                .thenReturn(restartSearch)
+                .thenReturn(restartSearch)
+                .thenReturn(restartSearch)
+                .thenReturn(restartSearch)
+                .thenReturn(restartSearch)
+                .thenReturn(restartSearch)
+                .thenReturn(restartSearch)
+                .thenReturn(restartSearch)
+                .thenReturn(restartSearch);
 
         // When
-        Map<String, String> result = UserInputUtil.getTypeOfSearch(scannerWrapper);
+        result = userInputUtil.getTypeOfSearch();
 
         // Then
         assertThat(result.isEmpty());
@@ -62,14 +74,12 @@ public class testUserInputUtil {
     public void testRestartSearchTrue() {
         // Given
         String restartSearch = "Yes";
-        // Mock dependencies
-        ScannerWrapper scannerWrapper = mock(ScannerWrapper.class);
 
         // Configure behavior of mocks
         when(scannerWrapper.getNextLine()).thenReturn(restartSearch); // Simulate user input
 
         // When
-        boolean result = UserInputUtil.restartSearch(scannerWrapper);
+        boolean result = userInputUtil.restartSearch();
 
         // Then
         assertTrue(result);
@@ -79,14 +89,12 @@ public class testUserInputUtil {
     public void testRestartSearchFalse() {
         // Given
         String restartSearch = "No";
-        // Mock dependencies
-        ScannerWrapper scannerWrapper = mock(ScannerWrapper.class);
 
         // Configure behavior of mocks
         when(scannerWrapper.getNextLine()).thenReturn(restartSearch); // Simulate user input
 
         // When
-        boolean result = UserInputUtil.restartSearch(scannerWrapper);
+        boolean result = userInputUtil.restartSearch();
 
         // Then
         assertFalse(result);

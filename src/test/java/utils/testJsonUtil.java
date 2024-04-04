@@ -1,17 +1,15 @@
 package utils;
 
-import Application.YourApplication;
+import Application.Application;
 import Application.service.*;
-import Application.service.ArtistContainer.AlbumInfoObj;
-import Application.service.ArtistContainer.ArtistInfoObj;
-import Application.service.ArtistContainer.WikiInfoObj;
+import Application.service.Artist.AlbumInfoObj;
+import Application.service.Artist.ArtistInfoObj;
+import Application.service.Artist.WikiInfoObj;
 import Application.utils.Json;
 import com.google.gson.JsonParser;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,7 +17,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 
-@SpringBootTest(classes = YourApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(classes = Application.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class testJsonUtil {
     @Test
     public void testJsonPrint() {

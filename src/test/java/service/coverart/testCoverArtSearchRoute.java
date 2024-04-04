@@ -1,8 +1,8 @@
 package service.coverart;
 
-import Application.YourApplication;
-import Application.api.CoverArtArchiveService;
-import Application.service.ArtistContainer.AlbumInfoObj;
+import Application.Application;
+import Application.service.CoverArtArchive.CoverArtArchiveService;
+import Application.service.Artist.AlbumInfoObj;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.logging.Logger;
 import static org.mockito.Mockito.*;
 
-@SpringBootTest(classes = YourApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(classes = Application.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class testCoverArtSearchRoute {
     @Test
     public void testCoverArtEndpoint() {

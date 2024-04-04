@@ -9,15 +9,9 @@ import java.util.Scanner;
 @Component
 public class ScannerWrapper implements UserInputReader {
     private Scanner scanner;
-    // Boolean indicating if this scanner has been closed
-    private boolean closed = false;
-    // The input source
-    private Readable source;
-    // Boolean is true if source is done
-    private boolean sourceClosed = false;
-    // A holder of the last IOException encountered
-    private IOException lastException;
-
+    public ScannerWrapper(Readable source) {
+        this.scanner = new Scanner(source);
+    }
     public ScannerWrapper() {
         this.scanner = new Scanner(System.in);
     }
@@ -27,23 +21,11 @@ public class ScannerWrapper implements UserInputReader {
     }
 
     public void close() {
-        if (closed)
-            return;
-        if (source instanceof Closeable) {
-            try {
-                ((Closeable)source).close();
-            } catch (IOException ioe) {
-                lastException = ioe;
-            }
-        }
-        sourceClosed = true;
-        source = null;
-        closed = true;
+        scanner.close();
     }
 
     @Override
     public String getNextLine() {
         return scanner.nextLine();
     }
-    // Other methods from Scanner that you might use
 }

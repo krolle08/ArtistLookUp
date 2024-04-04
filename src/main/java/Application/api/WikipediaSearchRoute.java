@@ -1,14 +1,8 @@
 package Application.api;
 
-import Application.YourApplication;
-import Application.service.ArtistContainer.WikiInfoObj;
 import Application.utils.RestTempUtil;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -23,7 +17,7 @@ import java.util.logging.Logger;
  */
 @RestController
 public class WikipediaSearchRoute {
-    private static final Logger logger = Logger.getLogger(YourApplication.class.getName());
+    private static final Logger logger = Logger.getLogger(WikipediaSearchRoute.class.getName());
     private final String protocol = "https";
     private final String schemeDelimiter = "://";
     private final String host = "en.wikipedia.org";
@@ -31,39 +25,11 @@ public class WikipediaSearchRoute {
     private final String api = "/api.php";
     private final String postPreFix = "?action=query&format=json&prop=extracts&exintro=true&redirects=true&titles=";
 
-    public void wikipediaService(WikiInfoObj wikiInfoObj) throws URISyntaxException, JsonProcessingException {
-        URI uri = buildWikiPediaUri(wikiInfoObj.getWikipedia());
-        ResponseEntity<String> response = getResponse(uri);
-
-        wikiInfoObj.setWikiPediaStatuscode(response.getStatusCodeValue());
-        wikiInfoObj.setDescription(extractDescription(response));
-        if(wikiInfoObj.getDescription() == null || wikiInfoObj.getDescription().isEmpty()){
-            logger.warning("No description was found for: " + wikiInfoObj.getWikipedia());
-        }
+    public URI getUrl(String searchTerm) throws URISyntaxException {
+        return new URI(RestTempUtil.constructUri(searchTerm,  protocol,  schemeDelimiter,  host,
+                pathPrefix,  api,  postPreFix).toString());
     }
-
-    private URI buildWikiPediaUri(String searchTerm) throws URISyntaxException {
-       String fullpath = RestTempUtil.constructUri(searchTerm,  protocol,  schemeDelimiter,  host,
-                pathPrefix,  api,  postPreFix);
-       return new URI(fullpath);
-    }
-
-    private ResponseEntity<String> getResponse(URI uri) {
-        RestTemplate restTemplate = new RestTemplate();
-        ResponseEntity<String> response = restTemplate.getForEntity(uri, String.class);
-        if (response.getBody() == null || response.getBody().isEmpty()) {
-            logger.warning("No results on provided uri: " + uri);
-        }
-        return response;
-    }
-
-    private String extractDescription(ResponseEntity response) throws JsonProcessingException {
-        String description = "";
-            ObjectMapper mapper = new ObjectMapper();
-            JsonNode rootNode = mapper.readTree(String.valueOf(response.getBody()));
-            JsonNode extractNode = rootNode.path("query").path("pages").elements().next().get("extract");
-            if (extractNode != null && !extractNode.isNull()) {
-                description = extractNode.asText();}
-        return description;
+    public ResponseEntity<String> getResponse(URI uri) {
+        return RestTempUtil.getResponse(uri);
     }
 }

@@ -1,18 +1,28 @@
 package Application.utils;
 
+import org.apache.catalina.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.Collections;
 import java.util.Map;
 
+@Component
 public class UserInputUtil {
     private static final Logger logger = LoggerFactory.getLogger(UserInputUtil.class);
     private static final int MAX_TYPING_ERRORS = 10;
     private static final String YES_OPTION = "Yes";
     private static final String NO_OPTION = "No";
+    private ScannerWrapper scannerWrapper;
 
-    public static Map<String, String> getTypeOfSearch(ScannerWrapper scannerWrapper) {
+    @Autowired
+    public UserInputUtil(ScannerWrapper scannerWrapper) {
+        this.scannerWrapper = scannerWrapper;
+    }
+
+    public Map<String, String> getTypeOfSearch() {
         Map<String, String> searchTypes = SearchTypeUtil.getInputTypes();
         int typos = 0;
         String searchTypeNumber = new String();
@@ -42,7 +52,7 @@ public class UserInputUtil {
         return Collections.emptyMap();
     }
 
-    public static boolean restartSearch(ScannerWrapper scannerWrapper) {
+    public boolean restartSearch() {
         int consecutiveTypoMistakes = 0;
 
         while (consecutiveTypoMistakes < MAX_TYPING_ERRORS) {
@@ -53,6 +63,7 @@ public class UserInputUtil {
             if (input.equals(YES_OPTION)) {
                 return true;
             } else if (input.equals(NO_OPTION)) {
+                scannerWrapper.close();
                 return false;
             } else {
                 consecutiveTypoMistakes++;

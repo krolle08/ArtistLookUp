@@ -1,4 +1,4 @@
-package Application.service.ArtistContainer;
+package Application.service.Artist;
 
 import java.util.UUID;
 
@@ -6,12 +6,12 @@ public class WikiInfoObj {
 
     private String iD;
     private String wikidata;
-    private String wikipedia;
+    private String wikipediaSearchTerm;
 
-    //HTTP code for response
+    //HTTP code for handling the response
     private Integer wikiDataStatuccode;
 
-    //HTTP code for response
+    //HTTP code for handling the response
     private Integer wikiPediaStatuscode;
 
     private String description;
@@ -39,31 +39,31 @@ public class WikiInfoObj {
         this.wikiPediaStatuscode = wikiPediaStatuscode;
     }
 
-    public WikiInfoObj(String wikidata, String wikipedia) {
+    public WikiInfoObj(String wikidata, String wikipediaSearchTerm) {
         this.iD = UUID.randomUUID().toString();
         this.wikidata = wikidata;
-        this.wikipedia = wikipedia;
+        this.wikipediaSearchTerm = wikipediaSearchTerm;
     }
     public String getiD() {
         return iD;
     }
 
-    public void setWikipediaSearchTerm(String wikipedia) {
-        this.wikipedia = wikipedia;
+    public void setWikipediaSearchTerm(String wikipediaSearchTerm) {
+        this.wikipediaSearchTerm = wikipediaSearchTerm;
     }
 
     public String getWikidata() {
         return wikidata;
     }
 
-    public String getWikipedia() {
-        return wikipedia;
+    public String getWikipediaSearchTerm() {
+        return wikipediaSearchTerm;
     }
 
 
     public boolean isEmpty() {
         return  wikidata == null &&
-                wikipedia == null &&
+                wikipediaSearchTerm == null &&
                 description == null;
     }
 }

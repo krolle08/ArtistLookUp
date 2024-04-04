@@ -1,7 +1,7 @@
 package Application.utils;
 
-import Application.service.ArtistContainer.AlbumInfoObj;
-import Application.service.GetDataImpl;
+import Application.service.Artist.AlbumInfoObj;
+import Application.features.GetDataImpl;
 import Application.service.MusicEntityObj;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;

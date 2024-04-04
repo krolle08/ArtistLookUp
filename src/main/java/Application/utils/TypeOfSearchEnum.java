@@ -1,4 +1,4 @@
-package Application.service;
+package Application.utils;
 
 public enum TypeOfSearchEnum {
     AREA("Area"),

@@ -1,9 +1,10 @@
 package Application.api;
 
-import Application.service.ArtistContainer.ArtistInfoObj;
-import Application.service.SearchArtistService;
-import Application.service.TypeOfSearchEnum;
+import Application.service.Artist.ArtistInfoObj;
+import Application.service.Artist.SearchArtistService;
+import Application.utils.TypeOfSearchEnum;
 import Application.utils.RestTempUtil;
+import Application.utils.URIException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -11,7 +12,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -23,7 +23,7 @@ import java.util.Map;
  */
 @RestController
 public class MusicBrainzNameSearchRoute {
-    private static final Logger logger = LoggerFactory.getLogger(SearchArtistService.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(MusicBrainzNameSearchRoute.class.getName());
     private final String protocol = "http";
     private final String schemeDelimiter = "://";
     private final String host = "musicbrainz.org";
@@ -34,63 +34,22 @@ public class MusicBrainzNameSearchRoute {
     private final String query = "/?query=";
     private final String json = "fmt=json";
 
-
-    public ArtistInfoObj getArtistMBID(Map<String, String> filterParams) throws JsonProcessingException {
-        ArtistInfoObj artistInfoObj = new ArtistInfoObj();
-
-        URI uri = createURI(filterParams);
-        if(uri == null) {
-            logger.warn("Error creating URI, skipped musicbrainz lookup");
-            return artistInfoObj;
-        }
-        ResponseEntity<String> responseEntity = getResponse(uri);
-        if (RestTempUtil.isBodyEmpty(responseEntity, "artists")) {
-            logger.warn("No response was given on the provided URI: " + uri + " make sure that the search type and search parameter: " + filterParams.entrySet().iterator().next().getKey() + " are correct");
-            return artistInfoObj;
-        }
-        artistInfoObj = extractData(responseEntity, filterParams.get(TypeOfSearchEnum.ARTIST.getSearchType()));
-        return artistInfoObj;
-    }
-
-    public URI createURI(Map<String, String> filterParams) {
+    public URI getUri(Map<String, String> filterParams) throws IllegalArgumentException {
+        URI uri;
         try {
-            StringBuffer uri = RestTempUtil.constructUri(filterParams, query, protocol, annotation, schemeDelimiter, host,
-                    port, pathPrefix, version, json);
-            return new URI(uri.toString());
+            uri = new URI(RestTempUtil.constructUri(filterParams, query, protocol, annotation, schemeDelimiter, host, port, pathPrefix, version, json).toString());
         } catch (URISyntaxException e) {
             logger.error("Error constructing URI with param: " + filterParams.entrySet().iterator().next().getValue() +
                     " " + e.getMessage());
-            return null;
+            throw new IllegalArgumentException(e.getMessage());
         }
+        return uri;
     }
-
-    public ResponseEntity<String> getResponse(URI uri) {
-        RestTemplate restTemplate = RestTempUtil.restTemplate(host, port);
-        return restTemplate.getForEntity(uri, String.class);
-    }
-
-    private ArtistInfoObj extractData(ResponseEntity responseEntity, String filterParams) throws JsonProcessingException {
-        ObjectMapper mapper = new ObjectMapper();
-        JsonNode rootNode = mapper.readTree(responseEntity.getBody().toString());
-        String mbid = null;
-        String artistName = null;
-        int highestScore = Integer.MIN_VALUE;
-
-        Iterator<JsonNode> annotationIterator = rootNode.path("artists").elements();
-
-        while (annotationIterator.hasNext()) {
-            JsonNode annotation = annotationIterator.next();
-            int score = annotation.path("score").asInt();
-            String type = annotation.path("name").asText();
-
-            if (filterParams.equalsIgnoreCase(type) && score > highestScore) {
-                highestScore = score;
-                mbid = annotation.path("id").asText();
-                artistName = type;
-            }
+    public ResponseEntity<String> getResponse(URI uri){
+        ResponseEntity<String> responseEntity = RestTempUtil.getResponse(uri, host, port);
+        if (RestTempUtil.isBodyEmpty(responseEntity, "artists")) {
+            logger.warn("No response was given on the provided URI: " + uri + " make sure that the search type and search parameter are correct " + filterParams.entrySet().iterator().next().getKey() + ", " + filterParams.entrySet().iterator().next().getValue());
         }
-        ArtistInfoObj artistInfoObj = new ArtistInfoObj(artistName, mbid);
-        artistInfoObj.setmBStatusCode(responseEntity.getStatusCodeValue());
-        return artistInfoObj;
+        return responseEntity;
     }
 }

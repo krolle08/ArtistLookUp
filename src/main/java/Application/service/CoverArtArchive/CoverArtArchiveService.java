@@ -1,6 +1,6 @@
-package Application.api;
+package Application.service.CoverArtArchive;
 
-import Application.service.ArtistContainer.AlbumInfoObj;
+import Application.service.Artist.AlbumInfoObj;
 import fm.last.musicbrainz.coverart.CoverArt;
 import fm.last.musicbrainz.coverart.CoverArtArchiveClient;
 import fm.last.musicbrainz.coverart.impl.DefaultCoverArtArchiveClient;
