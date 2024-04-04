@@ -40,23 +40,24 @@ To start the program follow this guide:
 3. Locate the project folder and open the build.gradle
 3.1 When prompted for "Open as project" or "Open as file", choose "Open as project"
 4. Depending on your programming software go to the plugin tab and make sure that the following plugins are installed:
-- Gradle
-- Gradle Extension
-- Maven
-- Maven Extension
+    - Gradle
+    - Gradle Extension
+    - Maven
+    - Maven Extension
 5. If done correctly a gradle tab should appear in the UI of your programming software
 5.1 In the gradle tab go to Tasks -> build -> clean and then build
 5.2 If the tab is not present in your UI, try restart the program.
     If still not present try Ctrl + Shift + O or Cmd + Shift + O on macOS (Only IntelliJ IDEA)
     If still not present open the programs terminal and run ./gradlew clean build or ./gradle clean build
     (depending on your gradle setup)
-6. Download sources for gradle with the "Download Sources" button in the gradletab.  Refresh gradle dependencies by tabbing the
+6. Download sources for gradle with the "Download Sources" button in the gradletab.  Refresh gradle dependencies by
+   tabbing the
    If not present run the following command in the terminal ./gradlew dependencies --refresh-dependencies --write-locks
    or ./gradle dependencies --refresh-dependencies --write-locks
 7. If using IntelliJ IDEA, go to the gradle tab press the "Reload all Gradle Project"
 6. Run the application from the run configuration (In IntelliJ IDEA it is located in the
-    top right corner). If not present in the UI of the program locate the main method in the Application class and run it
-    manually.
+    top right corner). If not present in the UI of the program locate the main method in the Application class and run
+    it manually.
 
 Changes involving libraries, dependencies, build.gradle, imports, external features, methods, class and fields
 requires a repeat of step 5.1 - 7.
@@ -98,7 +99,7 @@ Existing service calls to MusicBrainz can be updated with inspiration from Music
 https://musicbrainz.org/doc/MusicBrainz_API#Libraries.
 For example: A more detailed insight into Http responses and handling of them can be seen in
 MyWebServiceImplementation.java and also the unittest required if implementing new features, can
-be inspired from Unittests.java. But be aware that the library is deprecated, and it is therefore advised to test any code
-implemented into the repository carefully.
+be inspired from Unittests.java. But be aware that the library is deprecated, and it is therefore advised to test any
+code implemented into the repository carefully.
 Furthermore, error due to bad user inputs, resulting in empty or bad responses, could be optimized by handling the
 problem where they occur, as of now it restarts the whole process.
