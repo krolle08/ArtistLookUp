@@ -120,26 +120,6 @@ public class SearchArtistService {
         if (entity.getWikiInfo() == null || entity.getWikiInfo().isEmpty()) {
             entity.setWikiInfo(newEntity.getWikiInfo());
         }
-
-        // Merge albums from newInfo into existingInfo
-        List<AlbumInfoObj> existingAlbums = entity.getAlbums();
-        List<AlbumInfoObj> newAlbums = newEntity.getAlbums();
-        if (entity.getAlbums() == null) {
-            entity.setAlbums(newAlbums);
-        } else if (newAlbums != null) {
-            for (AlbumInfoObj newAlbum : newAlbums) {
-                boolean albumExists = false;
-                for (AlbumInfoObj existingAlbum : existingAlbums) {
-                    if (!existingAlbum.getAlbumId().equals(newAlbum.getAlbumId())) {
-                        albumExists = true;
-                        break;
-                    }
-                }
-                if (!albumExists) {
-                    entity.getAlbums().add(newAlbum);
-                }
-            }
-        }
     }
 }
 
