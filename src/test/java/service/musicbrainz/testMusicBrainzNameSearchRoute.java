@@ -29,12 +29,7 @@ public class testMusicBrainzNameSearchRoute {
         String mBid = "5b11f4ce-a62d-471e-81fc-a69a8278c7da";
         //When
         ArtistInfoObj artistInfoObj = null;
-        try {
-            artistInfoObj = musicBrainzNameService.getDataByName(nirvana);
-        } catch (URIException e) {
-            System.out.println("Should not have thrown an exception");
-            fail();
-        }
+        artistInfoObj = musicBrainzNameService.getDataByName(nirvana);
 
         //Then
         assertThat(artistInfoObj.getName()).isEqualTo("Nirvana");
@@ -50,12 +45,7 @@ public class testMusicBrainzNameSearchRoute {
         String MBID = "a466c2a2-6517-42fb-a160-1087c3bafd9f";
         ArtistInfoObj artistInfoObj = new ArtistInfoObj();
         //When
-        try {
-            artistInfoObj = musicBrainzNameService.getDataByName(slipknot);
-        } catch (URIException e) {
-            System.out.println("Should not have thrown an exception");
-            fail();
-        }
+        artistInfoObj = musicBrainzNameService.getDataByName(slipknot);
 
         //Then
         assertThat(artistInfoObj.getName()).isEqualTo("Slipknot");
@@ -73,12 +63,7 @@ public class testMusicBrainzNameSearchRoute {
 
         // When
         ArtistInfoObj artistInfoObj = new ArtistInfoObj();
-        try {
-            artistInfoObj = musicBrainzNameService.getDataByName(ErrorInSearch);
-        } catch (URIException e) {
-            System.out.println("Should not have thrown an exception");
-            fail();
-        }
+        artistInfoObj = musicBrainzNameService.getDataByName(ErrorInSearch);
 
         // Then
         assertThat(artistInfoObj.getName()).isNull();

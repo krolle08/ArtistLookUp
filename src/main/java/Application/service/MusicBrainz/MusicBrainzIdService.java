@@ -42,19 +42,18 @@ public class MusicBrainzIdService {
 
     public ArtistInfoObj extractData(ResponseEntity response, String mbid) {
         ObjectMapper mapper = new ObjectMapper();
-        ArtistInfoObj artistInfoObj = new ArtistInfoObj();
         try {
             JsonNode rootNode = mapper.readTree(response.getBody().toString());
             String name = extractName(rootNode, mbid);
             WikiInfoObj wikiInfoObj = extractwikiData(rootNode);
             List<AlbumInfoObj> albums = extractCoverIdAndTitle(rootNode);
-            artistInfoObj = new ArtistInfoObj(name, null, wikiInfoObj, albums);
+            ArtistInfoObj artistInfoObj = new ArtistInfoObj(name,mbid,wikiInfoObj,albums);
             artistInfoObj.setmBStatusCode(response.getStatusCode().value());
             return artistInfoObj;
         } catch (JsonProcessingException e) {
             logger.error("A problem occurred when mapping the response: " + e.getMessage());
             e.printStackTrace();
-            return artistInfoObj;
+            throw new RuntimeException("Error processing response", e);
         }
     }
 
@@ -70,8 +69,8 @@ public class MusicBrainzIdService {
     }
 
     private WikiInfoObj extractwikiData(JsonNode rootNode) {
-        String wikipediaResult = null;
-        String wikidataResult = null;
+        String wikipediaResult = "";
+        String wikidataResult = "";
 
         JsonNode relations = rootNode.get("relations");
         if (relations != null && relations.isArray()) {

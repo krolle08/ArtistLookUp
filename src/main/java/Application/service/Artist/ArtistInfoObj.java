@@ -5,17 +5,14 @@ import java.util.List;
 import java.util.UUID;
 
 public class ArtistInfoObj {
-
     private String iD;
     private String name;
     private String mBID;
     private WikiInfoObj wikiInfoObj;
-
     private Integer mBStatusCode;
     private List<AlbumInfoObj> albums = new ArrayList<>();
 
-    public ArtistInfoObj(String name, String mBID) {
-        this(name, mBID, null, null);
+    public ArtistInfoObj() {
     }
 
     public ArtistInfoObj(String name, String mBid, WikiInfoObj wikiInfoObj, List<AlbumInfoObj> albums) {
@@ -28,9 +25,6 @@ public class ArtistInfoObj {
 
     public List<AlbumInfoObj> getAlbums() {
         return albums;
-    }
-
-    public ArtistInfoObj(){
     }
 
     public void setmBStatusCode(Integer mBStatusCode) {
@@ -48,6 +42,7 @@ public class ArtistInfoObj {
     public Integer getmBStatusCode() {
         return mBStatusCode;
     }
+
     public void setiD(String iD) {
         this.iD = iD;
     }
@@ -63,7 +58,6 @@ public class ArtistInfoObj {
     public void setWikiInfo(WikiInfoObj wikiInfoObj) {
         this.wikiInfoObj = wikiInfoObj;
     }
-
 
     public ArtistInfoObj(String id) {
         this.iD = id;
@@ -82,11 +76,10 @@ public class ArtistInfoObj {
     }
 
     public boolean isEmpty() {
-        return iD == null &&
+        return
                 (name == null || name.isEmpty()) &&
-                (mBID == null || mBID.isEmpty()) &&
-                wikiInfoObj == null &&
-                (albums == null || albums.isEmpty()) &&
-                mBStatusCode == null;
+                        (mBID == null || mBID.isEmpty()) &&
+                        wikiInfoObj == null &&
+                        (albums == null || albums.isEmpty());
     }
 }

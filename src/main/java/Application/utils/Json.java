@@ -22,13 +22,13 @@ public class Json {
         mapper.enable(SerializationFeature.INDENT_OUTPUT);
         ObjectNode rootNode = mapper.createObjectNode();
 
-        rootNode.put("mbid", entity.getArtistInfo().getmBID());
-        String description = entity.getArtistInfo().getWikiInfo().getDescription();
+        rootNode.put("mbid", entity.getArtistInfoObj().getmBID());
+        String description = entity.getArtistInfoObj().getWikiInfo().getDescription();
 
         rootNode.put("description", formatDescription(description));
 
         ArrayNode albumsNode = rootNode.putArray("albums");
-        for (AlbumInfoObj album : entity.getArtistInfo().getAlbums()) {
+        for (AlbumInfoObj album : entity.getArtistInfoObj().getAlbums()) {
             ObjectNode albumNode = JsonNodeFactory.instance.objectNode();
             albumNode.put("title", album.getTitle());
             albumNode.put("id", album.getAlbumId());

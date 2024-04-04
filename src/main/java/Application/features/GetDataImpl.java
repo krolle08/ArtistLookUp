@@ -1,11 +1,11 @@
 package Application.features;
 
+import Application.service.Area.SearchAreaService;
 import Application.service.Artist.SearchArtistService;
-import Application.service.DataRetrieval;
+import Application.service.DataController;
 import Application.service.MusicEntityObj;
 import Application.utils.Json;
 import Application.utils.TypeOfSearchEnum;
-import Application.utils.URIException;
 import Application.utils.UserInputUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,11 +19,12 @@ import java.util.Map;
  * Component responsible for retrieving data based on user input and search parameters.
  */
 @Component
-public class GetDataImpl implements DataRetrieval{
+public class GetDataImpl implements DataController {
     private static final Logger logger = LoggerFactory.getLogger(GetDataImpl.class);
     private static final int MAX_RETRIES = 3;
     private static final long RETRY_DELAY_MS = 1000; // 1 second delay between retries
     private SearchArtistService searchArtistService;
+    private SearchAreaService searchAreaService;
 
     private UserInputUtil userInputUtil;
 
@@ -32,9 +33,10 @@ public class GetDataImpl implements DataRetrieval{
      * @param searchArtistService Service for searching artists.
      */
     @Autowired
-    public GetDataImpl(UserInputUtil userInputUtil, SearchArtistService searchArtistService) {
+    public GetDataImpl(UserInputUtil userInputUtil, SearchArtistService searchArtistService, SearchAreaService searchAreaService) {
         this.userInputUtil = userInputUtil;
         this.searchArtistService = searchArtistService;
+        this.searchAreaService = searchAreaService;
     }
     @Override
     public void run() {
@@ -52,31 +54,15 @@ public class GetDataImpl implements DataRetrieval{
                 TypeOfSearchEnum typeOfSearch = TypeOfSearchEnum.convertToEnum(searchParam.entrySet().iterator().next().getKey());
                 switch (typeOfSearch) {
                     case AREA:
+                        //Example of how future development could look like
+                        entity.setAreaInfoObj(searchAreaService.getData(searchParam));
                         break;
                     case ARTIST:
-                        entity.setArtistInfo(searchArtistService.searchArtist(searchParam));
-                        if (entity.getArtistInfo().isEmpty()) {
-                            logger.info("No results found for: {} as an/a: {}", searchParam.entrySet().iterator().next().getValue(), typeOfSearch);
+                        entity.setArtistInfoObj(searchArtistService.getData(searchParam));
+                        if (entity.getArtistInfoObj().isEmpty()) {
+                            logger.info("No results found for: {} as an {}", searchParam.entrySet().iterator().next().getValue(), typeOfSearch);
                             return;
                         }
-                        break;
-                    case EVENT:
-                        break;
-                    case GENRE:
-                        break;
-                    case INSTRUMENT:
-                        break;
-                    case LABEL:
-                        break;
-                    case PLACE:
-                        break;
-                    case RECORDING:
-                        break;
-                    case RELEASE_GROUP:
-                        break;
-                    case URL:
-                        break;
-                    case WORK:
                         break;
                     default:
                         logger.warn("Unsupported type of search: {}", typeOfSearch);

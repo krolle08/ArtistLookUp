@@ -28,7 +28,7 @@ public class testCoverArtSearchRoute {
         albums.add(album3);
         CoverArtArchiveService coverArtArchiveService = new CoverArtArchiveService();
         //When
-        coverArtArchiveService.getCovers(albums);
+        coverArtArchiveService.getCoverData(albums);
 
         //Then
         Assertions.assertThat(albums).as("Albums list is not null").isNotNull();
@@ -51,7 +51,7 @@ public class testCoverArtSearchRoute {
         service.setLogger(logger);
 
         //When
-        service.getCovers(albums);
+        service.getCoverData(albums);
 
         //Then
         verify(logger, times(1)).severe("Invalid UUID format for album ID: InvalidUUID");

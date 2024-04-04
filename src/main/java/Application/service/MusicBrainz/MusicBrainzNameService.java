@@ -41,8 +41,8 @@ public class MusicBrainzNameService {
         ObjectMapper mapper = new ObjectMapper();
         try {
             JsonNode rootNode = mapper.readTree(responseEntity.getBody().toString());
-            String mbid = null;
-            String artistName = null;
+            String mbid = "";
+            String artistName = "";
             int highestScore = Integer.MIN_VALUE;
 
             Iterator<JsonNode> annotationIterator = rootNode.path("artists").elements();

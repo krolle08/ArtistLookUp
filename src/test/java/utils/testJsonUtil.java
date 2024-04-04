@@ -38,15 +38,13 @@ public class testJsonUtil {
 
     private MusicEntityObj createMusicEntity() {
         MusicEntityObj entity = new MusicEntityObj();
-        ArtistInfoObj artistInfoObj = new ArtistInfoObj("Nirvana", "1234");
         WikiInfoObj wikiInfoObj = new WikiInfoObj("wikidata", "wikipedia");
         wikiInfoObj.setDescription("description");
-        entity.setArtistInfo(artistInfoObj);
-        entity.getArtistInfo().setWikiInfo(wikiInfoObj);
         List<AlbumInfoObj> albums = new ArrayList<>();
         albums.add(new AlbumInfoObj("1b022e01-4da6-387b-8658-8678046e4cef", "Nevermind"));
         albums.get(0).setImageURL("https://coverartarchive.org/release/a146429a-cedc-3ab0-9e41-1aaf5f6cd");
-        entity.getArtistInfo().setAlbums(albums);
+        ArtistInfoObj artistInfoObj = new ArtistInfoObj("Nirvana", "1234", wikiInfoObj, albums);
+        entity.setArtistInfoObj(artistInfoObj);
         return entity;
     }
 

@@ -1,8 +1,8 @@
 package Application.service;
 /**
- * Interface responsible for retrieving data based on user input.
+ * Interface responsible for controlling the type and flow of data based on user input.
  */
-public interface DataRetrieval {
+public interface DataController {
 
     /**
      * Runs the process of retrieving data based on user input.

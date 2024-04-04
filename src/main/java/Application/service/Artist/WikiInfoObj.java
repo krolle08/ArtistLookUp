@@ -5,7 +5,7 @@ import java.util.UUID;
 public class WikiInfoObj {
 
     private String iD;
-    private String wikidata;
+    private String wikidataSearchTerm;
     private String wikipediaSearchTerm;
 
     //HTTP code for handling the response
@@ -14,7 +14,7 @@ public class WikiInfoObj {
     //HTTP code for handling the response
     private Integer wikiPediaStatuscode;
 
-    private String description;
+    private String description = "";
 
     public String getDescription() {
         return description;
@@ -39,9 +39,9 @@ public class WikiInfoObj {
         this.wikiPediaStatuscode = wikiPediaStatuscode;
     }
 
-    public WikiInfoObj(String wikidata, String wikipediaSearchTerm) {
+    public WikiInfoObj(String wikidataSearchTerm, String wikipediaSearchTerm) {
         this.iD = UUID.randomUUID().toString();
-        this.wikidata = wikidata;
+        this.wikidataSearchTerm = wikidataSearchTerm;
         this.wikipediaSearchTerm = wikipediaSearchTerm;
     }
     public String getiD() {
@@ -52,8 +52,8 @@ public class WikiInfoObj {
         this.wikipediaSearchTerm = wikipediaSearchTerm;
     }
 
-    public String getWikidata() {
-        return wikidata;
+    public String getWikidataSearchTerm() {
+        return wikidataSearchTerm;
     }
 
     public String getWikipediaSearchTerm() {
@@ -62,7 +62,7 @@ public class WikiInfoObj {
 
 
     public boolean isEmpty() {
-        return  wikidata == null &&
+        return  wikidataSearchTerm == null &&
                 wikipediaSearchTerm == null &&
                 description == null;
     }

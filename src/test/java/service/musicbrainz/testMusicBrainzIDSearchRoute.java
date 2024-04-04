@@ -35,9 +35,9 @@ public class testMusicBrainzIDSearchRoute {
         //Then
         assertThat(artistInfoObj.getName()).isEqualTo("Nirvana");
         assertThat(artistInfoObj.getmBStatusCode()).isEqualTo(200);
-        assertThat(artistInfoObj.getWikiInfo().getWikidata()).isEqualTo(succescriteria);
+        assertThat(artistInfoObj.getWikiInfo().getWikidataSearchTerm()).isEqualTo(succescriteria);
         assertThat(!artistInfoObj.getAlbums().isEmpty());
-        assertThat(artistInfoObj.getAlbums().size()).isEqualTo(16); // Check if it has a size of 16, prepare for updates if they release albums
+        assertThat(artistInfoObj.getAlbums().size()).isEqualTo(17); // Check if it has a size of 16, prepare for updates if they release albums
     }
 
     @Test

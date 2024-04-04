@@ -28,7 +28,8 @@ public class UserInputUtil {
         String searchTypeNumber = new String();
 
         while (typos < MAX_TYPING_ERRORS) {
-            System.out.println("Type in the number corresponding to the type of search you want to perform:\n" + "1 Area\n" + "2 Artist\n" + "3 Event\n" + "4 Genre\n" + "5 Instrument\n" + "6 Label\n" + "7 Place\n" + "8 Recording\n" + "9 Relase Group\n" + "10 URL\n" + "11 Work\n");
+            System.out.println("Type in the number corresponding to the type of search you want to perform:" +
+                    "\n" + "1 Area\n" + "2 Artist\n");
 
             // User input
             searchTypeNumber = scannerWrapper.getNextLine().trim();
@@ -37,7 +38,7 @@ public class UserInputUtil {
             if (searchTypes.containsKey(searchTypeNumber)) {
                 String searchType = searchTypes.get(searchTypeNumber);
                 System.out.println("What " + searchType + " do you want to search for?");
-                String searchValue = scannerWrapper.getNextLine().trim();
+                String searchValue = scannerWrapper.getNextLine().trim().toUpperCase();
                 return Collections.singletonMap(searchType, searchValue);
             } else {
                 logger.info("Invalid number for a search type:" + searchTypeNumber);

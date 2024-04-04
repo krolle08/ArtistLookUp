@@ -47,9 +47,6 @@ public class MusicBrainzNameSearchRoute {
     }
     public ResponseEntity<String> getResponse(URI uri){
         ResponseEntity<String> responseEntity = RestTempUtil.getResponse(uri, host, port);
-        if (RestTempUtil.isBodyEmpty(responseEntity, "artists")) {
-            logger.warn("No response was given on the provided URI: " + uri + " make sure that the search type and search parameter are correct " + filterParams.entrySet().iterator().next().getKey() + ", " + filterParams.entrySet().iterator().next().getValue());
-        }
         return responseEntity;
     }
 }

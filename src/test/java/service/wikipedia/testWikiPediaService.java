@@ -31,7 +31,7 @@ public class testWikiPediaService {
 
         //When
         try {
-            wikiPediaService.getWikidataForArtist(wikiInfoObj);
+            wikiPediaService.getWikiPediadata(wikiInfoObj);
         } catch (URISyntaxException | JsonProcessingException e) {
            System.out.println("Exception should not be thrown");
            fail();

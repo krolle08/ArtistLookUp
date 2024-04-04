@@ -38,7 +38,7 @@ public class testWikiDataService {
 
         // When
         try {
-            wikidataService.getWikidataForArtist(wikiInfoObj);
+            wikidataService.getWikidata(wikiInfoObj);
            // wikidataSearchRoute.getWikidataForArtistWithId(wikiInfoObj);
         } catch (URISyntaxException e) {
             e.getStackTrace();

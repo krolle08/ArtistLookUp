@@ -2,7 +2,7 @@
 //    If running prompt ./gradlew clean build --refresh-dependencies
 plugins {
     id 'java'
-    id 'org.springframework.boot' version '2.5.4' // Plugin for Spring Boot projects
+    id 'org.springframework.boot' version '2.6.4' // Plugin for Spring Boot projects
     id 'com.github.ben-manes.versions' version '0.39.0'
 }
 
@@ -45,6 +45,8 @@ test {
         exceptionFormat = 'full' // To show full stack traces
     }
 }
+
+
 
 // Spring Boot specific configurations
 bootJar {

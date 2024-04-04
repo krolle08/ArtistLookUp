@@ -1,7 +1,6 @@
 package Application.service.Wikipedia;
 
 import Application.api.WikipediaSearchRoute;
-import Application.service.Artist.SearchArtistService;
 import Application.service.Artist.WikiInfoObj;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -22,7 +21,7 @@ public class WikiPediaService {
     @Autowired
     WikipediaSearchRoute wikipediaSearchRoute;
 
-    public void getWikidataForArtist(WikiInfoObj wikiInfoObj) throws URISyntaxException, JsonProcessingException {
+    public void getWikiPediadata(WikiInfoObj wikiInfoObj) throws URISyntaxException, JsonProcessingException {
         URI uri = wikipediaSearchRoute.getUrl(wikiInfoObj.getWikipediaSearchTerm());
         ResponseEntity<String> response = wikipediaSearchRoute.getResponse(uri);
         if (response.getBody() == null || response.getBody().isEmpty()) {

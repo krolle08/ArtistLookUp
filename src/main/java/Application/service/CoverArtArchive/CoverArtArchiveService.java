@@ -18,7 +18,7 @@ public class CoverArtArchiveService {
     private Logger logger = Logger.getLogger(CoverArtArchiveService.class.getName());
     CoverArtArchiveClient client = new DefaultCoverArtArchiveClient();
 
-    public void getCovers(List<AlbumInfoObj> albums) {
+    public void getCoverData(List<AlbumInfoObj> albums) {
         albums.forEach(album -> {
             try {
                 UUID albumId = UUID.fromString(album.getAlbumId());

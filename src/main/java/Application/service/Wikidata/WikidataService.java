@@ -1,7 +1,6 @@
 package Application.service.Wikidata;
 
 import Application.api.WikidataSearchRoute;
-import Application.service.Artist.SearchArtistService;
 import Application.service.Artist.WikiInfoObj;
 import Application.utils.RestTempUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -24,8 +23,8 @@ public class WikidataService {
     @Autowired
     WikidataSearchRoute wikidataSearchRoute;
 
-    public void getWikidataForArtist(WikiInfoObj wikiInfoObj) throws URISyntaxException, JsonProcessingException {
-        URI url = wikidataSearchRoute.getUri(wikiInfoObj.getWikidata());
+    public void getWikidata(WikiInfoObj wikiInfoObj) throws URISyntaxException, JsonProcessingException {
+        URI url = wikidataSearchRoute.getUri(wikiInfoObj.getWikidataSearchTerm());
         ResponseEntity<String> response = wikidataSearchRoute.getResponse(url);
         extractWikiPediaData(response, wikiInfoObj);
     }
@@ -36,13 +35,13 @@ public class WikidataService {
         JsonNode rootNode = mapper.readTree(response.getBody().toString());
         String wikipediaSearchTerm;
         Optional<JsonNode> entitiesNode = Optional.ofNullable(rootNode.path("entities"));
-        Optional<JsonNode> wikiNode = entitiesNode.flatMap(node -> Optional.ofNullable(node.get(wikiInfoObj.getWikidata().toUpperCase())));
+        Optional<JsonNode> wikiNode = entitiesNode.flatMap(node -> Optional.ofNullable(node.get(wikiInfoObj.getWikidataSearchTerm().toUpperCase())));
         Optional<JsonNode> sitelinksNode = wikiNode.flatMap(node -> Optional.ofNullable(node.get("sitelinks")));
         Optional<JsonNode> enwikiNode = sitelinksNode.flatMap(node -> Optional.ofNullable(node.get("enwiki")));
         if (enwikiNode.isPresent() && enwikiNode.get().has("title")) {
             wikipediaSearchTerm = enwikiNode.get().get("title").asText();
         } else{
-            logger.info("No word for searching on wikipedia was found in the wikidata response for:" + wikiInfoObj.getWikidata());
+            logger.info("No word for searching on wikipedia was found in the wikidata response for:" + wikiInfoObj.getWikidataSearchTerm());
             return;
         }
         wikiInfoObj.setWikipediaSearchTerm(RestTempUtil.encodeQueryString(wikipediaSearchTerm));
