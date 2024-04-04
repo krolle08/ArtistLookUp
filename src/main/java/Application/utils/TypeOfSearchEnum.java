@@ -1,17 +1,17 @@
-package Application.service;
+package Application.utils;
 
 public enum TypeOfSearchEnum {
-    AREA("AREA"),
-    ARTIST("ARTIST"),
-    EVENT("ARTIST"),
-    GENRE("ARTIST"),
-    INSTRUMENT("ARTIST"),
-    LABEL("ARTIST"),
-    PLACE("ARTIST"),
-    RECORDING("ARTIST"),
-    RELEASE_GROUP("ARTIST"),
-    URL("ARTIST"),
-    WORK("ARTIST");
+    AREA("Area"),
+    ARTIST("Artist"),
+    EVENT("Event"),
+    GENRE("Genre"),
+    INSTRUMENT("Instrument"),
+    LABEL("Label"),
+    PLACE("Place"),
+    RECORDING("Recording"),
+    RELEASE_GROUP("Release_group"),
+    URL("URL"),
+    WORK("Work");
     private final String reason;
 
 
@@ -36,6 +36,7 @@ public enum TypeOfSearchEnum {
         try {
             return TypeOfSearchEnum.valueOf(type.toUpperCase()); // Assuming the input string is in uppercase
         } catch (IllegalArgumentException e) {
+            e.printStackTrace();
             throw new IllegalArgumentException("Invalid search type");
         }
     }
