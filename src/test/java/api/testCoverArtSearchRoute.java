@@ -1,21 +1,28 @@
-package service.coverart;
+package api;
 
 import Application.Application;
-import Application.service.CoverArtArchive.CoverArtArchiveService;
+import Application.api.CoverArtArchiveSearchRoute;
 import Application.service.Artist.AlbumInfoObj;
+import Application.service.CoverArtArchive.CoverArtArchiveService;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
+
 import static org.mockito.Mockito.*;
 
 @SpringBootTest(classes = Application.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class testCoverArtSearchRoute {
+
+    @Autowired
+    CoverArtArchiveSearchRoute coverArtArchiveSearchRoute;
+
     @Test
-    public void testCoverArtEndpoint() {
+    public void testCoverArtEndpoint_Succes() {
         //Given
         String imageUrl = "http://coverartarchive.org/release/df89fb27-14a6-4814-87a4-39b7d9698e4d/38239449645.jpg";
 
@@ -26,9 +33,8 @@ public class testCoverArtSearchRoute {
         albums.add(album1);
         albums.add(album2);
         albums.add(album3);
-        CoverArtArchiveService coverArtArchiveService = new CoverArtArchiveService();
         //When
-        coverArtArchiveService.getCoverData(albums);
+        coverArtArchiveSearchRoute.doGetCoverData(albums);
 
         //Then
         Assertions.assertThat(albums).as("Albums list is not null").isNotNull();
@@ -46,12 +52,11 @@ public class testCoverArtSearchRoute {
 
         // Create a spy on Logger
         Logger logger = spy(Logger.getLogger(CoverArtArchiveService.class.getName()));
-        // Create an instance of CoverArtArchiveService with the spy logger
-        CoverArtArchiveService service = new CoverArtArchiveService();
-        service.setLogger(logger);
+        // Create an instance of CoverArtArchiveSearchRoute with the spy logger
+        coverArtArchiveSearchRoute.setLogger(logger);
 
         //When
-        service.getCoverData(albums);
+        coverArtArchiveSearchRoute.doGetCoverData(albums);
 
         //Then
         verify(logger, times(1)).severe("Invalid UUID format for album ID: InvalidUUID");

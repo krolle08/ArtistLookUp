@@ -26,9 +26,9 @@ public class MusicBrainzIdService {
     MusicBrainzIDSearchRoute musicBrainzIDSearchRoute;
 
 
-    public ArtistInfoObj getDataBymbid(String mbid) {
-        URI uri = musicBrainzIDSearchRoute.getUrl(mbid);
-        ResponseEntity<String> response = musicBrainzIDSearchRoute.getResponse(uri);
+    public ArtistInfoObj getMBData(String mbid) {
+        URI uri = musicBrainzIDSearchRoute.getUri(mbid);
+        ResponseEntity<String> response = musicBrainzIDSearchRoute.doGetResponse(uri);
         if (RestTempUtil.isBodyEmpty(response, null)) {
             logger.info("No body was provided on the following URI: " + uri + " make sure that the search " +
                     "type and search criteria are correct");

@@ -23,7 +23,7 @@ public class testJsonUtil {
     public void testJsonPrint() {
         // Given
         MusicEntityObj entity = createMusicEntity();
-        String expectedJson = createExpectedOutput();
+        String expectedJson = getExpectedOutput();
 
         // When
         String actualJson = Json.createJsonResponse(entity);
@@ -48,7 +48,7 @@ public class testJsonUtil {
         return entity;
     }
 
-    private String createExpectedOutput() {
+    private String getExpectedOutput() {
         return "{\"mbid\":\"1234\",\"description\":\"description\",\"albums\":[{\"title\":\"Nevermind\",\"id\":\"1b022e01-4da6-387b-8658-8678046e4cef\",\"image\":\"https://coverartarchive.org/release/a146429a-cedc-3ab0-9e41-1aaf5f6cd\"}]}";
     }
 

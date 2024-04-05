@@ -13,8 +13,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(classes = Application.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class testRestTempUtil {
@@ -84,7 +83,7 @@ public class testRestTempUtil {
     }
 
     @Test
-    public void testisBodyEmpty() {
+    public void testisBodyEmptyFalse() {
         // Given
         ResponseEntity<String> responseEntity = new ResponseEntity<>("Not Empty", HttpStatus.OK);
         String criteria = "artists";
@@ -94,6 +93,19 @@ public class testRestTempUtil {
 
         //Then
         assertFalse(result);
+    }
+
+    @Test
+    public void testisBodyEmptyTrue() {
+        // Given
+        ResponseEntity<String> responseEntity = new ResponseEntity<>("", HttpStatus.OK);
+        String criteria = "artists";
+
+        // When
+        boolean result = RestTempUtil.isBodyEmpty(responseEntity, criteria);
+
+        //Then
+        assertTrue(result);
     }
 
 }

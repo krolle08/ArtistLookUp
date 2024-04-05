@@ -25,7 +25,7 @@ public class WikidataService {
 
     public void getWikidata(WikiInfoObj wikiInfoObj) throws URISyntaxException, JsonProcessingException {
         URI url = wikidataSearchRoute.getUri(wikiInfoObj.getWikidataSearchTerm());
-        ResponseEntity<String> response = wikidataSearchRoute.getResponse(url);
+        ResponseEntity<String> response = wikidataSearchRoute.doGetResponse(url);
         extractWikiPediaData(response, wikiInfoObj);
     }
 
@@ -44,6 +44,6 @@ public class WikidataService {
             logger.info("No word for searching on wikipedia was found in the wikidata response for:" + wikiInfoObj.getWikidataSearchTerm());
             return;
         }
-        wikiInfoObj.setWikipediaSearchTerm(RestTempUtil.encodeQueryString(wikipediaSearchTerm));
+        wikiInfoObj.setWikipediaSearchTerm(RestTempUtil.encodeString(wikipediaSearchTerm));
     }
 }

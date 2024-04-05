@@ -83,7 +83,7 @@ Adding musicbrainz own database to improve system performance. It requires a bat
 or update of the database. A complete data snapshot of the entire database is generated twice a week
 https://musicbrainz.org/doc/MusicBrainz_Database
 It is recommended to use PostgreSQL when querying the MusicBrainz database.
-The server repository can be found at: https://github.com/metabrainz/musicbrainz-server
+The server api can be found at: https://github.com/metabrainz/musicbrainz-server
 
 MBID WEBSERVICE:
 Further development on Artist information can be achieved by expanding the MusicBrain ID lookup
@@ -100,6 +100,6 @@ https://musicbrainz.org/doc/MusicBrainz_API#Libraries.
 For example: A more detailed insight into Http responses and handling of them can be seen in
 MyWebServiceImplementation.java and also the unittest required if implementing new features, can
 be inspired from Unittests.java. But be aware that the library is deprecated, and it is therefore advised to test any
-code implemented into the repository carefully.
+code implemented into the api carefully.
 Furthermore, error due to bad user inputs, resulting in empty or bad responses, could be optimized by handling the
 problem where they occur, as of now it restarts the whole process.

@@ -4,7 +4,6 @@ import Application.api.MusicBrainzNameSearchRoute;
 import Application.service.Artist.ArtistInfoObj;
 import Application.utils.RestTempUtil;
 import Application.utils.TypeOfSearchEnum;
-import Application.utils.URIException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -25,9 +24,9 @@ public class MusicBrainzNameService {
     @Autowired
     MusicBrainzNameSearchRoute musicBrainzNameSearchRoute;
 
-    public ArtistInfoObj getDataByName(Map<String, String> filterParams) throws IllegalArgumentException {
+    public ArtistInfoObj getMBData(Map<String, String> filterParams) throws IllegalArgumentException {
         URI uri = musicBrainzNameSearchRoute.getUri(filterParams);
-        ResponseEntity<String> response = musicBrainzNameSearchRoute.getResponse(uri);
+        ResponseEntity<String> response = musicBrainzNameSearchRoute.doGetResponse(uri);
         if (RestTempUtil.isBodyEmpty(response, "artists")) {
             logger.warn("No response was given on the provided URI: " + uri + " . Make sure that search type and " +
                     "search parameter are correct " + filterParams.entrySet().iterator().next().getKey() + ", " +

@@ -1,13 +1,6 @@
 package Application.api;
 
-import Application.service.Artist.ArtistInfoObj;
-import Application.service.Artist.SearchArtistService;
-import Application.utils.TypeOfSearchEnum;
 import Application.utils.RestTempUtil;
-import Application.utils.URIException;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -15,7 +8,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Iterator;
 import java.util.Map;
 
 /**
@@ -45,7 +37,7 @@ public class MusicBrainzNameSearchRoute {
         }
         return uri;
     }
-    public ResponseEntity<String> getResponse(URI uri){
+    public ResponseEntity<String> doGetResponse(URI uri){
         ResponseEntity<String> responseEntity = RestTempUtil.getResponse(uri, host, port);
         return responseEntity;
     }

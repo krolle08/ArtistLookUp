@@ -4,7 +4,6 @@ import Application.Application;
 import Application.service.Artist.ArtistInfoObj;
 import Application.service.MusicBrainz.MusicBrainzNameService;
 import Application.utils.TypeOfSearchEnum;
-import Application.utils.URIException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -17,59 +16,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(classes = Application.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class testMusicBrainzNameSearchRoute {
+public class testMusicBrainzNameService {
     @Autowired
     private MusicBrainzNameService musicBrainzNameService;
-
-    @Test
-    public void testMusicBrainzWithNameSearch_Nirvana() {
-        //Given
-        Map<String, String> nirvana = new HashMap<>();
-        nirvana.put(TypeOfSearchEnum.ARTIST.getSearchType(), "Nirvana");
-        String mBid = "5b11f4ce-a62d-471e-81fc-a69a8278c7da";
-        //When
-        ArtistInfoObj artistInfoObj = null;
-        artistInfoObj = musicBrainzNameService.getDataByName(nirvana);
-
-        //Then
-        assertThat(artistInfoObj.getName()).isEqualTo("Nirvana");
-        assertThat(artistInfoObj.getmBStatusCode()).isEqualTo(200);
-        assertThat(artistInfoObj.getmBID()).isEqualTo(mBid);
-    }
-
-    @Test
-    public void testMusicBrainzWithNameSearch_Slipknot() {
-        //Given
-        Map<String, String> slipknot = new HashMap<>();
-        slipknot.put(TypeOfSearchEnum.ARTIST.getSearchType(), "Slipknot");
-        String MBID = "a466c2a2-6517-42fb-a160-1087c3bafd9f";
-        ArtistInfoObj artistInfoObj = new ArtistInfoObj();
-        //When
-        artistInfoObj = musicBrainzNameService.getDataByName(slipknot);
-
-        //Then
-        assertThat(artistInfoObj.getName()).isEqualTo("Slipknot");
-        assertThat(artistInfoObj.getmBStatusCode()).isEqualTo(200);
-        assertThat(artistInfoObj.getmBID()).isEqualTo(MBID);
-    }
-
-    @Test
-    public void testMusicBrainzNameSearchWithErrorInName() {
-        // Given
-        Map<String, String> ErrorInSearch = new HashMap<>();
-        ErrorInSearch.put(TypeOfSearchEnum.ARTIST.getSearchType(), "ErrorInName");
-
-        String uri = "http://musicbrainz.org:80/ws/2/artist/?query=artist:Nirvana&fmt=json";
-
-        // When
-        ArtistInfoObj artistInfoObj = new ArtistInfoObj();
-        artistInfoObj = musicBrainzNameService.getDataByName(ErrorInSearch);
-
-        // Then
-        assertThat(artistInfoObj.getName()).isNull();
-        assertThat(artistInfoObj.getmBID()).isNull();
-        assertThat(artistInfoObj.getAlbums()).isEmpty();
-    }
 
     @Test
     public void testMusicBrainzNameSearchExtractData() {

@@ -1,12 +1,13 @@
 package Application.api;
 
 import Application.utils.RestTempUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.logging.Logger;
 
 /**
  * Wikipedia documentation:
@@ -17,7 +18,7 @@ import java.util.logging.Logger;
  */
 @RestController
 public class WikipediaSearchRoute {
-    private static final Logger logger = Logger.getLogger(WikipediaSearchRoute.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(WikipediaSearchRoute.class.getName());
     private final String protocol = "https";
     private final String schemeDelimiter = "://";
     private final String host = "en.wikipedia.org";
@@ -25,11 +26,18 @@ public class WikipediaSearchRoute {
     private final String api = "/api.php";
     private final String postPreFix = "?action=query&format=json&prop=extracts&exintro=true&redirects=true&titles=";
 
-    public URI getUrl(String searchTerm) throws URISyntaxException {
-        return new URI(RestTempUtil.constructUri(searchTerm,  protocol,  schemeDelimiter,  host,
-                pathPrefix,  api,  postPreFix).toString());
+    public URI getUri(String searchTerm) {
+        try {
+            return new URI(RestTempUtil.constructUri(searchTerm, protocol, schemeDelimiter, host,
+                    pathPrefix, api, postPreFix).toString());
+        } catch (URISyntaxException e) {
+            logger.error("Error constructing URI with param: " + searchTerm +
+                    " " + e.getMessage());
+            throw new IllegalArgumentException(e.getMessage());
+        }
     }
-    public ResponseEntity<String> getResponse(URI uri) {
+
+    public ResponseEntity<String> doGetResponse(URI uri) {
         return RestTempUtil.getResponse(uri);
     }
 }

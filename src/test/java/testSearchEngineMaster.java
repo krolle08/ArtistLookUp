@@ -7,9 +7,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
-
+/**
+ * These tests are made as End-To-End test for when the application is running
+ */
 @SpringBootTest(classes = Application.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class testSearchEngineMaster {
 
@@ -19,10 +22,30 @@ public class testSearchEngineMaster {
     @MockBean
     private ScannerWrapper scannerWrapper;
     @Test
-    public void testSearchEngine() {
+    public void testCorrectInput() {
         //Given
         String searchType = "2";
         String search = "Nirvana";
+        String endSearch = "No";
+
+        // Configure behavior of mocks
+        when(scannerWrapper.getNextLine())
+                .thenReturn(searchType)
+                .thenReturn(search)
+                .thenReturn(endSearch);
+
+        // When
+        searchEngineController.runSearchEngine();
+
+        // Then
+        assertFalse(searchEngineController.getRestartSearchEngine());
+    }
+
+    @Test
+    public void testEmptyInput() {
+        //Given
+        String searchType = "2";
+        String search = "\n";
         String endSearch = "No";
 
         // Configure behavior of mocks

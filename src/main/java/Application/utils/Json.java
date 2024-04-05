@@ -42,13 +42,13 @@ public class Json {
         } catch (JsonProcessingException e) {
             log.error("Error occured during processing the rootNode into the desired jsonformat");
             e.printStackTrace();
-            return "{}";
+            throw new RuntimeException("Failed processing the rootNode");
         }
     }
-    public static String writeValueAsString(JsonNode rootNode) throws JsonProcessingException {
+    private static String writeValueAsString(JsonNode rootNode) throws JsonProcessingException {
         return mapper.writeValueAsString(rootNode);
     }
-    public static String formatDescription(String description) {
+    private static String formatDescription(String description) {
         // Remove HTML tags
         description = description.replaceAll("\\<.*?\\>", "");
         return description;

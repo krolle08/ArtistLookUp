@@ -29,12 +29,18 @@ public class WikidataSearchRoute {
     private final String pathPrefix = "/w";
     private final String api = "/api.php";
 
-    public URI getUri(String Wikidata) throws URISyntaxException {
-        return new URI(buildWikiDataUri(Wikidata, protocol, schemeDelimiter, host, pathPrefix, api).toString());
+    public URI getUri(String wikidataSearchTerm){
+        try {
+            return new URI(buildWikiDataUri(wikidataSearchTerm, protocol, schemeDelimiter, host, pathPrefix, api));
+        } catch (URISyntaxException e) {
+            logger.error("Error constructing URI with param: " + wikidataSearchTerm +
+                    " " + e.getMessage());
+            throw new IllegalArgumentException(e.getMessage());
+        }
     }
 
-    public static String buildWikiDataUri(String wikiDataSearchTerm, String protocol, String schemeDelimiter,
-                                          String host, String pathPrefix, String api ) {
+    private static String buildWikiDataUri(String wikiDataSearchTerm, String protocol, String schemeDelimiter,
+                                          String host, String pathPrefix, String api) {
         return UriComponentsBuilder.fromUriString(protocol + schemeDelimiter + host + pathPrefix + api)
                 .queryParam("action", "wbgetentities")
                 .queryParam("format", "json")
@@ -44,9 +50,9 @@ public class WikidataSearchRoute {
                 .toUriString();
     }
 
-    public ResponseEntity<String> getResponse(URI url) throws URISyntaxException {
-        ResponseEntity<String> response = RestTempUtil.getResponse(url);
-        handleResponse(response, url.toString());
+    public ResponseEntity<String> doGetResponse(URI uri) throws URISyntaxException {
+        ResponseEntity<String> response = RestTempUtil.getResponse(uri);
+        handleResponse(response, uri.toString());
         return response;
     }
 

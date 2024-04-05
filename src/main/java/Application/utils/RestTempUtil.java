@@ -98,6 +98,7 @@ public class RestTempUtil {
                 return true;
             }
         } catch (JsonProcessingException e) {
+            logger.warn("Failed reading the rootnode. " + e.getMessage());
             e.printStackTrace();
         }
         return false;
@@ -138,18 +139,6 @@ public class RestTempUtil {
             logger.warn("Error decoding input: " + input);
             e.printStackTrace();
             return input;
-        }
-    }
-
-    public static String encodeQueryString(String input) {
-        try {
-            return URLEncoder.encode(input, StandardCharsets.UTF_8.name())
-                    .replaceAll("\\+", "%20")
-                    .replaceAll("\\%28", "(")
-                    .replaceAll("\\%29", ")");
-        } catch (UnsupportedEncodingException e) {
-            logger.warn("Error encoding input: " + input);
-            throw new RuntimeException(e);
         }
     }
 }

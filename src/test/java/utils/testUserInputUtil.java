@@ -24,17 +24,17 @@ public class testUserInputUtil {
     private ScannerWrapper scannerWrapper;
     @Autowired
     private UserInputUtil userInputUtil;
+
     @Test
     public void testTypeOfSearch() {
         // Given
         Map<String, String> result;
         String searchType = "2";
         String search = "Nirvana";
-        String endSearch = "No";
         // Mock dependencies
 
         // Configure behavior of mocks
-        when(scannerWrapper.getNextLine()).thenReturn(searchType).thenReturn(search).thenReturn(endSearch); // Simulate user input
+        when(scannerWrapper.getNextLine()).thenReturn(searchType).thenReturn(search);
 
         // When
         result = userInputUtil.getTypeOfSearch();
@@ -45,9 +45,9 @@ public class testUserInputUtil {
     }
 
     @Test
-    public void testRestartSearchTypoError() {
+    public void testRestartSearchTypeError() {
         // Given
-        String restartSearch = "WrongTypo";
+        String restartSearch = "WrongTypeError";
         Map<String, String> result;
         // Mock dependencies
         // Configure behavior of mocks
@@ -71,12 +71,68 @@ public class testUserInputUtil {
     }
 
     @Test
+    public void testContainsNoAlphanumeric() {
+        // Given
+        Map<String, String> result;
+        String searchType = "2";
+        String search = "!#¤%&/%";
+
+        // Configure behavior of mocks
+        when(scannerWrapper.getNextLine())
+                .thenReturn(searchType)
+                .thenReturn(search)
+                .thenReturn(search)
+                .thenReturn(search)
+                .thenReturn(search)
+                .thenReturn(search)
+                .thenReturn(search)
+                .thenReturn(search)
+                .thenReturn(search)
+                .thenReturn(search)
+                .thenReturn(search);
+
+        // When
+        result = userInputUtil.getTypeOfSearch();
+
+        // Then
+        assertThat(result.isEmpty());
+    }
+
+    @Test
+    public void testEmptySearchValue() {
+        // Given
+        Map<String, String> result;
+        String searchType = "2";
+        String search = "\n";
+
+        // Configure behavior of mocks
+        when(scannerWrapper.getNextLine())
+                .thenReturn(searchType)
+                .thenReturn(search)
+                .thenReturn(search)
+                .thenReturn(search)
+                .thenReturn(search)
+                .thenReturn(search)
+                .thenReturn(search)
+                .thenReturn(search)
+                .thenReturn(search)
+                .thenReturn(search)
+                .thenReturn(search);
+
+        // When
+        result = userInputUtil.getTypeOfSearch();
+
+        // Then
+        assertThat(result.isEmpty());
+    }
+
+    @Test
     public void testRestartSearchTrue() {
         // Given
         String restartSearch = "Yes";
 
         // Configure behavior of mocks
-        when(scannerWrapper.getNextLine()).thenReturn(restartSearch); // Simulate user input
+        when(scannerWrapper.getNextLine()).thenReturn(restartSearch);
 
         // When
         boolean result = userInputUtil.restartSearch();
@@ -91,7 +147,7 @@ public class testUserInputUtil {
         String restartSearch = "No";
 
         // Configure behavior of mocks
-        when(scannerWrapper.getNextLine()).thenReturn(restartSearch); // Simulate user input
+        when(scannerWrapper.getNextLine()).thenReturn(restartSearch);
 
         // When
         boolean result = userInputUtil.restartSearch();
@@ -100,5 +156,29 @@ public class testUserInputUtil {
         assertFalse(result);
     }
 
+    @Test
+    public void testRestartSearchWrongTypo() {
+        // Given
+        String restartSearch = "WrongTypo";
 
+        // Configure behavior of mocks
+        when(scannerWrapper.getNextLine())
+                .thenReturn(restartSearch)
+                .thenReturn(restartSearch)
+                .thenReturn(restartSearch)
+                .thenReturn(restartSearch)
+                .thenReturn(restartSearch)
+                .thenReturn(restartSearch)
+                .thenReturn(restartSearch)
+                .thenReturn(restartSearch)
+                .thenReturn(restartSearch)
+                .thenReturn(restartSearch)
+                .thenReturn(restartSearch);
+
+        // When
+        boolean result = userInputUtil.restartSearch();
+
+        // Then
+        assertFalse(result);
+    }
 }

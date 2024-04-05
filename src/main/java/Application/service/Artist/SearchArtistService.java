@@ -56,14 +56,14 @@ public class SearchArtistService implements DataProcessor<ArtistInfoObj> {
         String searchValue = searchParam.get(TypeOfSearchEnum.ARTIST.getSearchType());
         ArtistInfoObj entity;
         if (isValidUUID(searchValue)) {
-            entity = musicBrainzIdService.getDataBymbid(searchValue);
+            entity = musicBrainzIdService.getMBData(searchValue);
             return entity;
         } else {
-            entity = musicBrainzNameService.getDataByName(searchParam);
+            entity = musicBrainzNameService.getMBData(searchParam);
             ArtistInfoObj newEntity;
             if (IsMusicBrainzIdPresent(entity)) {
                 // Populate the ArtistInfoObj using mbid
-                newEntity = musicBrainzIdService.getDataBymbid(entity.getmBID());
+                newEntity = musicBrainzIdService.getMBData(entity.getmBID());
                 updateEntity(entity, newEntity, searchParam.get(TypeOfSearchEnum.ARTIST.toString()));
             }
         }
@@ -133,40 +133,39 @@ public class SearchArtistService implements DataProcessor<ArtistInfoObj> {
         ExecutorService executorService = Executors.newFixedThreadPool(10);
 
         CompletableFuture<Void> wikidataFuture;
-        CompletableFuture<Void> wikipediaFuture;
-        CompletableFuture<Void> coverArtFuture;
+
+        // CompletableFuture for Wikipedia service
+        CompletableFuture<Void> wikipediaFuture = null;
+
+        // CompletableFuture for Cover Art service
+        CompletableFuture<Void> coverArtFuture = runCoverArtServiceAsync(entity, executorService);
 
         // Check if Wikipedia service can run
         if (shouldRunWikipediaService(entity)) {
             // Run Wikipedia service first
             wikipediaFuture = runWikipediaServiceAsync(entity, executorService);
-
-            // Start cover art service simultaneously with the Wikipedia service
-            coverArtFuture = runCoverArtServiceAsync(entity, executorService);
-
-            // Wait for completion of Wikipedia service and cover art service
-            CompletableFuture.allOf(wikipediaFuture, coverArtFuture).join();
-        } else {
+        } else if (shouldRunWikidataService(entity)) {
             // Run Wikidata service first
             wikidataFuture = runWikidataServiceAsync(entity, executorService);
-
             // Continue with Wikipedia service after Wikidata service completes
             wikipediaFuture = wikidataFuture.thenRunAsync(() ->
                     runWikipediaServiceAsync(entity, executorService)
             );
+        }
 
-            // Start cover art service simultaneously with Wikidata service and Wikipedia service
-            coverArtFuture = runCoverArtServiceAsync(entity, executorService);
-
-            // Wait for completion of Wikidata service, Wikipedia service, and cover art service
-            CompletableFuture.allOf(wikidataFuture, wikipediaFuture, coverArtFuture).join();
+        // Wait for completion of Wikipedia service and cover art service if Wikipedia service is invoked
+        if (wikipediaFuture != null) {
+            CompletableFuture.allOf(wikipediaFuture, coverArtFuture).join();
+        } else {
+            // Wait for completion of only cover art service if Wikipedia service is not invoked
+            coverArtFuture.join();
         }
     }
 
     private CompletableFuture<Void> runWikidataServiceAsync(ArtistInfoObj entity, ExecutorService executorService) {
         return CompletableFuture.runAsync(() -> {
             try {
-                    wikidataService.getWikidata(entity.getWikiInfo());
+                wikidataService.getWikidata(entity.getWikiInfo());
             } catch (URISyntaxException | JsonProcessingException e) {
                 handleServiceErrorAsync(entity, e, executorService);
             }
@@ -176,7 +175,7 @@ public class SearchArtistService implements DataProcessor<ArtistInfoObj> {
     private CompletableFuture<Void> runWikipediaServiceAsync(ArtistInfoObj entity, ExecutorService executorService) {
         return CompletableFuture.runAsync(() -> {
             try {
-                    wikiPediaService.getWikiPediadata(entity.getWikiInfo());
+                wikiPediaService.getWikiPediadata(entity.getWikiInfo());
             } catch (URISyntaxException | JsonProcessingException e) {
                 handleServiceErrorAsync(entity, e, executorService);
             }
@@ -191,6 +190,10 @@ public class SearchArtistService implements DataProcessor<ArtistInfoObj> {
 
     private boolean shouldRunWikipediaService(ArtistInfoObj entity) {
         return entity.getWikiInfo() != null && !entity.getWikiInfo().getWikipediaSearchTerm().isEmpty();
+    }
+
+    private boolean shouldRunWikidataService(ArtistInfoObj entity) {
+        return entity.getWikiInfo() != null && !entity.getWikiInfo().getWikidataSearchTerm().isEmpty();
     }
 
     private void handleServiceErrorAsync(ArtistInfoObj entity, Exception e, ExecutorService executorService) {

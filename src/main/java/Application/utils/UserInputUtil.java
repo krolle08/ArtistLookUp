@@ -1,6 +1,5 @@
 package Application.utils;
 
-import org.apache.catalina.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,6 +7,8 @@ import org.springframework.stereotype.Component;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Component
 public class UserInputUtil {
@@ -15,7 +16,7 @@ public class UserInputUtil {
     private static final int MAX_TYPING_ERRORS = 10;
     private static final String YES_OPTION = "Yes";
     private static final String NO_OPTION = "No";
-    private ScannerWrapper scannerWrapper;
+    private final ScannerWrapper scannerWrapper;
 
     @Autowired
     public UserInputUtil(ScannerWrapper scannerWrapper) {
@@ -25,7 +26,7 @@ public class UserInputUtil {
     public Map<String, String> getTypeOfSearch() {
         Map<String, String> searchTypes = SearchTypeUtil.getInputTypes();
         int typos = 0;
-        String searchTypeNumber = new String();
+        String searchTypeNumber;
 
         while (typos < MAX_TYPING_ERRORS) {
             System.out.println("Type in the number corresponding to the type of search you want to perform:" +
@@ -39,7 +40,12 @@ public class UserInputUtil {
                 String searchType = searchTypes.get(searchTypeNumber);
                 System.out.println("What " + searchType + " do you want to search for?");
                 String searchValue = scannerWrapper.getNextLine().trim().toUpperCase();
-                return Collections.singletonMap(searchType, searchValue);
+                if (searchValue.isEmpty() || !containsAlphanumeric(searchValue)) {
+                    logger.info("searching with user input is not possible:" + searchTypeNumber);
+                    System.out.println("Invalid to search for: " + searchType + ". Please enter a valid search criteria.");
+                } else {
+                    return Collections.singletonMap(searchType, searchValue);
+                }
             } else {
                 logger.info("Invalid number for a search type:" + searchTypeNumber);
                 ++typos;
@@ -51,6 +57,20 @@ public class UserInputUtil {
             }
         }
         return Collections.emptyMap();
+    }
+
+    public boolean containsAlphanumeric(String inputString) {
+        // Define a regular expression pattern to match alphanumeric characters
+        String alphanumericPattern = ".*[a-zA-Z0-9].*";
+
+        // Create a Pattern object
+        Pattern pattern = Pattern.compile(alphanumericPattern);
+
+        // Create a Matcher object
+        Matcher matcher = pattern.matcher(inputString);
+
+        // Use matcher.find() to check if the input contains alphanumeric characters
+        return matcher.find();
     }
 
     public boolean restartSearch() {
