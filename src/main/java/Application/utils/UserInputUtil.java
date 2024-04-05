@@ -81,9 +81,9 @@ public class UserInputUtil {
             //Ask user if they want to make a search on the existing session
             System.out.println("Want to make a new search on the existing session? (Yes/No)");
             String input = scannerWrapper.getNextLine();
-            if (input.equals(YES_OPTION)) {
+            if (input.equalsIgnoreCase(YES_OPTION)) {
                 return true;
-            } else if (input.equals(NO_OPTION)) {
+            } else if (input.equalsIgnoreCase(NO_OPTION)) {
                 scannerWrapper.close();
                 return false;
             } else {
