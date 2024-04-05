@@ -9,7 +9,7 @@ import java.util.UUID;
 
 public class AreaInfoObj {
 
-    private String iD;
+    private final String iD;
     private String name;
     private String Address;
     private Integer mBStatusCode;

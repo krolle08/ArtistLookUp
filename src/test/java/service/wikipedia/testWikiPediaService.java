@@ -38,7 +38,7 @@ public class testWikiPediaService {
         }
 
         //Then
-        assertTrue(wikiInfoObj.getWikiPediaStatuccode().equals(HttpStatus.OK.value()));
+        assertEquals((int) wikiInfoObj.getWikiPediaStatuccode(), HttpStatus.OK.value());
         assertFalse(wikiInfoObj.getDescription().isEmpty());
     }
 
@@ -58,7 +58,7 @@ public class testWikiPediaService {
         }
 
         //Then
-        assertTrue(wikiInfoObj.getWikiPediaStatuccode().equals(HttpStatus.OK.value()));
+        assertEquals((int) wikiInfoObj.getWikiPediaStatuccode(), HttpStatus.OK.value());
         assertTrue(wikiInfoObj.getDescription().isEmpty());
     }
     @Test

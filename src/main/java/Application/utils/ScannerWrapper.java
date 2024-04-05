@@ -8,7 +8,7 @@ import java.util.Scanner;
 
 @Component
 public class ScannerWrapper implements UserInputReader {
-    private Scanner scanner;
+    private final Scanner scanner;
     public ScannerWrapper(Readable source) {
         this.scanner = new Scanner(source);
     }

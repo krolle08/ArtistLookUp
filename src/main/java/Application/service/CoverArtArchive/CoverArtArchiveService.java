@@ -13,7 +13,7 @@ import java.util.logging.Logger;
  */
 @RestController
 public class CoverArtArchiveService {
-    private Logger logger = Logger.getLogger(CoverArtArchiveService.class.getName());
+    private final Logger logger = Logger.getLogger(CoverArtArchiveService.class.getName());
     @Autowired
     private CoverArtArchiveSearchRoute coverArtArchiveSearchRoute;
 

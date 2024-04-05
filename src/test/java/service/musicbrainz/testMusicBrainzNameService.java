@@ -37,7 +37,7 @@ public class testMusicBrainzNameService {
         // Then
         assertFalse(artistInfoObj.getName().isEmpty());
         assertFalse(artistInfoObj.getmBID().isEmpty());
-        assertFalse(artistInfoObj.getAlbums() == null);
+        assertNotNull(artistInfoObj.getAlbums());
     }
 
     private String responseBody() {

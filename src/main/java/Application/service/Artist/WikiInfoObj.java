@@ -4,8 +4,8 @@ import java.util.UUID;
 
 public class WikiInfoObj {
 
-    private String iD;
-    private String wikidataSearchTerm;
+    private final String iD;
+    private final String wikidataSearchTerm;
     private String wikipediaSearchTerm;
 
     //HTTP code for handling the response

@@ -121,25 +121,14 @@ public class RestTempUtil {
     }
 
     public static String encodeString(String input) {
-        try {
-            return URLEncoder.encode(input, StandardCharsets.UTF_8.name())
-                    .replaceAll("\\+", "%20")
-                    .replaceAll("\\%28", "(")
-                    .replaceAll("\\%29", ")");
-        } catch (UnsupportedEncodingException e) {
-            logger.warn("Error encoding input: " + input);
-            throw new RuntimeException(e);
-        }
+        return URLEncoder.encode(input, StandardCharsets.UTF_8)
+                .replaceAll("\\+", "%20")
+                .replaceAll("\\%28", "(")
+                .replaceAll("\\%29", ")");
     }
 
     public static String decodeString(String input) {
-        try {
-            return URLDecoder.decode(input, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            logger.warn("Error decoding input: " + input);
-            e.printStackTrace();
-            return input;
-        }
+        return URLDecoder.decode(input, StandardCharsets.UTF_8);
     }
 }
 

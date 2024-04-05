@@ -4,7 +4,7 @@ import java.util.UUID;
 
 public class AlbumInfoObj {
 
-    private String iD;
+    private final String iD;
     private String albumId;
     private String title;
     private String imageURL;

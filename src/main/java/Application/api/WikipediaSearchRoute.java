@@ -29,7 +29,7 @@ public class WikipediaSearchRoute {
     public URI getUri(String searchTerm) {
         try {
             return new URI(RestTempUtil.constructUri(searchTerm, protocol, schemeDelimiter, host,
-                    pathPrefix, api, postPreFix).toString());
+                    pathPrefix, api, postPreFix));
         } catch (URISyntaxException e) {
             logger.error("Error constructing URI with param: " + searchTerm +
                     " " + e.getMessage());

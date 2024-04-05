@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class SearchTypeUtil {
-    private static Map<String, String> searchTypes = createMapOfSearchTypes();
+    private static final Map<String, String> searchTypes = createMapOfSearchTypes();
 
     public static Map<String, String> getInputTypes() {
         return searchTypes;

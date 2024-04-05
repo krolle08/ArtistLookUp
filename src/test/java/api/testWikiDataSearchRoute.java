@@ -55,11 +55,11 @@ public class testWikiDataSearchRoute {
 
         // Then
         assertFalse(jsonObject.isJsonNull());
-        Assertions.assertTrue(jsonObject.get("entities").getAsJsonObject().get(nirvanaTerm).getAsJsonObject().get("id")
-                .getAsJsonPrimitive().getAsString().equals(nirvanaTerm));
-        Assertions.assertTrue(Objects.equals(jsonObject.get("entities").getAsJsonObject().get(nirvanaTerm).getAsJsonObject()
+        Assertions.assertEquals(jsonObject.get("entities").getAsJsonObject().get(nirvanaTerm).getAsJsonObject().get("id")
+                .getAsJsonPrimitive().getAsString(), nirvanaTerm);
+        Assertions.assertEquals(jsonObject.get("entities").getAsJsonObject().get(nirvanaTerm).getAsJsonObject()
                 .get("sitelinks").getAsJsonObject().get("enwiki").getAsJsonObject().get("title").getAsJsonPrimitive()
-                .getAsString(), bandName));
+                .getAsString(), bandName);
     }
 
     @Test

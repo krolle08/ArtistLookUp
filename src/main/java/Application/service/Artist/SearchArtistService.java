@@ -27,11 +27,11 @@ import java.util.concurrent.Executors;
 @Service
 public class SearchArtistService implements DataProcessor<ArtistInfoObj> {
     private static final Logger logger = LoggerFactory.getLogger(SearchArtistService.class.getName());
-    private MusicBrainzNameService musicBrainzNameService;
-    private MusicBrainzIdService musicBrainzIdService;
-    private CoverArtArchiveService coverArtArchiveService;
-    private WikiPediaService wikiPediaService;
-    private WikidataService wikidataService;
+    private final MusicBrainzNameService musicBrainzNameService;
+    private final MusicBrainzIdService musicBrainzIdService;
+    private final CoverArtArchiveService coverArtArchiveService;
+    private final WikiPediaService wikiPediaService;
+    private final WikidataService wikidataService;
 
     public SearchArtistService(MusicBrainzNameService musicBrainzNameService,
                                MusicBrainzIdService musicBrainzIdService,

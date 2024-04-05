@@ -18,26 +18,26 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest(classes = Application.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class testRestTempUtil {
 
-    private Map<String, String> filterParams = new HashMap<>();
-    private String query ="/?query=";
-    private String protocol="http";
-    private String annotation = "/artist";
-    private String schemeDelimiter = "://";
-    private String host = "musicbrainz.org";
-    private int port = 80;
-    private String pathPrefix = "/ws";
-    private String version = "/2";
-    private String json = "fmt=json";
+    private final Map<String, String> filterParams = new HashMap<>();
+    private final String query ="/?query=";
+    private final String protocol="http";
+    private final String annotation = "/artist";
+    private final String schemeDelimiter = "://";
+    private final String host = "musicbrainz.org";
+    private final int port = 80;
+    private final String pathPrefix = "/ws";
+    private final String version = "/2";
+    private final String json = "fmt=json";
 
-    private String mbid= "5b11f4ce-a62d-471e-81fc-a69a8278c7da";
+    private final String mbid= "5b11f4ce-a62d-471e-81fc-a69a8278c7da";
 
-    private String pathPostFix ="?fmt=json&inc=url-rels+release-groups";
+    private final String pathPostFix ="?fmt=json&inc=url-rels+release-groups";
 
-    private String postPrefix = "?action=query&format=json&prop=extracts&exintro=true&redirects=true&titles=";
+    private final String postPrefix = "?action=query&format=json&prop=extracts&exintro=true&redirects=true&titles=";
 
-    private String searchTerm ="Nirvana+%28band%29";
+    private final String searchTerm ="Nirvana+%28band%29";
 
-    private String api = "/api.php";
+    private final String api = "/api.php";
 
     @BeforeEach
     public void setup() {

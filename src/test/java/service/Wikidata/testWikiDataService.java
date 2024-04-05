@@ -85,7 +85,7 @@ public class testWikiDataService {
         }
 
         // Then
-        Assertions.assertTrue(wikiInfoObj.getWikipediaSearchTerm() == null);
+        Assertions.assertNull(wikiInfoObj.getWikipediaSearchTerm());
     }
 
     public String responseWithRateLimits() {

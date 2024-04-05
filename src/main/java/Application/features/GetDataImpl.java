@@ -23,10 +23,10 @@ public class GetDataImpl implements DataController {
     private static final Logger logger = LoggerFactory.getLogger(GetDataImpl.class);
     private static final int MAX_RETRIES = 3;
     private static final long RETRY_DELAY_MS = 1000; // 1 second delay between retries
-    private SearchArtistService searchArtistService;
-    private SearchAreaService searchAreaService;
+    private final SearchArtistService searchArtistService;
+    private final SearchAreaService searchAreaService;
 
-    private UserInputUtil userInputUtil;
+    private final UserInputUtil userInputUtil;
 
     /**
      * @param userInputUtil       Utility class for handling user input.
