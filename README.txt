@@ -101,10 +101,11 @@ For example: A more detailed insight into Http responses and handling of them ca
 MyWebServiceImplementation.java and also the unittest required if implementing new features, can
 be inspired from Unittests.java. But be aware that the library is deprecated, and it is therefore advised to test any
 code implemented into the application carefully.
-Furthermore, performance test may be added to evaluate the performance of the software under various
-conditions, response times, throughput, and resource utilization, identify bottlenecks. Examples: Load testing, stress
-testing, and endurance testing. Also, security test may be relevant depending on the future development of the application.
-Examples: Penetration testing, vulnerability scanning, and injection attacks. Existing exception handling may be
-optimized to handle the exception and correct the error when it occurs, as of now the whole process restarts.
+
+Furthermore, performance test has been added to evaluate the performance of the software under various
+conditions, response times, throughput, and resource utilization, identify bottlenecks, but they are not completed yet.
+Also, security test may be relevant depending on the future development of the application. Examples: Penetration
+testing, vulnerability scanning, and injection attacks. Existing exception handling may be optimized to handle the
+exception and correct the error when it occurs, as of now the whole process restarts.
 
 
