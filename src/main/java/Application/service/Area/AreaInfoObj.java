@@ -1,10 +1,5 @@
 package Application.service.Area;
 
-import Application.service.Artist.AlbumInfoObj;
-import Application.service.Artist.WikiInfoObj;
-
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 public class AreaInfoObj {
@@ -13,15 +8,17 @@ public class AreaInfoObj {
     private String name;
     private String Address;
     private Integer mBStatusCode;
+
     public AreaInfoObj(String name, String mBid) {
         this.iD = UUID.randomUUID().toString();
         this.name = name;
         this.Address = mBid;
     }
 
-    public String getiD(){
+    public String getiD() {
         return iD;
     }
+
     public String getName() {
         return name;
     }
@@ -45,9 +42,10 @@ public class AreaInfoObj {
     public void setmBStatusCode(Integer mBStatusCode) {
         this.mBStatusCode = mBStatusCode;
     }
+
     public boolean isEmpty() {
         return
                 (name == null || name.isEmpty()) &&
-                (Address == null || Address.isEmpty());
+                        (Address == null || Address.isEmpty());
     }
 }

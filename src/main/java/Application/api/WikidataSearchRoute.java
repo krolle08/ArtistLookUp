@@ -1,5 +1,6 @@
 package Application.api;
 
+import Application.utils.CustomRetryTemplate;
 import Application.utils.RestTempUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -8,7 +9,6 @@ import org.springframework.retry.RetryCallback;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
-import utils.CustomRetryTemplate;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -29,18 +29,8 @@ public class WikidataSearchRoute {
     private final String pathPrefix = "/w";
     private final String api = "/api.php";
 
-    public URI getUri(String wikidataSearchTerm){
-        try {
-            return new URI(buildWikiDataUri(wikidataSearchTerm, protocol, schemeDelimiter, host, pathPrefix, api));
-        } catch (URISyntaxException e) {
-            logger.error("Error constructing URI with param: " + wikidataSearchTerm +
-                    " " + e.getMessage());
-            throw new IllegalArgumentException(e.getMessage());
-        }
-    }
-
     private static String buildWikiDataUri(String wikiDataSearchTerm, String protocol, String schemeDelimiter,
-                                          String host, String pathPrefix, String api) {
+                                           String host, String pathPrefix, String api) {
         return UriComponentsBuilder.fromUriString(protocol + schemeDelimiter + host + pathPrefix + api)
                 .queryParam("action", "wbgetentities")
                 .queryParam("format", "json")
@@ -48,21 +38,6 @@ public class WikidataSearchRoute {
                 .queryParam("props", "sitelinks")
                 .build()
                 .toUriString();
-    }
-
-    public ResponseEntity<String> doGetResponse(URI uri) throws URISyntaxException {
-        ResponseEntity<String> response = RestTempUtil.getResponse(uri);
-        handleResponse(response, uri.toString());
-        return response;
-    }
-
-    public ResponseEntity<String> handleResponse(ResponseEntity<String> response, String url) throws URISyntaxException {
-        if (response.getBody().contains("ratelimits")) {
-            return handleRateLimitations(url);
-        } else if (response.getBody().contains("no-such-entity")) {
-            logger.info("The requested uri:" + url + " did not match any data on Wikidata");
-        }
-        return response;
     }
 
     private static ResponseEntity<String> handleRateLimitations(String url) throws URISyntaxException {
@@ -79,5 +54,30 @@ public class WikidataSearchRoute {
             logger.info("The request on uri:" + url + " did not match any data in Wikidata");
         }
         return newResponse;
+    }
+
+    public URI getUri(String wikidataSearchTerm) {
+        try {
+            return new URI(buildWikiDataUri(wikidataSearchTerm, protocol, schemeDelimiter, host, pathPrefix, api));
+        } catch (URISyntaxException e) {
+            logger.error("Error constructing URI with param: " + wikidataSearchTerm +
+                    " " + e.getMessage());
+            throw new IllegalArgumentException(e.getMessage());
+        }
+    }
+
+    public ResponseEntity<String> doGetResponse(URI uri) throws URISyntaxException {
+        ResponseEntity<String> response = RestTempUtil.getResponse(uri);
+        handleResponse(response, uri.toString());
+        return response;
+    }
+
+    public ResponseEntity<String> handleResponse(ResponseEntity<String> response, String url) throws URISyntaxException {
+        if (response.getBody().contains("ratelimits")) {
+            return handleRateLimitations(url);
+        } else if (response.getBody().contains("no-such-entity")) {
+            logger.info("The requested uri:" + url + " did not match any data on Wikidata");
+        }
+        return response;
     }
 }

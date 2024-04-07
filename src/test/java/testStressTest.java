@@ -16,6 +16,22 @@ import java.util.Properties;
  */
 @Disabled("This test is still under development and should not be run automatically")
 public class testStressTest {
+    private static HTTPSamplerProxy createHttpSamplerProxy() {
+        HTTPSamplerProxy httpSamplerProxy = new HTTPSamplerProxy();
+        httpSamplerProxy.setName("HTTP Request");
+        httpSamplerProxy.setDomain("yourwebsite.com");
+        httpSamplerProxy.setPort(80);
+        httpSamplerProxy.setProtocol("http");
+        httpSamplerProxy.setMethod("GET");
+        httpSamplerProxy.setPath("/search");
+        httpSamplerProxy.setFollowRedirects(true);
+        httpSamplerProxy.setAutoRedirects(false);
+        httpSamplerProxy.setUseKeepAlive(true);
+        httpSamplerProxy.setDoMultipartPost(false);
+        httpSamplerProxy.setMonitor(false);
+        return httpSamplerProxy;
+    }
+
     @Disabled("This test is still under development and should not be run automatically")
     @Test
     public void stressTest() {
@@ -58,30 +74,13 @@ public class testStressTest {
 
     private Properties loadJMeterProperties() {
         Properties properties = new Properties();
-        try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream("jmeter.properties");
+        try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream("jmeter.properties")
         ) {
             properties.load(inputStream);
         } catch (Exception e) {
             e.printStackTrace();
         }
         return properties;
-    }
-
-
-    private static HTTPSamplerProxy createHttpSamplerProxy() {
-        HTTPSamplerProxy httpSamplerProxy = new HTTPSamplerProxy();
-        httpSamplerProxy.setName("HTTP Request");
-        httpSamplerProxy.setDomain("yourwebsite.com");
-        httpSamplerProxy.setPort(80);
-        httpSamplerProxy.setProtocol("http");
-        httpSamplerProxy.setMethod("GET");
-        httpSamplerProxy.setPath("/search");
-        httpSamplerProxy.setFollowRedirects(true);
-        httpSamplerProxy.setAutoRedirects(false);
-        httpSamplerProxy.setUseKeepAlive(true);
-        httpSamplerProxy.setDoMultipartPost(false);
-        httpSamplerProxy.setMonitor(false);
-        return httpSamplerProxy;
     }
 }
 
