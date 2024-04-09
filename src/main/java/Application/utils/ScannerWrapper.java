@@ -6,6 +6,9 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.util.Scanner;
 
+/**
+ * Handles Userinput
+ */
 @Component
 public class ScannerWrapper implements UserInputReader {
     private final Scanner scanner;

@@ -53,4 +53,7 @@ public class Json {
         description = description.replaceAll("\\<.*?\\>", "");
         return description;
     }
+    public static void printJsonResponse(String jsonResponse) {
+        System.out.println(jsonResponse);
+    }
 }

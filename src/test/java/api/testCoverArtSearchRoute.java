@@ -3,29 +3,36 @@ package api;
 import Application.Application;
 import Application.api.CoverArtArchiveSearchRoute;
 import Application.service.Artist.AlbumInfoObj;
-import Application.service.CoverArtArchive.CoverArtArchiveService;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import fm.last.musicbrainz.coverart.CoverArt;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Logger;
 
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 @SpringBootTest(classes = Application.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@ExtendWith(MockitoExtension.class)
 public class testCoverArtSearchRoute {
 
     @Autowired
     CoverArtArchiveSearchRoute coverArtArchiveSearchRoute;
 
+    @Mock
+    Logger logger;
+
     @Test
     public void testCoverArtEndpoint_Succes() {
         //Given
-        String imageUrl = "http://coverartarchive.org/release/df89fb27-14a6-4814-87a4-39b7d9698e4d/38239449645.jpg";
-
         List<AlbumInfoObj> albums = new ArrayList<>();
         AlbumInfoObj album1 = new AlbumInfoObj("01cf1391-141b-3c87-8650-45ade6e59070", "Incesticide");
         AlbumInfoObj album2 = new AlbumInfoObj("249e7835-5c39-3a10-b15b-e2d3470fb40c", "From the Muddy Banks of the Wishkah");
@@ -34,14 +41,13 @@ public class testCoverArtSearchRoute {
         albums.add(album2);
         albums.add(album3);
         //When
-        coverArtArchiveSearchRoute.doGetCoverData(albums);
+        CoverArt coverArt = coverArtArchiveSearchRoute.doGetCoverData(album1.getAlbumId());
 
         //Then
-        Assertions.assertThat(albums).as("Albums list is not null").isNotNull();
-        Assertions.assertThat(albums)
-                .filteredOn(album -> imageUrl.equals(album.getImageURL()))
-                .as("Only one album has a matching imageUrl")
-                .hasSize(1);
+        Assertions.assertThat(coverArt).as("Albums list is not null").isNotNull();
+        Assertions.assertThat(coverArt.getImages().isEmpty()).isFalse();
+        Assertions.assertThat(coverArt.getImages().stream()
+                .anyMatch(album -> album.getImageUrl().isEmpty())).isFalse();
     }
 
     @Test
@@ -50,15 +56,10 @@ public class testCoverArtSearchRoute {
         List<AlbumInfoObj> albums = new ArrayList<>();
         albums.add(new AlbumInfoObj("InvalidUUID", "Incesticide"));
 
-        // Create a spy on Logger
-        Logger logger = spy(Logger.getLogger(CoverArtArchiveService.class.getName()));
         // Create an instance of CoverArtArchiveSearchRoute with the spy logger
         coverArtArchiveSearchRoute.setLogger(logger);
 
-        //When
-        coverArtArchiveSearchRoute.doGetCoverData(albums);
-
-        //Then
-        verify(logger, times(1)).severe("Invalid UUID format for album ID: InvalidUUID");
+        //When Then
+        assertThrows(IllegalArgumentException.class, () -> coverArtArchiveSearchRoute.doGetCoverData("InvalidUUID"));
     }
 }

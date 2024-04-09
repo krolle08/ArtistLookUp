@@ -1,8 +1,8 @@
-package service.coverart;
+package service.RestApiRequester.coverart;
 
 import Application.Application;
-import Application.service.CoverArtArchive.CoverArtArchiveService;
 import Application.service.Artist.AlbumInfoObj;
+import Application.service.CoverArtArchive.CoverArtArchiveService;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,11 +10,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Logger;
-import static org.mockito.Mockito.*;
 
 @SpringBootTest(classes = Application.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class testCoverArtService {
+public class testRestApiRequesterService {
 
     @Autowired
     private CoverArtArchiveService coverArtArchiveService;

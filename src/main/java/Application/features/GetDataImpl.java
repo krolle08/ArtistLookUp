@@ -3,8 +3,7 @@ package Application.features;
 import Application.service.Area.SearchAreaService;
 import Application.service.Artist.SearchArtistService;
 import Application.service.DataController;
-import Application.service.MusicEntityObj;
-import Application.utils.Json;
+import Application.service.InvalidArtistException;
 import Application.utils.TypeOfSearchEnum;
 import Application.utils.UserInputUtil;
 import org.slf4j.Logger;
@@ -29,8 +28,10 @@ public class GetDataImpl implements DataController {
     private final UserInputUtil userInputUtil;
 
     /**
+     * Responsible for handling terminal user inputs. Not implemented yet.
      * @param userInputUtil       Utility class for handling user input.
      * @param searchArtistService Service for searching artists.
+     * @param searchAreaService Service for searching areas.
      */
     @Autowired
     public GetDataImpl(UserInputUtil userInputUtil, SearchArtistService searchArtistService, SearchAreaService searchAreaService) {
@@ -44,8 +45,6 @@ public class GetDataImpl implements DataController {
         Map<String, String> searchParam= new HashMap<>();
         while (retryCount < MAX_RETRIES) {
             try {
-                MusicEntityObj entity = new MusicEntityObj();
-                searchParam = userInputUtil.getTypeOfSearch();
                 if (searchParam.isEmpty()) {
                     logger.warn("No search parameters were available. Please try again.");
                     retryCount++;
@@ -55,23 +54,17 @@ public class GetDataImpl implements DataController {
                 switch (typeOfSearch) {
                     case AREA:
                         //Example of how future development could look like
-                        entity.setAreaInfoObj(searchAreaService.getData(searchParam));
+                        searchAreaService.getData(searchParam);
                         break;
                     case ARTIST:
-                        entity.setArtistInfoObj(searchArtistService.getData(searchParam));
-                        if (entity.getArtistInfoObj().isEmpty()) {
-                            logger.info("No results found for: {} as an {}", searchParam.entrySet().iterator().next().getValue(), typeOfSearch);
-                            return;
-                        }
+                        searchArtistService.getData(searchParam);
                         break;
                     default:
                         logger.warn("Unsupported type of search: {}", typeOfSearch);
                         break;
                 }
-                String jsonResponse = Json.createJsonResponse(entity);
-                printJsonResponse(jsonResponse);
                 return;
-            } catch (RuntimeException e) {
+            } catch (RuntimeException | InvalidArtistException e) {
                 logger.error("An error occurred: {}, while searching for artist: " + searchParam
                         .get(TypeOfSearchEnum.ARTIST.getSearchType()),e.getMessage());
                 e.printStackTrace();
@@ -87,11 +80,6 @@ public class GetDataImpl implements DataController {
             }
         }
         logger.warn("Operation failed after {} retries.", MAX_RETRIES);
-    }
-
-    @Override
-    public void printJsonResponse(String jsonResponse) {
-        System.out.println(jsonResponse);
     }
 }
 

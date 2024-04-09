@@ -9,7 +9,9 @@ public interface DataProcessor<T> {
 
     /**
      * Retrieves data and populate objects.
+     * @param searchParam used to assign the type of search and its value from the request
+     * @return an object which accordingly to the response returns populated or empty
      */
-    T getData(Map<String, String> searchParam);
+    MusicEntityObj getData(Map<String, String> searchParam) throws InvalidArtistException;
 }
 

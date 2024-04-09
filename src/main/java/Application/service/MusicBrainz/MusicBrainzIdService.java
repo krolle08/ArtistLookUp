@@ -27,15 +27,16 @@ public class MusicBrainzIdService {
 
 
     public ArtistInfoObj getMBData(String mbid) {
+        ArtistInfoObj artistInfoObj = new ArtistInfoObj();
         URI uri = musicBrainzIDSearchRoute.getUri(mbid);
         ResponseEntity<String> response = musicBrainzIDSearchRoute.doGetResponse(uri);
         if (RestTempUtil.isBodyEmpty(response, null)) {
             logger.info("No body was provided on the following URI: " + uri + " make sure that the search " +
                     "type and search criteria are correct");
-            return null;
+            return artistInfoObj;
         } else {
-            ArtistInfoObj artistInfoObj = extractData(response, mbid);
-            artistInfoObj.setmBStatusCode(response.getStatusCodeValue());
+            artistInfoObj = extractData(response, mbid);
+            artistInfoObj.setmBStatusCode(response.getStatusCodeValue()); // Relevant for future development, handling bad responses
             return artistInfoObj;
         }
     }
@@ -48,7 +49,7 @@ public class MusicBrainzIdService {
             WikiInfoObj wikiInfoObj = extractwikiData(rootNode);
             List<AlbumInfoObj> albums = extractCoverIdAndTitle(rootNode);
             ArtistInfoObj artistInfoObj = new ArtistInfoObj(name,mbid,wikiInfoObj,albums);
-            artistInfoObj.setmBStatusCode(response.getStatusCode().value());
+            artistInfoObj.setmBStatusCode(response.getStatusCode().value()); // Relevant for future development, handling bad responses
             return artistInfoObj;
         } catch (JsonProcessingException e) {
             logger.error("A problem occurred when mapping the response: " + e.getMessage());

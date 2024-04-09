@@ -22,7 +22,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 public class RestTempUtil {
-    private static final Logger logger = LoggerFactory.getLogger(SearchArtistService.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(RestTempUtil.class.getName());
 
     public static StringBuffer constructUri(String id, String queryType, String protocol, String schemeDelimiter, String host, int port, String pathPrefix, String version, String pathPostFix) {
         StringBuffer url = new StringBuffer();
@@ -61,8 +61,8 @@ public class RestTempUtil {
             // Append each parameter from filterParams
             for (Map.Entry<String, String> entry : filterParams.entrySet()) {
                 String paramName = entry.getKey().toLowerCase();
-                String paramValue;
-                if (entry.getValue().contains(" ")) {
+                String paramValue = entry.getValue();
+                if (paramValue.contains(" ") || paramValue.contains("_")) {
                     paramValue = RestTempUtil.encodeString(entry.getValue());
                 } else {
                     paramValue = entry.getValue();
@@ -100,6 +100,7 @@ public class RestTempUtil {
         } catch (JsonProcessingException e) {
             logger.warn("Failed reading the rootnode. " + e.getMessage());
             e.printStackTrace();
+            return true;
         }
         return false;
     }
@@ -124,10 +125,12 @@ public class RestTempUtil {
         try {
             return URLEncoder.encode(input, StandardCharsets.UTF_8.name())
                     .replaceAll("\\+", "%20")
+                    .replaceAll("_", "%20") // Replace underscores with %5F
                     .replaceAll("\\%28", "(")
                     .replaceAll("\\%29", ")");
         } catch (UnsupportedEncodingException e) {
             logger.warn("Error encoding input: " + input);
+            e.printStackTrace();
             throw new RuntimeException(e);
         }
     }

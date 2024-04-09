@@ -1,5 +1,9 @@
 package Application.utils;
 
+/**
+ * List of search possibilites on MusicBrainz.
+ * Only Artist is implemented at the moment.
+ */
 public enum TypeOfSearchEnum {
     AREA("Area"),
     ARTIST("Artist"),

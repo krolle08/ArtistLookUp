@@ -2,6 +2,7 @@ package Application.service.MusicBrainz;
 
 import Application.api.MusicBrainzNameSearchRoute;
 import Application.service.Artist.ArtistInfoObj;
+import Application.service.InvalidArtistException;
 import Application.utils.RestTempUtil;
 import Application.utils.TypeOfSearchEnum;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -24,18 +25,18 @@ public class MusicBrainzNameService {
     @Autowired
     MusicBrainzNameSearchRoute musicBrainzNameSearchRoute;
 
-    public ArtistInfoObj getMBData(Map<String, String> filterParams) throws IllegalArgumentException {
-        URI uri = musicBrainzNameSearchRoute.getUri(filterParams);
+    public ArtistInfoObj getMBIdData(Map<String, String> searchParam) throws IllegalArgumentException, InvalidArtistException {
+        URI uri = musicBrainzNameSearchRoute.getUri(searchParam);
         ResponseEntity<String> response = musicBrainzNameSearchRoute.doGetResponse(uri);
         if (RestTempUtil.isBodyEmpty(response, "artists")) {
             logger.warn("No response was given on the provided URI: " + uri + " . Make sure that search type and " +
-                    "search parameter are correct " + filterParams.entrySet().iterator().next().getKey() + ", " +
-                    filterParams.entrySet().iterator().next().getValue() + " . restarting process.");
-            return new ArtistInfoObj();
+                    "search parameter are correct " + searchParam.entrySet().iterator().next().getKey() + ", " +
+                    searchParam.entrySet().iterator().next().getValue());
+            throw new InvalidArtistException("No response was given on the provided search value: " + searchParam.entrySet().iterator().next().getValue());
         }
-        return extractDataAndPopulateObj(response, filterParams.get(TypeOfSearchEnum.ARTIST.getSearchType()));
+        return extractDataAndPopulateObj(response, searchParam.get(TypeOfSearchEnum.ARTIST.getSearchType()));
     }
-    public ArtistInfoObj extractDataAndPopulateObj(ResponseEntity responseEntity, String filterParams){
+    public ArtistInfoObj extractDataAndPopulateObj(ResponseEntity responseEntity, String searchParam){
         ArtistInfoObj artistInfoObj = new ArtistInfoObj();
         ObjectMapper mapper = new ObjectMapper();
         try {
@@ -51,7 +52,7 @@ public class MusicBrainzNameService {
                 int score = annotation.path("score").asInt();
                 String type = annotation.path("name").asText();
 
-                if (filterParams.equalsIgnoreCase(type) && score > highestScore) {
+                if (searchParam.equalsIgnoreCase(type) && score > highestScore) {
                     highestScore = score;
                     mbid = annotation.path("id").asText();
                     artistName = type;

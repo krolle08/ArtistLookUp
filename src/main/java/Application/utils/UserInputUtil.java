@@ -1,5 +1,6 @@
 package Application.utils;
 
+import Application.service.InvalidSearchRequestException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +23,50 @@ public class UserInputUtil {
     public UserInputUtil(ScannerWrapper scannerWrapper) {
         this.scannerWrapper = scannerWrapper;
     }
+    public static void IsSearchRequestAllowed(Map<String, String> searchRequest) throws InvalidSearchRequestException {
+        Map<String, String> searchTypes = SearchTypeUtil.getInputTypes();
+        String searchType = searchRequest.entrySet().iterator().next().getKey();
+
+        // Check if the input corresponds to a valid search type
+        if (searchTypes.containsValue(searchType)) {
+            String searchValue = searchRequest.entrySet().iterator().next().getValue();
+            if (searchValue.isEmpty() || !containsAlphanumeric(searchValue)) {
+                logger.info("Empty and/or the provided search value is not possible: " + searchValue);
+                throw new InvalidSearchRequestException("Empty and/or the provided search value is not possible: " + searchValue);
+            } else {
+                String sanitizedValue = sanitizeInput(searchValue);
+                searchRequest.entrySet().iterator().next().setValue(sanitizedValue);
+                return;
+            }
+        }
+        logger.warn("SearchType is not available: " + searchType);
+        throw new InvalidSearchRequestException("SearchType is not available: " + searchType);
+    }
+
+    private static String sanitizeInput(String input) {
+        // Replace underscores with empty strings if not followed by another underscore or whitespace
+        // Replace other special characters with whitespace surrounding them
+        return input.replaceAll("[^a-zA-Z0-9&_\\s-]", " ")
+                .replaceAll("(?<![\\w&&[^_]])[_-](?![_\\w])", " ") // Replace standalone underscores or hyphens with whitespace
+                .replaceAll("\\s*&\\s*", " & ")
+                .replaceAll("\\s*-\\s*", " ")
+                .replaceAll("\\s*_\\s*", " ")
+                .trim();
+    }
+
+    public static boolean containsAlphanumeric(String inputString) {
+        // Define a regular expression pattern to match alphanumeric characters
+        String alphanumericPattern = ".*[a-zA-Z0-9].*";
+
+        // Create a Pattern object
+        Pattern pattern = Pattern.compile(alphanumericPattern);
+
+        // Create a Matcher object
+        Matcher matcher = pattern.matcher(inputString);
+
+        // Use matcher.find() to check if the input contains alphanumeric characters
+        return matcher.find();
+    }
 
     public Map<String, String> getTypeOfSearch() {
         Map<String, String> searchTypes = SearchTypeUtil.getInputTypes();
@@ -34,6 +79,7 @@ public class UserInputUtil {
 
             // User input
             searchTypeNumber = scannerWrapper.getNextLine().trim();
+
 
             // Check if the input corresponds to a valid search type
             if (searchTypes.containsKey(searchTypeNumber)) {
@@ -57,20 +103,6 @@ public class UserInputUtil {
             }
         }
         return Collections.emptyMap();
-    }
-
-    public boolean containsAlphanumeric(String inputString) {
-        // Define a regular expression pattern to match alphanumeric characters
-        String alphanumericPattern = ".*[a-zA-Z0-9].*";
-
-        // Create a Pattern object
-        Pattern pattern = Pattern.compile(alphanumericPattern);
-
-        // Create a Matcher object
-        Matcher matcher = pattern.matcher(inputString);
-
-        // Use matcher.find() to check if the input contains alphanumeric characters
-        return matcher.find();
     }
 
     public boolean restartSearch() {

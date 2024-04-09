@@ -2,11 +2,12 @@ package Application.service.Artist;
 
 import Application.service.CoverArtArchive.CoverArtArchiveService;
 import Application.service.DataProcessor;
+import Application.service.InvalidArtistException;
 import Application.service.MusicBrainz.MusicBrainzIdService;
 import Application.service.MusicBrainz.MusicBrainzNameService;
+import Application.service.MusicEntityObj;
 import Application.service.Wikidata.WikidataService;
 import Application.service.Wikipedia.WikiPediaService;
-import Application.utils.ServiceProcessingException;
 import Application.utils.TypeOfSearchEnum;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.slf4j.Logger;
@@ -46,22 +47,37 @@ public class SearchArtistService implements DataProcessor<ArtistInfoObj> {
     }
 
     @Override
-    public ArtistInfoObj getData(Map<String, String> searchParam) {
-        ArtistInfoObj entity = getMusicBrainzData(searchParam);
-        getWikiAndCoverData(entity);
+    public MusicEntityObj getData(Map<String, String> searchParam) throws InvalidArtistException {
+        MusicEntityObj entity = new MusicEntityObj();
+        ArtistInfoObj artistInfoObj;
+        try {
+            entity = new MusicEntityObj();
+            artistInfoObj = getMusicBrainzData(searchParam);
+            if (artistInfoObj.isEmpty()) {
+                logger.info("No results found for: {} as an {}", searchParam.entrySet().iterator().next().getValue(),
+                        searchParam.entrySet().iterator().next().getKey());
+                throw new InvalidArtistException("No results found for: " + searchParam.entrySet().iterator().next().getValue()
+                        + " as an " + searchParam.entrySet().iterator().next().getKey());
+            }
+            getWikiAndCoverData(artistInfoObj);
+        } catch (RuntimeException e) {
+            logger.error("Failed creating URI or processing response", e);
+            return entity;
+        }
+        entity.setArtistInfoObj(artistInfoObj);
         return entity;
     }
 
-    private ArtistInfoObj getMusicBrainzData(Map<String, String> searchParam) {
-        String searchValue = searchParam.get(TypeOfSearchEnum.ARTIST.getSearchType());
+    private ArtistInfoObj getMusicBrainzData(Map<String, String> searchParam) throws InvalidArtistException {
+        String searchValue = searchParam.entrySet().iterator().next().getValue();
         ArtistInfoObj entity;
         if (isValidUUID(searchValue)) {
             entity = musicBrainzIdService.getMBData(searchValue);
             return entity;
         } else {
-            entity = musicBrainzNameService.getMBData(searchParam);
+            entity = musicBrainzNameService.getMBIdData(searchParam);
             ArtistInfoObj newEntity;
-            if (IsMusicBrainzIdPresent(entity)) {
+            if (IsMBIdPresent(entity)) {
                 // Populate the ArtistInfoObj using mbid
                 newEntity = musicBrainzIdService.getMBData(entity.getmBID());
                 updateEntity(entity, newEntity, searchParam.get(TypeOfSearchEnum.ARTIST.toString()));
@@ -81,11 +97,25 @@ public class SearchArtistService implements DataProcessor<ArtistInfoObj> {
         }
     }
 
-    private boolean IsMusicBrainzIdPresent(ArtistInfoObj entity) {
-        return entity == null || entity.getmBID() != null && !entity.getmBID().isEmpty();
+    private boolean IsMBIdPresent(ArtistInfoObj entity) {
+        return entity == null || entity.getmBID() != null && !entity.getmBID().isEmpty() && isValidUUID(entity.getmBID());
     }
 
     private void updateEntity(ArtistInfoObj entity, ArtistInfoObj newEntity, String searchParam) {
+        checkAndAddMBIdPresence(entity, newEntity);
+        checkAndAddNamePresence(entity, newEntity, searchParam);
+        checkAndAddWikiInfo(entity, newEntity);
+        addAlbumsIfNotPresent(entity, newEntity);
+    }
+
+    private void checkAndAddMBIdPresence(ArtistInfoObj entity, ArtistInfoObj newEntity) {
+        if (!entity.getmBID().equals(newEntity.getmBID())) {
+            logger.warn("MusicBrainz ID are different in the entity and newEntity object: {}, {}", entity.getmBID(), newEntity.getmBID());
+            throw new RuntimeException("MusicBrainz ID are different in the entity and newEntity object");
+        }
+    }
+
+    private void checkAndAddNamePresence(ArtistInfoObj entity, ArtistInfoObj newEntity, String searchParam) {
         // Update name if not already set
         if (entity.getName() == null || entity.getName().isEmpty()) {
             entity.setName(newEntity.getName());
@@ -93,15 +123,15 @@ public class SearchArtistService implements DataProcessor<ArtistInfoObj> {
             throw new RuntimeException("Different names has been received doing the search of: " + searchParam +
                     " and when searching with the following mbid: " + entity.getmBID());
         }
+    }
 
-        // Update WikiInfo if not already set
+    private void checkAndAddWikiInfo(ArtistInfoObj entity, ArtistInfoObj newEntity) {
         if (entity.getWikiInfo() == null || entity.getWikiInfo().isEmpty()) {
             entity.setWikiInfo(newEntity.getWikiInfo());
         }
+    }
 
-        if (!entity.getmBID().equals(newEntity.getmBID())) {
-            logger.warn("MusicBrainz ID are different in the entity and newEntity object: {}, {}", entity.getmBID(), newEntity.getmBID());
-        }
+    private void addAlbumsIfNotPresent(ArtistInfoObj entity, ArtistInfoObj newEntity) {
         // Merge albums from newEntity into entity
         List<AlbumInfoObj> existingAlbums = entity.getAlbums();
         List<AlbumInfoObj> newAlbums = newEntity.getAlbums();
@@ -202,7 +232,7 @@ public class SearchArtistService implements DataProcessor<ArtistInfoObj> {
 
     private void handleServiceError(ArtistInfoObj entity, Exception e) {
         logger.error("Error processing the API service for entity: {}", entity, e);
-        throw new ServiceProcessingException("Failed creating URI or processing response as Json", e);
+        throw new RuntimeException("Failed creating URI or processing response as Json", e);
 
     }
 }
