@@ -22,10 +22,9 @@ public class WikiPediaService {
     WikipediaSearchRoute wikipediaSearchRoute;
 
     public void getWikiPediadata(WikiInfoObj wikiInfoObj) throws URISyntaxException, JsonProcessingException {
-        URI uri = wikipediaSearchRoute.getUri(wikiInfoObj.getWikipediaSearchTerm());
-        ResponseEntity<String> response = wikipediaSearchRoute.doGetResponse(uri);
+        ResponseEntity<String> response = wikipediaSearchRoute.doGetResponse(wikiInfoObj.getWikipediaSearchTerm());
         if (response.getBody() == null || response.getBody().isEmpty()) {
-            logger.warn("No results on provided uri: " + uri);
+            logger.warn("No results on provided wikipediaSearchTerm: {}", wikiInfoObj.getWikipediaSearchTerm());
         } else {
             wikiInfoObj.setDescription(extractDescription(response.getBody()));
         }

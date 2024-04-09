@@ -29,6 +29,23 @@ public class WikidataSearchRoute {
     private final String pathPrefix = "/w";
     private final String api = "/api.php";
 
+    public ResponseEntity<String> doGetResponse(String wikidataSearchTerm) throws URISyntaxException {
+        URI uri = getUri(wikidataSearchTerm);
+        ResponseEntity<String> response = RestTempUtil.getResponse(uri);
+        handleResponse(response, uri.toString());
+        return response;
+    }
+
+    public URI getUri(String wikidataSearchTerm) {
+        try {
+            return new URI(buildWikiDataUri(wikidataSearchTerm, protocol, schemeDelimiter, host, pathPrefix, api));
+        } catch (URISyntaxException e) {
+            logger.error("Error constructing URI with param: " + wikidataSearchTerm +
+                    " " + e.getMessage());
+            throw new IllegalArgumentException(e.getMessage());
+        }
+    }
+
     private static String buildWikiDataUri(String wikiDataSearchTerm, String protocol, String schemeDelimiter,
                                            String host, String pathPrefix, String api) {
         return UriComponentsBuilder.fromUriString(protocol + schemeDelimiter + host + pathPrefix + api)
@@ -54,22 +71,6 @@ public class WikidataSearchRoute {
             logger.info("The request on uri:" + url + " did not match any data in Wikidata");
         }
         return newResponse;
-    }
-
-    public URI getUri(String wikidataSearchTerm) {
-        try {
-            return new URI(buildWikiDataUri(wikidataSearchTerm, protocol, schemeDelimiter, host, pathPrefix, api));
-        } catch (URISyntaxException e) {
-            logger.error("Error constructing URI with param: " + wikidataSearchTerm +
-                    " " + e.getMessage());
-            throw new IllegalArgumentException(e.getMessage());
-        }
-    }
-
-    public ResponseEntity<String> doGetResponse(URI uri) throws URISyntaxException {
-        ResponseEntity<String> response = RestTempUtil.getResponse(uri);
-        handleResponse(response, uri.toString());
-        return response;
     }
 
     public ResponseEntity<String> handleResponse(ResponseEntity<String> response, String url) throws URISyntaxException {

@@ -37,7 +37,8 @@ public class MusicBrainzNameSearchRoute {
         }
         return uri;
     }
-    public ResponseEntity<String> doGetResponse(URI uri){
+    public ResponseEntity<String> doGetResponse(Map<String, String> filterParams){
+        URI uri = getUri(filterParams);
         ResponseEntity<String> responseEntity = RestTempUtil.getResponse(uri, host, port);
         return responseEntity;
     }

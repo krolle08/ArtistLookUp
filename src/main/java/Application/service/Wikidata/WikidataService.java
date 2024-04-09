@@ -24,8 +24,7 @@ public class WikidataService {
     WikidataSearchRoute wikidataSearchRoute;
 
     public void getWikidata(WikiInfoObj wikiInfoObj) throws URISyntaxException, JsonProcessingException {
-        URI url = wikidataSearchRoute.getUri(wikiInfoObj.getWikidataSearchTerm());
-        ResponseEntity<String> response = wikidataSearchRoute.doGetResponse(url);
+        ResponseEntity<String> response = wikidataSearchRoute.doGetResponse(wikiInfoObj.getWikidataSearchTerm());
         extractWikiPediaData(response, wikiInfoObj);
     }
 

@@ -37,7 +37,8 @@ public class WikipediaSearchRoute {
         }
     }
 
-    public ResponseEntity<String> doGetResponse(URI uri) {
+    public ResponseEntity<String> doGetResponse(String searchTerm) {
+        URI uri = getUri(searchTerm);
         return RestTempUtil.getResponse(uri);
     }
 }

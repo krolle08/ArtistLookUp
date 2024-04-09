@@ -55,10 +55,10 @@ public class testMusicBrainzIdServiceRoute {
     @Test
     public void testPositiveResponse_Succes() {
         //Given
-        URI uri = URI.create("http://musicbrainz.org:80/ws/2/artist/5b11f4ce-a62d-471e-81fc-a69a8278c7da?fmt=json&inc=url-rels+release-groups");
+        String searchTerm="5b11f4ce-a62d-471e-81fc-a69a8278c7da";
 
         // When
-        ResponseEntity<String> result =  musicBrainzIdService.doGetResponse(uri);
+        ResponseEntity<String> result =  musicBrainzIdService.doGetResponse(searchTerm);
 
         // Then
         Assertions.assertFalse(result.getBody().isEmpty());

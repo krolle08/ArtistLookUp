@@ -14,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.net.URI;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -26,17 +25,16 @@ public class MusicBrainzNameService {
     MusicBrainzNameSearchRoute musicBrainzNameSearchRoute;
 
     public ArtistInfoObj getMBIdData(Map<String, String> searchParam) throws IllegalArgumentException, InvalidArtistException {
-        URI uri = musicBrainzNameSearchRoute.getUri(searchParam);
-        ResponseEntity<String> response = musicBrainzNameSearchRoute.doGetResponse(uri);
+        ResponseEntity<String> response = musicBrainzNameSearchRoute.doGetResponse(searchParam);
         if (RestTempUtil.isBodyEmpty(response, "artists")) {
-            logger.warn("No response was given on the provided URI: " + uri + " . Make sure that search type and " +
-                    "search parameter are correct " + searchParam.entrySet().iterator().next().getKey() + ", " +
+            logger.info("No response on the provided searchparameters: {}, {}.", searchParam.entrySet().iterator().next().getKey(),
                     searchParam.entrySet().iterator().next().getValue());
-            throw new InvalidArtistException("No response was given on the provided search value: " + searchParam.entrySet().iterator().next().getValue());
+            throw new InvalidArtistException("No response on the provided search value: " + searchParam.entrySet().iterator().next().getValue());
         }
         return extractDataAndPopulateObj(response, searchParam.get(TypeOfSearchEnum.ARTIST.getSearchType()));
     }
-    public ArtistInfoObj extractDataAndPopulateObj(ResponseEntity responseEntity, String searchParam){
+
+    public ArtistInfoObj extractDataAndPopulateObj(ResponseEntity responseEntity, String searchParam) {
         ArtistInfoObj artistInfoObj = new ArtistInfoObj();
         ObjectMapper mapper = new ObjectMapper();
         try {
@@ -61,8 +59,8 @@ public class MusicBrainzNameService {
             artistInfoObj.setName(artistName);
             artistInfoObj.setmBID(mbid);
             artistInfoObj.setmBStatusCode(responseEntity.getStatusCodeValue());
-            return artistInfoObj;}
-        catch (JsonProcessingException e){
+            return artistInfoObj;
+        } catch (JsonProcessingException e) {
             logger.warn("A problem occurred mapping the response: " + e.getMessage());
             e.printStackTrace();
             return artistInfoObj;

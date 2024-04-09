@@ -35,39 +35,39 @@ These additional references should also help you:
 
 To start the program follow this guide:
 
-1.  Open your Programming Software (VS-Code, IntelliJ, Visual Studio)
-2.  Go to file and Select "Open" or "Open as project"
-3.  Locate the project folder and open the build.gradle
-3.1 When prompted for "Open as project" or "Open as file", choose "Open as project"
-4   It is recommended to have min. Java 21.0.1 installed on your pc.
-4.1 Go to Project Structure (IntellijJ) or system properties to ensure that the project runs on min. Java 21.0.1
-4.2 Language level 8 (Lampdas, type annotations etc.)
-5.  Install gradle recommended min. version 7.6.4
-6.  Goto File | Settings | Build, Execution, Deployment | Build Tools | Gradle
-6.1 Go to Grade Projects section and change make sure that 'Download external annotations and dependencies' is ticked on,
-    'Set Build and run using:' to Gradle (default) and 'Run Tests using:' to Gradle (default)
-6.2 Set 'Distribution' to Wrapper and 'Gradle JVM' to 1.8
-7.  Go to File | Settings | Build, Execution, Deployment | Compiler | Java Compiler
-7.1 Set 'Use compiler' to Javac and set 'Project bytecode version' to 1.8
-8.  Depending on your programming software go to the plugin tab and make sure that the following plugins are installed:
-    - Gradle
-    - Gradle Extension
-    - Maven
-    - Maven Extension
-9.  If successful, a gradle tab should appear in the UI of your programming software
-9.1 In the gradle tab go to Tasks -> build -> clean and then build
-9.2 If the tab is not present in your UI, try restart the program.
-    If still not present try Ctrl + Shift + O or Cmd + Shift + O on macOS (Only IntelliJ IDEA)
-    If still not present open the programs terminal and run ./gradlew clean build or ./gradle clean build
-    (depending on your gradle setup)
-10.  Download sources for gradle with the "Download Sources" button in the gradletab.  Refresh gradle dependencies by
-    tabbing the
-    If not present run the following command in the terminal ./gradlew dependencies --refresh-dependencies --write-locks
-    or ./gradle dependencies --refresh-dependencies --write-locks
-11.  If using IntelliJ IDEA, go to the gradle tab press the "Reload all Gradle Project"
-12.  Run the application from the run configuration (In IntelliJ IDEA it is located in the
-    top right corner). If not present in the UI of the program locate the main method in the Application class and run
-    it manually.
+1.      Make sure Git is installed on your pc, if not download here: https://git-scm.com/
+2.      Open your preferred software e.g. IntelliJ and if you want to clone the project ensure that the git extension is
+        installed.
+2.1     If project is on pc: Go to file and Select "Open" or "Open as project", locate the project and open the build.gradle
+2.2     If cloning: Open the git extension and import the project, when prompt for security concerns press "Yes, Trust the authors"
+3.      Go to extension and install gradle and gradle extension. Depending on your settings, may the "Extension Pack for
+        Java", "Maven" and "Maven extension" extensions be needed.
+3.1     Install Java if not installed, https://www.oracle.com/java/technologies/downloads/.
+3.2     Install gradle (recommended min. 7.6.4), https://gradle.org/install/
+3.3     Add JAVA_HOME and GRADLE_HOME to the system variables, same goes for PATH
+3.3     Install gradle extension
+3.4     Update the project structure and settings to use gradle and java sdk.
+
+3.4.1   Project Structure -> Language level 8 (Lampdas, type annotations etc.)
+3.4.2   Project Structure -> Project Settings -> Project -> SDK: Set to the desired java sdk
+3.4.3   Goto File | Settings | Build, Execution, Deployment | Build Tools | Gradle
+3.4.4   Go to Grade Projects section and change make sure that 'Download external annotations and dependencies' is
+        ticked on, 'Set Build and run using:' to Gradle (default) and 'Run Tests using:' to Gradle (default), Set
+        'Distribution' to Wrapper and 'Gradle JVM' to 1.8
+3.4.5   Go to File | Settings | Build, Execution, Deployment | Compiler | Java Compiler: Set 'Use compiler' to Javac and
+        set 'Project bytecode version' to 1.8
+4.      Restart the program.
+5.      A gradle tab should have appeared in your UI, if not check the "view" tab to see if it is disabled.
+6.      If tab is available: In the gradle tab go to Tasks -> build -> clean and then build
+        If tab not available: Open terminal in program and run ./gradlew clean build or ./gradle clean build
+        (depending on your gradle setup)
+6.1     If tab is available: Download sources for gradle by pressing the "Download Sources" button in the gradle tab.
+        If tab not available: Run the following command in the terminal ./gradlew dependencies --refresh-dependencies
+        --write-locks or ./gradle dependencies --refresh-dependencies --write-locks
+6.2     If using IntelliJ IDEA, press the "Reload all Gradle Project" buttom.
+7.      Project is now ready to run. To run go to the run configuration (Located in the
+        top right corner in IntelliJ), and start the application, or else navigate to the main class Application and
+        execute the main method.
 
 Changes involving libraries, dependencies, build.gradle, imports, external features, methods, class and fields
 requires a repeat of step 5.1 - 7.
