@@ -28,7 +28,7 @@ public class testMusicBrainzIdServiceRoute {
         assertNotNull(uri); // Assert that URI is not null
         assertEquals("http", uri.getScheme()); // Assert scheme
         assertEquals("musicbrainz.org", uri.getHost()); // Assert host
-        String expected = "/ws/2/artist/query=artist:" + searchTerm;
+        String expected = "/ws/2/artist/" + searchTerm;
         String actual = uri.getPath() + uri.getQuery();
         assertTrue(actual.contains(expected));
     }
