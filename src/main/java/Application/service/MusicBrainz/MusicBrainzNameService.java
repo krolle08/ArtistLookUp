@@ -16,6 +16,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.Iterator;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 public class MusicBrainzNameService {
@@ -26,7 +28,7 @@ public class MusicBrainzNameService {
 
     public ArtistInfoObj getMBIdData(Map<String, String> searchParam) throws IllegalArgumentException, InvalidArtistException {
         ResponseEntity<String> response = musicBrainzNameSearchRoute.doGetResponse(searchParam);
-        if (RestTempUtil.isBodyEmpty(response, "artists")) {
+        if (RestTempUtil.isBodyEmpty(response)) {
             logger.info("No response on the provided searchparameters: {}, {}.", searchParam.entrySet().iterator().next().getKey(),
                     searchParam.entrySet().iterator().next().getValue());
             throw new InvalidArtistException("No response on the provided search value: " + searchParam.entrySet().iterator().next().getValue());
@@ -39,31 +41,50 @@ public class MusicBrainzNameService {
         ObjectMapper mapper = new ObjectMapper();
         try {
             JsonNode rootNode = mapper.readTree(responseEntity.getBody().toString());
-            String mbid = "";
             String artistName = "";
-            int highestScore = Integer.MIN_VALUE;
 
-            Iterator<JsonNode> annotationIterator = rootNode.path("artists").elements();
+            Iterator<JsonNode> annotationIterator = rootNode.path("annotations").elements();
+            boolean foundUUID = false; // Flag to track if UUID is found
 
-            while (annotationIterator.hasNext()) {
+            while (annotationIterator.hasNext() && !foundUUID) {
                 JsonNode annotation = annotationIterator.next();
-                int score = annotation.path("score").asInt();
-                String type = annotation.path("name").asText();
-
-                if (searchParam.equalsIgnoreCase(type) && score > highestScore) {
-                    highestScore = score;
-                    mbid = annotation.path("id").asText();
-                    artistName = type;
+                if (annotation.path("type").asText().equals("artist")) {
+                    String text = annotation.get("text").asText();
+                    String uuid = extractUUIDForTerm(text, searchParam);
+                    if(uuid != null){
+                        artistInfoObj.setmBID(uuid);
+                        artistInfoObj.setName(searchParam);
+                        artistInfoObj.setmBStatusCode(responseEntity.getStatusCodeValue());
+                        foundUUID = true;
+                    }
                 }
             }
-            artistInfoObj.setName(artistName);
-            artistInfoObj.setmBID(mbid);
-            artistInfoObj.setmBStatusCode(responseEntity.getStatusCodeValue());
             return artistInfoObj;
         } catch (JsonProcessingException e) {
             logger.warn("A problem occurred mapping the response: " + e.getMessage());
             e.printStackTrace();
             return artistInfoObj;
+        }
+    }
+
+    public static String extractUUIDForTerm(String text, String searchTerm) {
+        String regex = "\\[http://musicbrainz.org/artist/([a-fA-F0-9\\-]+)\\.html\\|" + Pattern.quote(searchTerm) + "]";
+        Pattern pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
+        Matcher matcher = pattern.matcher(text);
+        if (matcher.find()) {
+            return matcher.group(1);
+        }
+        return null;
+    }
+
+    public static String extractUUID(String text) {
+        String regex = "\\[artist:([a-fA-F0-9\\-]+)\\|.*\\]";
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(text);
+        if (matcher.find()) {
+            return matcher.group(1);
+        } else {
+            return null;
         }
     }
 }

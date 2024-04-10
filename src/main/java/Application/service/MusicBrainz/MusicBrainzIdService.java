@@ -29,7 +29,7 @@ public class MusicBrainzIdService {
     public ArtistInfoObj getMBData(String mbid) {
         ArtistInfoObj artistInfoObj = new ArtistInfoObj();
         ResponseEntity<String> response = musicBrainzIDSearchRoute.doGetResponse(mbid);
-        if (RestTempUtil.isBodyEmpty(response, null)) {
+        if (RestTempUtil.isBodyEmpty(response)) {
             logger.info("No body was provided on mbid: " + mbid + " make sure that the search " +
                     "type and search criteria are correct");
             return artistInfoObj;

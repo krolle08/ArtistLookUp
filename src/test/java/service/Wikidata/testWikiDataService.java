@@ -1,21 +1,15 @@
 package service.Wikidata;
 
 import Application.Application;
-import Application.api.WikidataSearchRoute;
 import Application.service.Artist.WikiInfoObj;
 import Application.service.Wikidata.WikidataService;
 import Application.utils.RestTempUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.ResponseEntity;
-
-import java.net.URISyntaxException;
-import java.util.Objects;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;

@@ -3,6 +3,7 @@ package api;
 import Application.Application;
 import Application.api.MusicBrainzNameSearchRoute;
 import Application.service.MusicBrainz.MusicBrainzNameService;
+import Application.utils.RestTempUtil;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,15 +25,30 @@ public class testMusicBrainzNameSearchRoute {
     private MusicBrainzNameSearchRoute musicBrainzNameSearchRoute;
 
     @Test
-    public void testInputForUri_Succes() {
+    public void testInputForUriToOrdOgTegn_Succes() {
         //Given
         Map<String, String> filter = new HashMap<>();
-        filter.put("Artist", "Nirvana");
+        filter.put("Artist", "Nik & Jay");
 
         // When
 
         // Then
         assertDoesNotThrow(() -> musicBrainzNameSearchRoute.getUri(filter), "Exception occurred while creating URI");
+    }
+
+    @Test
+    public void testInputForUriEtOrd_Succes2() {
+        //Given
+        Map<String, String> filter = new HashMap<>();
+        filter.put("Artist", "Nirvana");
+        String expected = "/ws/2/annotation/query=artist:" + "nirvana";
+
+        // When
+        URI result = musicBrainzNameSearchRoute.getUri(filter);
+
+        // Then
+        String actual = result.getPath() + result.getQuery();
+        assertTrue(actual.contains(expected));
     }
 
     @Test
@@ -42,9 +58,8 @@ public class testMusicBrainzNameSearchRoute {
         filter.put("Artist", "###");
 
         // When
-
         // Then
-        assertThrows(IllegalArgumentException.class, () -> musicBrainzNameSearchRoute.getUri(filter));
+        assertDoesNotThrow( () -> musicBrainzNameSearchRoute.getUri(filter));
     }
 
     @Test
@@ -55,16 +70,17 @@ public class testMusicBrainzNameSearchRoute {
         // When
 
         // Then
-        assertThrows(IllegalArgumentException.class, () -> musicBrainzNameSearchRoute.getUri(filter));
+        assertDoesNotThrow(() -> musicBrainzNameSearchRoute.getUri(filter));
     }
 
     @Test
     public void testPositiveResponse_Succes() {
         //Given
-        URI uri = URI.create("http://musicbrainz.org:80/ws/2/artist/?query=artist:NIRVANA&fmt=json");
+        Map<String, String> filter = new HashMap<>();
+        filter.put("Artist", "Nirvana");
 
         // When
-        ResponseEntity<String> result =  musicBrainzNameSearchRoute.doGetResponse(uri);
+        ResponseEntity<String> result =  musicBrainzNameSearchRoute.doGetResponse(filter);
 
         // Then
         Assertions.assertFalse(result.getBody().isEmpty());

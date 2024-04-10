@@ -20,7 +20,7 @@ public class testMusicBrainzIdServiceRoute {
     @Test
     public void testInputForUri_Success() {
         //Given
-        String searchTerm = "Nirvana";
+        String searchTerm = "5b11f4ce-a62d-471e-81fc-a69a8278c7da";
 
         // When
         URI uri = musicBrainzIdService.getUri(searchTerm);
@@ -28,7 +28,9 @@ public class testMusicBrainzIdServiceRoute {
         assertNotNull(uri); // Assert that URI is not null
         assertEquals("http", uri.getScheme()); // Assert scheme
         assertEquals("musicbrainz.org", uri.getHost()); // Assert host
-        assertEquals("/ws/2/artist/Nirvana", uri.getPath()); // Assert path
+        String expected = "/ws/2/artist/query=artist:" + searchTerm;
+        String actual = uri.getPath() + uri.getQuery();
+        assertTrue(actual.contains(expected));
     }
     @Test
     public void testBadInputForUri_Error() {

@@ -2,14 +2,16 @@ package Application.api;
 
 import Application.utils.CustomRetryTemplate;
 import Application.utils.RestTempUtil;
+import Application.utils.RestTemplateConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.retry.RetryCallback;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponentsBuilder;
 
+import javax.annotation.PostConstruct;
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -23,11 +25,27 @@ import java.net.URISyntaxException;
 @RestController
 public class WikidataSearchRoute {
     private static final Logger logger = LoggerFactory.getLogger(WikidataSearchRoute.class.getName());
-    private final String protocol = "https";
-    private final String schemeDelimiter = "://";
-    private final String host = "wikidata.org";
-    private final String pathPrefix = "/w";
-    private final String api = "/api.php";
+    @Value("${wikiData.protocol}")
+    private String protocol;
+
+    @Value("${wikiData.host}")
+    private String host;
+    @Value("${wikiData.pathPrefix}")
+    private String pathPrefix;
+
+    @Value("${wikiData.api}")
+    private String api;
+    private RestTemplateConfig config;
+
+    @PostConstruct
+    public void init() {
+        config = new RestTemplateConfig(protocol, host, null, api, null,
+                null, pathPrefix, null);
+        // Initialize any properties or perform setup logic here
+        logger.info("Initialized MusicBrainzIDSearchRoute with properties: " +
+                        "protocol={}, host={}, pathPrefix={}, api={}",
+                protocol, host, pathPrefix, api);
+    }
 
     public ResponseEntity<String> doGetResponse(String wikidataSearchTerm) throws URISyntaxException {
         URI uri = getUri(wikidataSearchTerm);
@@ -37,24 +55,7 @@ public class WikidataSearchRoute {
     }
 
     public URI getUri(String wikidataSearchTerm) {
-        try {
-            return new URI(buildWikiDataUri(wikidataSearchTerm, protocol, schemeDelimiter, host, pathPrefix, api));
-        } catch (URISyntaxException e) {
-            logger.error("Error constructing URI with param: " + wikidataSearchTerm +
-                    " " + e.getMessage());
-            throw new IllegalArgumentException(e.getMessage());
-        }
-    }
-
-    private static String buildWikiDataUri(String wikiDataSearchTerm, String protocol, String schemeDelimiter,
-                                           String host, String pathPrefix, String api) {
-        return UriComponentsBuilder.fromUriString(protocol + schemeDelimiter + host + pathPrefix + api)
-                .queryParam("action", "wbgetentities")
-                .queryParam("format", "json")
-                .queryParam("ids", wikiDataSearchTerm)
-                .queryParam("props", "sitelinks")
-                .build()
-                .toUriString();
+        return RestTempUtil.constructUriWikiData(wikidataSearchTerm, config);
     }
 
     private static ResponseEntity<String> handleRateLimitations(String url) throws URISyntaxException {
@@ -74,11 +75,14 @@ public class WikidataSearchRoute {
     }
 
     public ResponseEntity<String> handleResponse(ResponseEntity<String> response, String url) throws URISyntaxException {
-        if (response.getBody().contains("ratelimits")) {
-            return handleRateLimitations(url);
-        } else if (response.getBody().contains("no-such-entity")) {
+        if (response.getBody() == null || response.getBody().isEmpty() || response.getBody().contains("no-such-entity")) {
             logger.info("The requested uri:" + url + " did not match any data on Wikidata");
+        } else if (response.getBody().contains("ratelimits")) {
+            return handleRateLimitations(url);
         }
         return response;
+    }
+    public RestTemplateConfig getRestConfig(){
+        return config;
     }
 }

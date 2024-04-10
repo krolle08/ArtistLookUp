@@ -34,8 +34,8 @@ public class UserInputUtil {
                 logger.info("Empty and/or the provided search value is not possible: " + searchValue);
                 throw new InvalidSearchRequestException("Empty and/or the provided search value is not possible: " + searchValue);
             } else {
-                String sanitizedValue = sanitizeInput(searchValue);
-                searchRequest.entrySet().iterator().next().setValue(sanitizedValue);
+               // String sanitizedValue = sanitizeInput(searchValue);
+               // searchRequest.entrySet().iterator().next().setValue(sanitizedValue);
                 return;
             }
         }

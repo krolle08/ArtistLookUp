@@ -52,7 +52,7 @@ public class RestApiRequester {
             if (entity.getArtistInfoObj() == null || entity.getArtistInfoObj().isEmpty()) {
                 throw new InvalidArtistException("Invalid artist: " + id);
             }
-            logger.info("Request Completed for: " + id);
+            logger.info("Request Completed for: " + searchParam.entrySet().iterator().next().getValue());
             HttpHeaders headers = new HttpHeaders();
             headers.add("Request", "Completed with success");
             return ResponseEntity.ok().headers(headers).body(Json.createJsonResponse(entity));

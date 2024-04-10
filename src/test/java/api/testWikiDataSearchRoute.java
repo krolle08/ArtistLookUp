@@ -81,36 +81,14 @@ public class testWikiDataSearchRoute {
     }
 
     @Test
-    public void testgetUribadInput_Error() {
-        //Given
-        String badInput = "###";
-
-        // When
-
-        // Then
-        assertThrows(IllegalArgumentException.class, () -> wikidataSearchRoute.getUri(badInput));
-    }
-
-    @Test
-    public void testgetUriEmptyInput_Error() {
-        //Given
-        String emptyInput = "\n";
-
-        // When
-
-        // Then
-        assertThrows(IllegalArgumentException.class, () -> wikidataSearchRoute.getUri(emptyInput));
-    }
-
-    @Test
     public void testPositiveResponse_Succes() {
         //Given
-        URI uri = URI.create("https://wikidata.org/w/api.php?action=wbgetentities&format=json&ids=Q11649&props=sitelinks");
+        String wikidataSearchTerm = "Q11649";
 
         // When
         ResponseEntity<String> result = null;
         try {
-            result = wikidataSearchRoute.doGetResponse(uri);
+            result = wikidataSearchRoute.doGetResponse(wikidataSearchTerm);
         } catch (URISyntaxException e) {
             System.out.println("Should not have thrown an exception");
             fail();
@@ -123,11 +101,11 @@ public class testWikiDataSearchRoute {
     @Test
     public void testNegativeResponse_Error() throws URISyntaxException  {
         //Given
-        URI uri = URI.create("https://wikidata.org/w/api.php?action=wbgetentities&format=json&ids=Q00000&props=sitelinks");
+        String wikidataSearchTerm = "Q00000";
 
         // When
 
-        ResponseEntity<String> result = wikidataSearchRoute.doGetResponse(uri);
+        ResponseEntity<String> result = wikidataSearchRoute.doGetResponse(wikidataSearchTerm);
 
         //Then
         assertNotNull(result.getBody(), "Response entity should not be null");

@@ -1,146 +1,130 @@
 package Application.utils;
 
-import Application.service.Artist.SearchArtistService;
-import com.fasterxml.jackson.core.JsonProcessingException;
+import Application.service.Artist.AlbumInfoObj;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.http.HttpHost;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.impl.client.HttpClientBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 public class RestTempUtil {
     private static final Logger logger = LoggerFactory.getLogger(RestTempUtil.class.getName());
 
-    public static StringBuffer constructUri(String id, String queryType, String protocol, String schemeDelimiter, String host, int port, String pathPrefix, String version, String pathPostFix) {
-        StringBuffer url = new StringBuffer();
-        url.append(protocol).append(schemeDelimiter).append(host);
-        String queryterm;
-        if (port != 0) {
-            url.append(":").append(port);
-        }
-        if (id.isEmpty()) {
-            logger.info("No ID was given for the search:" + id);
-        }
-        if (id.contains(" ")) {
-            queryterm = encodeString(id);
-        } else {
-            queryterm = id;
-        }
 
-        url.append(pathPrefix).append(version).append(queryType).append(queryterm);
-        url.append(pathPostFix);
-        return url;
+    public static URI constructUri(String id,RestTemplateConfig config) {
+        StringBuilder uriBuilder = new StringBuilder()
+                .append(config.getProtocol()).append("://")
+                .append(config.getHost())
+                .append(config.getPathPrefix())
+                .append(config.getVersion())
+                .append(config.getQueryTypeArtist() != null ? config.getQueryTypeArtist() : "")
+                .append(id)
+                .append(config.getPathPostFix());
+
+        if (config.getJson() != null) {
+            uriBuilder.append("&fmt=").append(config.getJson());
+        }
+        if (config.getPostPreFix() != null) {
+            uriBuilder.append("&inc=").append(config.getPostPreFix());
+        }
+        return URI.create(uriBuilder.toString());
+
     }
 
-    public static StringBuffer constructUri(Map<String, String> filterParams, String query, String protocol,
-                                            String annotation, String schemeDelimiter, String host, int port,
-                                            String pathPrefix, String version, String json) {
-        StringBuffer url = new StringBuffer();
-        url.append(protocol).append(schemeDelimiter).append(host);
-        if (port != 0) {
-            url.append(":").append(port);
+    public static URI constructUri(Map<String, String> filterParams, String query, RestTemplateConfig config) {
+        String path = config.getPathPrefix() + config.getVersion() + config.getPathPostFix() + query;
+        StringBuilder uriBuilder = new StringBuilder()
+                .append(config.getProtocol()).append("://")
+                .append(config.getHost()).append(":").append(config.getPort())
+                .append(path);
+
+        filterParams.forEach((key, value) -> uriBuilder.append(key.toLowerCase()).append(":")
+                .append(encodeIfNeeded(value.toLowerCase())));
+
+        if (config.getJson() != null) {
+            uriBuilder.append("&").append(config.getJson());
         }
-        url.append(pathPrefix).append(version).append(annotation).append(query);
-        if (filterParams.isEmpty()) {
-            logger.info("No parameter for the search has been provided");
-            return new StringBuffer();
-        } else {
-            // Append each parameter from filterParams
-            for (Map.Entry<String, String> entry : filterParams.entrySet()) {
-                String paramName = entry.getKey().toLowerCase();
-                String paramValue = entry.getValue();
-                if (paramValue.contains(" ") || paramValue.contains("_")) {
-                    paramValue = RestTempUtil.encodeString(entry.getValue());
-                } else {
-                    paramValue = entry.getValue();
-                }
-                // Append parameter name and value to URL
-                url.append(paramName).append(":").append(paramValue);
+        if (config.getPostPreFix() != null) {
+            uriBuilder.append("&").append(config.getPostPreFix());
+        }
+        return URI.create(uriBuilder.toString());
+    }
+
+    public static URI constructUriWikiData(String searchTerm, RestTemplateConfig config) {
+        StringBuilder uriBuilder = new StringBuilder()
+                .append(config.getProtocol()).append("://")
+                .append(config.getHost());
+        return UriComponentsBuilder.fromUriString(uriBuilder + config.getPathPrefix() + config.getPathPostFix())
+                .queryParam("action", "wbgetentities")
+                .queryParam("format", "json")
+                .queryParam("ids", searchTerm)
+                .queryParam("props", "sitelinks")
+                .build()
+                .toUri();
+    }
+
+    public static URI constructUriWikiPedia(String searchTerm, RestTemplateConfig config) {
+        String searchValue = decodeString(searchTerm);
+        String path = config.getPathPrefix() + config.getPathPostFix();
+        return UriComponentsBuilder.newInstance()
+                .scheme(config.getProtocol())
+                .host(config.getHost())
+                .path(path)
+                .queryParam("action", "query")
+                .queryParam("format", "json")
+                .queryParam("prop", "extracts")
+                .queryParam("exintro", true)
+                .queryParam("redirects", true)
+                .queryParam("titles", searchValue)
+                .build()
+                .toUri();
+    }
+
+    public static boolean isBodyEmpty(ResponseEntity<String> responseEntity) {
+            String responseBody = responseEntity.getBody();
+            return responseBody == null || responseBody.isBlank();
             }
-        }
-        url.append("&").append(json);
-        return url;
-    }
 
-    public static String constructUri(String searchTerm, String protocol, String schemeDelimiter, String host,
-                                      String pathPrefix, String api, String postPreFix) {
-        StringBuffer url = new StringBuffer();
-        url.append(protocol).append(schemeDelimiter).append(host);
-        if (searchTerm.isEmpty()) {
-            logger.info("No search term was given for the search:" + searchTerm);
-        }
-        url.append(pathPrefix).append(api).append(postPreFix);
-        url.append(searchTerm);
-        return url.toString();
-    }
-
-    public static boolean isBodyEmpty(ResponseEntity responseEntity, String criteria) {
-        ObjectMapper mapper = new ObjectMapper();
-        try {
-            JsonNode rootNode = mapper.readTree(responseEntity.getBody().toString());
-            if (criteria == null && !rootNode.isEmpty()) {
-                return false;
-            }
-            if (rootNode.path(criteria).isEmpty()) {
-                return true;
-            }
-        } catch (JsonProcessingException e) {
-            logger.warn("Failed reading the rootnode. " + e.getMessage());
-            e.printStackTrace();
-            return true;
-        }
-        return false;
-    }
-
-    public static RestTemplate restTemplate(String host, int port) {
-        HttpHost proxy = new HttpHost(host, port);
-        RequestConfig config = RequestConfig.custom().setProxy(proxy).build();
-        return new RestTemplateBuilder().requestFactory(() -> new HttpComponentsClientHttpRequestFactory(HttpClientBuilder.create().setDefaultRequestConfig(config).build())).build();
-    }
-
-    public static ResponseEntity<String> getResponse(URI uri, String host, int port) {
-        RestTemplate restTemplate = RestTempUtil.restTemplate(host, port);
-        return restTemplate.getForEntity(uri, String.class);
+    public static RestTemplate getRestTemplate() {
+        RestTemplate restTemplate = new RestTemplate();
+        return restTemplate;
     }
 
     public static ResponseEntity<String> getResponse(URI uri) {
-        RestTemplate restTemplate = new RestTemplate();
+        RestTemplate restTemplate = getRestTemplate();
         return restTemplate.getForEntity(uri, String.class);
     }
 
-    public static String encodeString(String input) {
+    public static String encodeIfNeeded(String input) {
+        if (input == null || input.isEmpty()) {
+            return "";
+        }
         try {
-            return URLEncoder.encode(input, StandardCharsets.UTF_8.name())
+            return java.net.URLEncoder.encode(input, StandardCharsets.UTF_8.name())
                     .replaceAll("\\+", "%20")
                     .replaceAll("_", "%20") // Replace underscores with %5F
                     .replaceAll("\\%28", "(")
                     .replaceAll("\\%29", ")");
-        } catch (UnsupportedEncodingException e) {
+        } catch (Exception e) {
             logger.warn("Error encoding input: " + input);
-            e.printStackTrace();
             throw new RuntimeException(e);
         }
     }
 
     public static String decodeString(String input) {
+        if (input == null || input.isEmpty()) {
+            return "";
+        }
         try {
-            return URLDecoder.decode(input, StandardCharsets.UTF_8.name());
-        } catch (UnsupportedEncodingException e) {
+            return java.net.URLDecoder.decode(input, StandardCharsets.UTF_8.name());
+        } catch (Exception e) {
             logger.warn("Error decoding input: " + input);
-            e.printStackTrace();
             throw new RuntimeException(e);
         }
     }

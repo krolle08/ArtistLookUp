@@ -1,14 +1,18 @@
 package utils;
 
 import Application.Application;
+import Application.api.MusicBrainzIDSearchRoute;
+import Application.api.WikidataSearchRoute;
 import Application.utils.RestTempUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockitoAnnotations;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -19,26 +23,11 @@ import static org.junit.jupiter.api.Assertions.*;
 public class testRestTempUtil {
 
     private final Map<String, String> filterParams = new HashMap<>();
-    private final String query ="/?query=";
-    private final String protocol="http";
-    private final String annotation = "/artist";
-    private final String schemeDelimiter = "://";
-    private final String host = "musicbrainz.org";
-    private final int port = 80;
-    private final String pathPrefix = "/ws";
-    private final String version = "/2";
-    private final String json = "fmt=json";
 
-    private final String mbid= "5b11f4ce-a62d-471e-81fc-a69a8278c7da";
-
-    private final String pathPostFix ="?fmt=json&inc=url-rels+release-groups";
-
-    private final String postPrefix = "?action=query&format=json&prop=extracts&exintro=true&redirects=true&titles=";
-
-    private final String searchTerm ="Nirvana+%28band%29";
-
-    private final String api = "/api.php";
-
+    @Autowired
+    MusicBrainzIDSearchRoute musicBrainzIDSearchRoute;
+    @Autowired
+    WikidataSearchRoute wikidataSearchRoute;
     @BeforeEach
     public void setup() {
         MockitoAnnotations.openMocks(this); // Initialize mocks
@@ -46,37 +35,26 @@ public class testRestTempUtil {
     }
 
     @Test
-    public void testConstructURI_Type1() {
+    public void testMusicBrainzIdURIConstructer() {
         // Given
-        StringBuffer result;
-        String expectedURI = "http://musicbrainz.org:80/ws/2/artist/?query=artist:Nirvana&fmt=json";
+        URI result;
+        String expectedURI = "http://musicbrainz.org/ws/2/artist/?query=artist:Nirvana&fmt=json&inc=url-rels+release-groups";
 
         // When
-        result = RestTempUtil.constructUri(filterParams,query,protocol,annotation,schemeDelimiter,host,port,pathPrefix,version,json);
+        result = RestTempUtil.constructUri("Nirvana", musicBrainzIDSearchRoute.getRestConfig());
 
         //Then
-        assertThat(result.toString().equals(expectedURI));
+        assertTrue(result.toString().equals(expectedURI));
     }
     @Test
-    public void testConstructURI_Type2() {
+    public void testWikiDataURIConstructor() {
         // Given
-        StringBuffer result;
-        String expectedURI = "http://musicbrainz.org:80/ws/2/artist/5b11f4ce-a62d-471e-81fc-a69a8278c7da?fmt=json&inc=url-rels+release-groups";
+        URI result;
+        String searchTerm ="Q11649";
+        String expectedURI = "https://wikidata.org/w/api.php?action=wbgetentities&format=json&ids=Q11649&props=sitelinks";
 
         // When
-        result = RestTempUtil.constructUri(mbid,annotation+"/", protocol, schemeDelimiter, host, port, pathPrefix, version, pathPostFix);
-
-        //Then
-        assertThat(result.toString().equals(expectedURI));
-    }
-    @Test
-    public void testConstructURI_Type3() {
-        // Given
-        String result;
-        String expectedURI = "http://musicbrainz.org:80/ws/2/artist/?query=artist:Nirvana&fmt=json";
-
-        // When
-        result = RestTempUtil.constructUri(searchTerm, protocol, schemeDelimiter, host, pathPrefix, api, postPrefix);
+        result = RestTempUtil.constructUriWikiData(searchTerm, wikidataSearchRoute.getRestConfig());
 
         //Then
         assertThat(result.equals(expectedURI));
@@ -85,7 +63,31 @@ public class testRestTempUtil {
     @Test
     public void testisBodyEmptyFalse() {
         // Given
-        ResponseEntity<String> responseEntity = new ResponseEntity<>("{\"artists\":{\n" +
+        ResponseEntity<String> responseEntity = getResponseEntity();
+        String criteria = "artists";
+
+        // When
+        boolean result = RestTempUtil.isBodyEmpty(responseEntity);
+
+        //Then
+        assertFalse(result);
+    }
+
+    @Test
+    public void testisBodyEmptyTrue() {
+        // Given
+        ResponseEntity<String> responseEntity = new ResponseEntity<>("", HttpStatus.OK);
+        String criteria = "artists";
+
+        // When
+        boolean result = RestTempUtil.isBodyEmpty(responseEntity);
+
+        //Then
+        assertTrue(result);
+    }
+
+    private ResponseEntity<String> getResponseEntity(){
+        return new ResponseEntity<>("{\"artists\":{\n" +
                 "  \"artist\": {\n" +
                 "    \"id\": \"b961732c-0c70-4bd7-94b4-843317862853\",\n" +
                 "    \"type\": \"Group\",\n" +
@@ -138,26 +140,6 @@ public class testRestTempUtil {
                 "    ]\n" +
                 "  }\n" +
                 "}\n}", HttpStatus.OK);
-        String criteria = "artists";
-
-        // When
-        boolean result = RestTempUtil.isBodyEmpty(responseEntity, criteria);
-
-        //Then
-        assertFalse(result);
-    }
-
-    @Test
-    public void testisBodyEmptyTrue() {
-        // Given
-        ResponseEntity<String> responseEntity = new ResponseEntity<>("", HttpStatus.OK);
-        String criteria = "artists";
-
-        // When
-        boolean result = RestTempUtil.isBodyEmpty(responseEntity, criteria);
-
-        //Then
-        assertTrue(result);
     }
 
 }

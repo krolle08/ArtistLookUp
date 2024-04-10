@@ -119,7 +119,7 @@ public class SearchArtistService implements DataProcessor<ArtistInfoObj> {
         // Update name if not already set
         if (entity.getName() == null || entity.getName().isEmpty()) {
             entity.setName(newEntity.getName());
-        } else if (!entity.getName().equals(newEntity.getName())) {
+        } else if (!entity.getName().equalsIgnoreCase(newEntity.getName())) {
             throw new RuntimeException("Different names has been received doing the search of: " + searchParam +
                     " and when searching with the following mbid: " + entity.getmBID());
         }

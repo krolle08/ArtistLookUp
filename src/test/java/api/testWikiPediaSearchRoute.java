@@ -2,10 +2,7 @@ package api;
 
 import Application.Application;
 import Application.api.WikipediaSearchRoute;
-import Application.service.Artist.WikiInfoObj;
-import Application.service.Wikipedia.WikiPediaService;
 import Application.utils.RestTempUtil;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Assertions;
@@ -16,7 +13,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.util.AssertionErrors.assertNotNull;
@@ -29,7 +25,7 @@ public class testWikiPediaSearchRoute {
     @Test
     public void testGetUri_Succes() {
         // Given
-        String wikiPediaSearchTerm = RestTempUtil.encodeString("Nirvana (band)");
+        String wikiPediaSearchTerm = RestTempUtil.encodeIfNeeded("Nirvana (band)");
         URI result;
 
         // When
@@ -43,36 +39,13 @@ public class testWikiPediaSearchRoute {
     }
 
     @Test
-    public void testgetUribadInput_Error() {
-        //Given
-        String badInput = "###";
-
-        // When
-
-        // Then
-        assertThrows(IllegalArgumentException.class, () -> wikipediaSearchRoute.getUri(badInput));
-    }
-
-    @Test
-    public void testgetUriEmptyInput_Error() {
-        //Given
-        String emptyInput = "\n";
-
-        // When
-
-        // Then
-        assertThrows(IllegalArgumentException.class, () -> wikipediaSearchRoute.getUri(emptyInput));
-    }
-
-
-    @Test
     public void testDoGetResponse_Success() {
         //Given
-        URI uri = URI.create("https://en.wikipedia.org/w/api.php?action=query&format=json&prop=extracts&exintro=true&redirects=true&titles=Nirvana%20(band)");
+        String searchTerm = "Nirvana (band)";
 
         //When
 
-        ResponseEntity<String> result = wikipediaSearchRoute.doGetResponse(uri);
+        ResponseEntity<String> result = wikipediaSearchRoute.doGetResponse(searchTerm);
 
         //Then
         assertNotNull(result.toString(), "Response entity should not be null");
@@ -102,7 +75,7 @@ public class testWikiPediaSearchRoute {
     @Test
     public void testNegativeResponse_Error() {
         //Given
-        URI uri = URI.create("https://en.wikipedia.org/w/api.php?action=query&format=json&prop=extracts&exintro=true&redirects=true&titles=Nirvana%20(test)");
+        String uri = "Nirvana (test)";
 
         // When
 

@@ -1,7 +1,6 @@
 package service.wikipedia;
 
 import Application.Application;
-import Application.api.WikipediaSearchRoute;
 import Application.service.Artist.WikiInfoObj;
 import Application.service.Wikipedia.WikiPediaService;
 import Application.utils.RestTempUtil;
@@ -10,7 +9,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 
 import java.net.URISyntaxException;
 
@@ -26,7 +24,7 @@ public class testWikiPediaService {
     public void testGetWikiepediaData_Succes(){
         //Given
         String nirvanatitle = "Nirvana (band)";
-        String nirvanaURLQuery = RestTempUtil.encodeString(nirvanatitle);
+        String nirvanaURLQuery = RestTempUtil.encodeIfNeeded(nirvanatitle);
         WikiInfoObj wikiInfoObj = new WikiInfoObj(null, nirvanaURLQuery);
 
         //When
@@ -46,7 +44,7 @@ public class testWikiPediaService {
     public void testGetWikiepediaData_NoResponse(){
         //Given
         String nirvanatitle = "NO Response Given";
-        String nirvanaURLQuery = RestTempUtil.encodeString(nirvanatitle);
+        String nirvanaURLQuery = RestTempUtil.encodeIfNeeded(nirvanatitle);
         WikiInfoObj wikiInfoObj = new WikiInfoObj(null, nirvanaURLQuery);
 
         //When

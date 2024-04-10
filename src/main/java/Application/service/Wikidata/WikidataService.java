@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Optional;
 
@@ -43,6 +42,6 @@ public class WikidataService {
             logger.info("No word for searching on wikipedia was found in the wikidata response for:" + wikiInfoObj.getWikidataSearchTerm());
             return;
         }
-        wikiInfoObj.setWikipediaSearchTerm(RestTempUtil.encodeString(wikipediaSearchTerm));
+        wikiInfoObj.setWikipediaSearchTerm(RestTempUtil.encodeIfNeeded(wikipediaSearchTerm));
     }
 }

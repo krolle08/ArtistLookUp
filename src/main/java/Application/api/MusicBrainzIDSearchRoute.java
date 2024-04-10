@@ -1,11 +1,15 @@
 package Application.api;
 
 import Application.utils.RestTempUtil;
+import Application.utils.RestTemplateConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.annotation.PostConstruct;
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -16,21 +20,48 @@ import java.net.URISyntaxException;
  */
 @RestController
 public class MusicBrainzIDSearchRoute {
+
     private static final Logger logger = LoggerFactory.getLogger(MusicBrainzIDSearchRoute.class.getName());
-    private final String protocol = "http";
-    private final String schemeDelimiter = "://";
-    private final String host = "musicbrainz.org";
-    private final Integer port = 80;
-    private final String pathPrefix = "/ws";
-    private final String version = "/2";
-    private final String queryTypeArtist = "/artist/";
-    private static final String pathPostFix = "?fmt=json&inc=url-rels+release-groups";
+    @Value("${musicBrainz.protocol}")
+    private String protocol;
+
+    @Value("${musicBrainz.host}")
+    private String host;
+
+    @Value("${musicBrainz.pathPrefix}")
+    private String pathPrefix;
+
+    @Value("${musicBrainz.version}")
+    private String version;
+
+    @Value("${musicBrainz.queryTypeArtist}")
+    private String queryTypeArtist;
+
+    @Value("${musicBrainz.pathPostFix}")
+    private String pathPostFix;
+    private RestTemplateConfig config;
+
+    @PostConstruct
+    public void init() {
+        config = new RestTemplateConfig(protocol, host, null, pathPostFix, version,
+                queryTypeArtist, pathPrefix, null);
+        // Initialize any properties or perform setup logic here
+        logger.info("Initialized MusicBrainzIDSearchRoute with properties: " +
+                        "protocol={}, host={}, pathPrefix={}, version={}, queryTypeArtist={}",
+                protocol, host, pathPrefix, version, queryTypeArtist);
+    }
+
+    @ResponseBody
+    public ResponseEntity<String> doGetResponse(String searchTerm) {
+        URI uri = getUri(searchTerm);
+        ResponseEntity<String> response = RestTempUtil.getResponse(uri);
+        return response;
+    }
 
     public URI getUri(String searchTerm) {
         URI uri;
         try {
-            uri = new URI(RestTempUtil.constructUri(searchTerm, queryTypeArtist, protocol, schemeDelimiter, host,
-                    port, pathPrefix, version, pathPostFix).toString());
+            uri = new URI(RestTempUtil.constructUri(searchTerm, config).toString());
         } catch (URISyntaxException e) {
             logger.error("Error constructing URI with mbid: " + searchTerm +
                     " " + e.getMessage());
@@ -39,9 +70,7 @@ public class MusicBrainzIDSearchRoute {
         return uri;
     }
 
-    public ResponseEntity<String> doGetResponse(String searchTerm) {
-        URI uri = getUri(searchTerm);
-        ResponseEntity<String> response = RestTempUtil.getResponse(uri, host, port);
-        return response;
+    public RestTemplateConfig getRestConfig(){
+        return config;
     }
 }

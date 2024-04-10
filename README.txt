@@ -36,22 +36,22 @@ These additional references should also help you:
 To start the program follow this guide:
 
 1.      Make sure Git is installed on your pc, if not download here: https://git-scm.com/
-2.      Open your preferred software e.g. IntelliJ and if you want to clone the project ensure that the git extension is
+2.      Open your preferred IDE and if you want to clone the project ensure that the git extension is
         installed.
-2.1     If project is on pc: Go to file and Select "Open" or "Open as project", locate the project and open the build.gradle
-2.2     If cloning: Open the git extension and import the project, when prompt for security concerns press "Yes, Trust the authors"
+2.1     If repository is on pc: Go to file and Select "Open" or "Open as project", locate the project and open the build.gradle
+2.2     If cloning: Open the git extension and import the project using the URL found on github
 3.      Go to extension and install gradle and gradle extension. Depending on your settings, may the "Extension Pack for
         Java", "Maven" and "Maven extension" extensions be needed.
-3.1     Install Java if not installed, https://www.oracle.com/java/technologies/downloads/.
+3.1     Install Java, if not installed go here: https://www.oracle.com/java/technologies/downloads/.
 3.2     Install gradle (recommended min. 7.6.4), https://gradle.org/install/
 3.3     Add JAVA_HOME and GRADLE_HOME to the system variables, same goes for PATH
 3.3     Install gradle extension
-3.4     Update the project structure and settings to use gradle and java sdk.
+3.4     Update the project structure and settings to use the installed gradle, java and set language level to 11
 
-3.4.1   Project Structure -> Language level 8 (Lampdas, type annotations etc.)
-3.4.2   Project Structure -> Project Settings -> Project -> SDK: Set to the desired java sdk
+3.4.1   Project Structure -> Language level 11
+3.4.2   Project Structure -> Project Settings -> Project -> SDK: Set the desired java sdk
 3.4.3   Goto File | Settings | Build, Execution, Deployment | Build Tools | Gradle
-3.4.4   Go to Grade Projects section and change make sure that 'Download external annotations and dependencies' is
+3.4.4   Go to Gradle Projects section and change make sure that 'Download external annotations and dependencies' is
         ticked on, 'Set Build and run using:' to Gradle (default) and 'Run Tests using:' to Gradle (default), Set
         'Distribution' to Wrapper and 'Gradle JVM' to 1.8
 3.4.5   Go to File | Settings | Build, Execution, Deployment | Compiler | Java Compiler: Set 'Use compiler' to Javac and
