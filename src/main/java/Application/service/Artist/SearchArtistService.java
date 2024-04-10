@@ -9,6 +9,7 @@ import Application.service.MusicEntityObj;
 import Application.service.Wikidata.WikidataService;
 import Application.service.Wikipedia.WikiPediaService;
 import Application.utils.TypeOfSearchEnum;
+import Application.utils.UserInputUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

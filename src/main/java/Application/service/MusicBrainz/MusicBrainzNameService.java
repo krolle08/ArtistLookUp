@@ -5,6 +5,7 @@ import Application.service.Artist.ArtistInfoObj;
 import Application.service.InvalidArtistException;
 import Application.utils.RestTempUtil;
 import Application.utils.TypeOfSearchEnum;
+import Application.utils.UserInputUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -41,24 +42,28 @@ public class MusicBrainzNameService {
         ObjectMapper mapper = new ObjectMapper();
         try {
             JsonNode rootNode = mapper.readTree(responseEntity.getBody().toString());
-            String artistName = "";
-
             Iterator<JsonNode> annotationIterator = rootNode.path("annotations").elements();
             boolean foundUUID = false; // Flag to track if UUID is found
-
+            String text = "";
+            String mbid = "";
             while (annotationIterator.hasNext() && !foundUUID) {
                 JsonNode annotation = annotationIterator.next();
-                if (annotation.path("type").asText().equals("artist")) {
-                    String text = annotation.get("text").asText();
+                boolean isNodeArtist = annotation.path("type").asText().equals("artist");
+                if (isNodeArtist && annotation.path("name").asText().equals(UserInputUtil.sanitizeInput(searchParam))) {
+                    mbid = annotation.path("entity").asText();
+                    foundUUID = true;
+                } else if (isNodeArtist) {
+                    text = annotation.get("text").asText();
                     String uuid = extractUUIDForTerm(text, searchParam);
-                    if(uuid != null){
-                        artistInfoObj.setmBID(uuid);
-                        artistInfoObj.setName(searchParam);
-                        artistInfoObj.setmBStatusCode(responseEntity.getStatusCodeValue());
+                    if (uuid != null) {
+                        mbid = uuid;
                         foundUUID = true;
                     }
                 }
             }
+            artistInfoObj.setmBID(mbid);
+            artistInfoObj.setName(searchParam);
+            artistInfoObj.setmBStatusCode(responseEntity.getStatusCodeValue());
             return artistInfoObj;
         } catch (JsonProcessingException e) {
             logger.warn("A problem occurred mapping the response: " + e.getMessage());

@@ -2,6 +2,7 @@ package Application.utils;
 
 import Application.service.Artist.AlbumInfoObj;
 import Application.features.GetDataImpl;
+import Application.service.InvalidSearchRequestException;
 import Application.service.MusicEntityObj;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -17,7 +18,12 @@ public class Json {
 
     private static final Log log = LogFactory.getLog(GetDataImpl.class);
     private static final ObjectMapper mapper = new ObjectMapper();
-    public static String createJsonResponse(MusicEntityObj entity) {
+    public static String createJsonResponse(MusicEntityObj entity) throws InvalidSearchRequestException {
+        if(entity.getArtistInfoObj().getmBID() == null || entity.getArtistInfoObj().getmBID().isEmpty()){
+            throw new InvalidSearchRequestException("No information found on: " +
+                    entity.getArtistInfoObj().getName());
+        }
+
         // Format the dataContainer data as JSON
         mapper.enable(SerializationFeature.INDENT_OUTPUT);
         ObjectNode rootNode = mapper.createObjectNode();

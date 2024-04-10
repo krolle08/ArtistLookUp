@@ -26,7 +26,12 @@ public class testJsonUtil {
         String expectedJson = getExpectedOutput();
 
         // When
-        String actualJson = Json.createJsonResponse(entity);
+        String actualJson = null;
+        try {
+            actualJson = Json.createJsonResponse(entity);
+        } catch (InvalidSearchRequestException e) {
+            throw new RuntimeException(e);
+        }
 
         // Parse JSON strings into JSON objects'
         com.google.gson.JsonObject actualObject = JsonParser.parseString(actualJson).getAsJsonObject();

@@ -34,8 +34,8 @@ public class UserInputUtil {
                 logger.info("Empty and/or the provided search value is not possible: " + searchValue);
                 throw new InvalidSearchRequestException("Empty and/or the provided search value is not possible: " + searchValue);
             } else {
-               // String sanitizedValue = sanitizeInput(searchValue);
-               // searchRequest.entrySet().iterator().next().setValue(sanitizedValue);
+                String sanitizedValue = sanitizeInput(searchValue);
+                searchRequest.entrySet().iterator().next().setValue(sanitizedValue);
                 return;
             }
         }
@@ -43,7 +43,7 @@ public class UserInputUtil {
         throw new InvalidSearchRequestException("SearchType is not available: " + searchType);
     }
 
-    private static String sanitizeInput(String input) {
+    public static String sanitizeInput(String input) {
         // Replace underscores with empty strings if not followed by another underscore or whitespace
         // Replace other special characters with whitespace surrounding them
         return input.replaceAll("[^a-zA-Z0-9&_\\s-]", " ")

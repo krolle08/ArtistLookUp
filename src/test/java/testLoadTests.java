@@ -13,7 +13,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -36,10 +38,11 @@ public class testLoadTests {
 
     @Test
     public void testLoadScenario() throws Exception {
-        int numUsers = 1;
+        int numUsers = 10;
         HttpClient httpClient = HttpClients.createDefault();
         ExecutorService executor = Executors.newFixedThreadPool(numUsers);
 
+        List<String> responses = new ArrayList<>();
         // Define the base URL of your application
         String baseUrl = "http://localhost:" + testConfig.getPortNumber(); // Use port from configuration
 
@@ -61,7 +64,7 @@ public class testLoadTests {
                        HttpResponse response = httpClient.execute(request);
 
                     // Consume the response entity
-                         String responseBody = EntityUtils.toString(response.getEntity());
+                    responses.add(EntityUtils.toString(response.getEntity()));
 
                     // Optionally, you can log or assert the response if needed
 

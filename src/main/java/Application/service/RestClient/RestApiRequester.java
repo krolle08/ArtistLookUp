@@ -77,7 +77,7 @@ public class RestApiRequester {
     }
 
     @GetMapping("/area/{id}")
-    public ResponseEntity<String> getAreaRequest(@PathVariable String id) {
+    public ResponseEntity<String> getAreaRequest(@PathVariable String id) throws InvalidSearchRequestException {
         Map<String, String> searchParam = new HashMap<>();
         searchParam.put(TypeOfSearchEnum.AREA.getSearchType(), id);
         MusicEntityObj entity = searchAreaService.getData(searchParam);
