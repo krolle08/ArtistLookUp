@@ -42,17 +42,17 @@ public class MusicBrainzNameService {
         ObjectMapper mapper = new ObjectMapper();
         try {
             JsonNode rootNode = mapper.readTree(responseEntity.getBody().toString());
-            Iterator<JsonNode> annotationIterator = rootNode.path("annotations").elements();
+            Iterator<JsonNode> annotationIterator = rootNode.path("artists").elements();
             boolean foundUUID = false; // Flag to track if UUID is found
             String text = "";
             String mbid = "";
             while (annotationIterator.hasNext() && !foundUUID) {
                 JsonNode annotation = annotationIterator.next();
-                boolean isNodeArtist = annotation.path("type").asText().equals("artist");
-                if (isNodeArtist && annotation.path("name").asText().equals(UserInputUtil.sanitizeInput(searchParam))) {
-                    mbid = annotation.path("entity").asText();
+                boolean isNamePresent = annotation.path("name").asText().equalsIgnoreCase(UserInputUtil.sanitizeInput(searchParam));
+                if (isNamePresent && (annotation.path("type").asText().equals("Group") || annotation.path("type").asText().equals("Person"))) {
+                    mbid = annotation.path("id").asText();
                     foundUUID = true;
-                } else if (isNodeArtist) {
+                } else if (isNamePresent) {
                     text = annotation.get("text").asText();
                     String uuid = extractUUIDForTerm(text, searchParam);
                     if (uuid != null) {

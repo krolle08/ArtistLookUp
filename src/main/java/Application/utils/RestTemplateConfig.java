@@ -10,9 +10,10 @@ public class RestTemplateConfig {
     private String json;
     private String postPreFix;
     private String queryTypeArtist;
+    private String inc;
 
     public RestTemplateConfig(String protocol, String host, String port, String pathPostFix, String version,
-                              String queryTypeArtist, String pathPrefix, String json) {
+                              String queryTypeArtist, String pathPrefix, String json, String inc) {
         this.protocol = protocol;
         this.host = host;
         this.port = port;
@@ -21,6 +22,11 @@ public class RestTemplateConfig {
         this.queryTypeArtist = queryTypeArtist;
         this.pathPrefix = pathPrefix;
         this.json = json;
+        this.inc = inc;
+    }
+
+    public String getInc() {
+        return inc;
     }
 
     public RestTemplateConfig() {

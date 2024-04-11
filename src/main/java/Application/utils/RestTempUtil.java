@@ -1,8 +1,5 @@
 package Application.utils;
 
-import Application.service.Artist.AlbumInfoObj;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -17,28 +14,36 @@ public class RestTempUtil {
     private static final Logger logger = LoggerFactory.getLogger(RestTempUtil.class.getName());
 
 
-    public static URI constructUri(String id,RestTemplateConfig config) {
+    public static URI getMBIdUriconstructor(String id, RestTemplateConfig config) {
         StringBuilder uriBuilder = new StringBuilder()
                 .append(config.getProtocol()).append("://")
                 .append(config.getHost())
                 .append(config.getPathPrefix())
                 .append(config.getVersion())
                 .append(config.getQueryTypeArtist() != null ? config.getQueryTypeArtist() : "")
-                .append(id)
-                .append(config.getPathPostFix());
+                .append(id);
 
+        if (config.getJson() != null) {
+            uriBuilder.append("?fmt=").append(config.getJson());
+        }
+        if (config.getInc() != null) {
+            uriBuilder.append("&inc=").append(config.getInc());
+        }
+        return URI.create(uriBuilder.toString());
+
+    }
+
+    private void addParamtoURI(StringBuilder uriBuilder, RestTemplateConfig config){
         if (config.getJson() != null) {
             uriBuilder.append("&fmt=").append(config.getJson());
         }
         if (config.getPostPreFix() != null) {
             uriBuilder.append("&inc=").append(config.getPostPreFix());
         }
-        return URI.create(uriBuilder.toString());
-
     }
 
-    public static URI constructUri(Map<String, String> filterParams, String query, RestTemplateConfig config) {
-        String path = config.getPathPrefix() + config.getVersion() + config.getPathPostFix() + query;
+    public static URI getMBNameUriconstructor(Map<String, String> filterParams, RestTemplateConfig config) {
+        String path = config.getPathPrefix() + config.getVersion() + config.getPathPostFix() + config.getQueryTypeArtist();
         StringBuilder uriBuilder = new StringBuilder()
                 .append(config.getProtocol()).append("://")
                 .append(config.getHost()).append(":").append(config.getPort())
@@ -48,15 +53,15 @@ public class RestTempUtil {
                 .append(encodeIfNeeded(value.toLowerCase())));
 
         if (config.getJson() != null) {
-            uriBuilder.append("&").append(config.getJson());
+            uriBuilder.append("&fmt=").append(config.getJson());
         }
-        if (config.getPostPreFix() != null) {
-            uriBuilder.append("&").append(config.getPostPreFix());
+        if (config.getInc() != null) {
+            uriBuilder.append("&inc=").append(config.getInc());
         }
         return URI.create(uriBuilder.toString());
     }
 
-    public static URI constructUriWikiData(String searchTerm, RestTemplateConfig config) {
+    public static URI getWikiDataUriconstructor(String searchTerm, RestTemplateConfig config) {
         StringBuilder uriBuilder = new StringBuilder()
                 .append(config.getProtocol()).append("://")
                 .append(config.getHost());
@@ -69,7 +74,7 @@ public class RestTempUtil {
                 .toUri();
     }
 
-    public static URI constructUriWikiPedia(String searchTerm, RestTemplateConfig config) {
+    public static URI getWikipediaUriconstructor(String searchTerm, RestTemplateConfig config) {
         String searchValue = decodeString(searchTerm);
         String path = config.getPathPrefix() + config.getPathPostFix();
         return UriComponentsBuilder.newInstance()

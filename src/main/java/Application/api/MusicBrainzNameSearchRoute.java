@@ -42,6 +42,8 @@ public class MusicBrainzNameSearchRoute {
 
     @Value("${musicBrainzName.json}")
     private String json;
+    @Value("${musicBrainzName.inc}")
+    private String inc;
 
 
     private RestTemplateConfig config;
@@ -49,7 +51,7 @@ public class MusicBrainzNameSearchRoute {
     @PostConstruct
     public void init() {
         config = new RestTemplateConfig(protocol, host, port, pathPostfix, version,
-                null, pathPrefix, json);
+                query, pathPrefix, json, inc);
         // Initialize any properties or perform setup logic here
         logger.info("Initialized MusicBrainzIDSearchRoute with properties: " +
                         "protocol={}, host={}, port={}, pathPrefix={}, version={}",
@@ -61,7 +63,7 @@ public class MusicBrainzNameSearchRoute {
     public URI getUri(Map<String, String> filterParams) throws IllegalArgumentException {
         URI uri;
         try {
-            uri = new URI(RestTempUtil.constructUri(filterParams, query, config).toString());
+            uri = new URI(RestTempUtil.getMBNameUriconstructor(filterParams, config).toString());
         } catch (URISyntaxException e) {
             logger.error("Error constructing URI with param: " + filterParams.entrySet().iterator().next().getValue() +
                     " " + e.getMessage());
@@ -73,5 +75,9 @@ public class MusicBrainzNameSearchRoute {
         URI uri = getUri(filterParams);
         ResponseEntity<String> responseEntity = RestTempUtil.getResponse(uri);
         return responseEntity;
+    }
+
+    public RestTemplateConfig getRestConfig(){
+        return config;
     }
 }

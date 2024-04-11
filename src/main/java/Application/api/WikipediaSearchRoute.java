@@ -37,7 +37,7 @@ public class WikipediaSearchRoute {
     @PostConstruct
     public void init() {
         config = new RestTemplateConfig(protocol, host, null, api, null,
-                null, pathPrefix, null);
+                null, pathPrefix, null, null);
         // Initialize any properties or perform setup logic here
         logger.info("Initialized MusicBrainzIDSearchRoute with properties: " +
                         "protocol={}, host={}, pathPrefix={}, api={}",
@@ -50,7 +50,7 @@ public class WikipediaSearchRoute {
     }
 
     public URI getUri(String searchTerm) {
-        return RestTempUtil.constructUriWikiPedia(searchTerm, config);
+        return RestTempUtil.getWikipediaUriconstructor(searchTerm, config);
     }
 
 

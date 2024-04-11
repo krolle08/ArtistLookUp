@@ -37,18 +37,20 @@ public class MusicBrainzIDSearchRoute {
     @Value("${musicBrainz.queryTypeArtist}")
     private String queryTypeArtist;
 
-    @Value("${musicBrainz.pathPostFix}")
-    private String pathPostFix;
+    @Value("${musicBrainz.json}")
+    private String json;
+    @Value("${musicBrainz.inc}")
+    private String inc;
     private RestTemplateConfig config;
 
     @PostConstruct
     public void init() {
-        config = new RestTemplateConfig(protocol, host, null, pathPostFix, version,
-                queryTypeArtist, pathPrefix, null);
+        config = new RestTemplateConfig(protocol, host, null, null, version,
+                queryTypeArtist, pathPrefix, json, inc);
         // Initialize any properties or perform setup logic here
         logger.info("Initialized MusicBrainzIDSearchRoute with properties: " +
-                        "protocol={}, host={}, pathPrefix={}, version={}, queryTypeArtist={}",
-                protocol, host, pathPrefix, version, queryTypeArtist);
+                        "protocol={}, host={}, version={}, pathPrefix={},  queryTypeArtist={}",
+                protocol, host, version, pathPrefix , queryTypeArtist);
     }
 
     @ResponseBody
@@ -61,7 +63,7 @@ public class MusicBrainzIDSearchRoute {
     public URI getUri(String searchTerm) {
         URI uri;
         try {
-            uri = new URI(RestTempUtil.constructUri(searchTerm, config).toString());
+            uri = new URI(RestTempUtil.getMBIdUriconstructor(searchTerm, config).toString());
         } catch (URISyntaxException e) {
             logger.error("Error constructing URI with mbid: " + searchTerm +
                     " " + e.getMessage());

@@ -2,6 +2,7 @@ package utils;
 
 import Application.Application;
 import Application.api.MusicBrainzIDSearchRoute;
+import Application.api.MusicBrainzNameSearchRoute;
 import Application.api.WikidataSearchRoute;
 import Application.utils.RestTempUtil;
 import org.junit.jupiter.api.BeforeEach;
@@ -28,6 +29,8 @@ public class testRestTempUtil {
     MusicBrainzIDSearchRoute musicBrainzIDSearchRoute;
     @Autowired
     WikidataSearchRoute wikidataSearchRoute;
+    @Autowired
+    MusicBrainzNameSearchRoute musicBrainzNameSearchRoute;
     @BeforeEach
     public void setup() {
         MockitoAnnotations.openMocks(this); // Initialize mocks
@@ -37,11 +40,23 @@ public class testRestTempUtil {
     @Test
     public void testMusicBrainzIdURIConstructer() {
         // Given
-        URI result;
-        String expectedURI = "http://musicbrainz.org/ws/2/artist/?query=artist:Nirvana&fmt=json&inc=url-rels+release-groups";
+        String expectedURI = "http://musicbrainz.org/ws/2/artist/5b11f4ce-a62d-471e-81fc-a69a8278c7da?fmt=json&inc=url-rels+release-groups";
 
         // When
-        result = RestTempUtil.constructUri("Nirvana", musicBrainzIDSearchRoute.getRestConfig());
+        URI result = RestTempUtil.getMBIdUriconstructor("5b11f4ce-a62d-471e-81fc-a69a8278c7da", musicBrainzIDSearchRoute.getRestConfig());
+
+        //Then
+        assertTrue(result.toString().equalsIgnoreCase(expectedURI));
+    }
+
+    @Test
+    public void testMusicBrainzNameURIConstructer() {
+        // Given
+        URI result;
+        String expectedURI = "http://musicbrainz.org:80/ws/2/annotation/?query=artist:nirvana&fmt=json&inc=url-rels+release-groups";
+
+        // When
+        result = RestTempUtil.getMBNameUriconstructor(filterParams, musicBrainzNameSearchRoute.getRestConfig());
 
         //Then
         assertTrue(result.toString().equals(expectedURI));
@@ -54,7 +69,7 @@ public class testRestTempUtil {
         String expectedURI = "https://wikidata.org/w/api.php?action=wbgetentities&format=json&ids=Q11649&props=sitelinks";
 
         // When
-        result = RestTempUtil.constructUriWikiData(searchTerm, wikidataSearchRoute.getRestConfig());
+        result = RestTempUtil.getWikiDataUriconstructor(searchTerm, wikidataSearchRoute.getRestConfig());
 
         //Then
         assertThat(result.equals(expectedURI));
@@ -64,7 +79,6 @@ public class testRestTempUtil {
     public void testisBodyEmptyFalse() {
         // Given
         ResponseEntity<String> responseEntity = getResponseEntity();
-        String criteria = "artists";
 
         // When
         boolean result = RestTempUtil.isBodyEmpty(responseEntity);
@@ -77,7 +91,6 @@ public class testRestTempUtil {
     public void testisBodyEmptyTrue() {
         // Given
         ResponseEntity<String> responseEntity = new ResponseEntity<>("", HttpStatus.OK);
-        String criteria = "artists";
 
         // When
         boolean result = RestTempUtil.isBodyEmpty(responseEntity);

@@ -40,7 +40,7 @@ public class WikidataSearchRoute {
     @PostConstruct
     public void init() {
         config = new RestTemplateConfig(protocol, host, null, api, null,
-                null, pathPrefix, null);
+                null, pathPrefix, null,null);
         // Initialize any properties or perform setup logic here
         logger.info("Initialized MusicBrainzIDSearchRoute with properties: " +
                         "protocol={}, host={}, pathPrefix={}, api={}",
@@ -55,7 +55,7 @@ public class WikidataSearchRoute {
     }
 
     public URI getUri(String wikidataSearchTerm) {
-        return RestTempUtil.constructUriWikiData(wikidataSearchTerm, config);
+        return RestTempUtil.getWikiDataUriconstructor(wikidataSearchTerm, config);
     }
 
     private static ResponseEntity<String> handleRateLimitations(String url) throws URISyntaxException {
