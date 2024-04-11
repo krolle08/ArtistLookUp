@@ -80,6 +80,18 @@ LANGUAGE:
 Adding a feature allowing multiple language responses would be advisable, because tests has shown that some artist only
 has wikipedia descriptions in specific languages. This service only looks for english descriptions.
 
+TEST:
+Expanding the different scenarios tested to see how internal errors and failed responses from external services are
+handled, can be further developed.
+Furthermore, performance test may be added to evaluate performance under various conditions, response times, throughput,
+and resource utilization and to identify bottlenecks. Also, security test may be relevant depending on the future
+development of the application. Examples: Penetration testing, vulnerability scanning, and injection attacks.
+
+EXCEPTION:
+Existing exception handling may be optimized to handle the various responses and type of request the application takes
+care of. This helps improve errors with more precise description of the issue and where it appeared and occurred, which
+helps to improve the stability of the application.
+
 ADDITIONALLY:
 Existing service calls to MusicBrainz can be updated with inspiration from MusicBrainz own library
 https://musicbrainz.org/doc/MusicBrainz_API#Libraries.
@@ -88,10 +100,5 @@ MyWebServiceImplementation.java and also the unittest required if implementing n
 be inspired from Unittests.java. But be aware that the library is deprecated, and it is therefore advised to test any
 code implemented into the application carefully.
 
-Furthermore, performance test has been added to evaluate the performance of the software under various
-conditions, response times, throughput, and resource utilization, identify bottlenecks, but they are not completed yet.
-Also, security test may be relevant depending on the future development of the application. Examples: Penetration
-testing, vulnerability scanning, and injection attacks. Existing exception handling may be optimized to handle the
-exception and correct the error when it occurs, as of now the whole process restarts.
 
 
