@@ -61,8 +61,9 @@ public class SearchArtistService implements DataProcessor<ArtistInfoObj> {
                         + " as an " + searchParam.entrySet().iterator().next().getKey());
             }
             getWikiAndCoverData(artistInfoObj);
-        } catch (RuntimeException e) {
-            logger.error("Failed creating URI or processing response", e);
+        } catch (IllegalArgumentException e) {
+            e.printStackTrace();
+            logger.warn(e.getMessage());
             return entity;
         }
         entity.setArtistInfoObj(artistInfoObj);

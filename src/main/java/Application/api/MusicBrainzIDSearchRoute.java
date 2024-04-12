@@ -65,9 +65,10 @@ public class MusicBrainzIDSearchRoute {
         try {
             uri = new URI(RestTempUtil.getMBIdUriconstructor(searchTerm, config).toString());
         } catch (URISyntaxException e) {
-            logger.error("Error constructing URI with mbid: " + searchTerm +
+            logger.error("Error constructing URI with Music Brainz id: " + searchTerm +
                     " " + e.getMessage());
-            throw new IllegalArgumentException(e.getMessage());
+            throw new IllegalArgumentException("Error constructing URI with Music Brainz id: " + searchTerm +
+                    " " + e.getMessage());
         }
         return uri;
     }

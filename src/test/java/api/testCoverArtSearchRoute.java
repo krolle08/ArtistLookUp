@@ -53,13 +53,12 @@ public class testCoverArtSearchRoute {
     @Test
     public void testIllegalArgumentExceptionThrownForInvalidUUID() {
         // Given
-        List<AlbumInfoObj> albums = new ArrayList<>();
-        albums.add(new AlbumInfoObj("InvalidUUID", "Incesticide"));
+        String Invallid ="InvalidUUID";
 
         // Create an instance of CoverArtArchiveSearchRoute with the spy logger
         coverArtArchiveSearchRoute.setLogger(logger);
 
         //When Then
-        assertThrows(IllegalArgumentException.class, () -> coverArtArchiveSearchRoute.doGetCoverData("InvalidUUID"));
+        assertThrows(IllegalArgumentException.class, () -> coverArtArchiveSearchRoute.doGetCoverData(Invallid));
     }
 }

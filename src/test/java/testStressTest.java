@@ -14,16 +14,16 @@ import java.util.Properties;
  * Stress test
  * Still under development
  */
-@Disabled("This test is still under development and should not be run automatically")
+@Disabled("This test is still under development and should not run automatically")
 public class testStressTest {
     private static HTTPSamplerProxy createHttpSamplerProxy() {
         HTTPSamplerProxy httpSamplerProxy = new HTTPSamplerProxy();
         httpSamplerProxy.setName("HTTP Request");
-        httpSamplerProxy.setDomain("yourwebsite.com");
-        httpSamplerProxy.setPort(80);
+        httpSamplerProxy.setDomain("localhost");
+        httpSamplerProxy.setPort(8080);
         httpSamplerProxy.setProtocol("http");
         httpSamplerProxy.setMethod("GET");
-        httpSamplerProxy.setPath("/search");
+        httpSamplerProxy.setPath("/artist/nirvana");
         httpSamplerProxy.setFollowRedirects(true);
         httpSamplerProxy.setAutoRedirects(false);
         httpSamplerProxy.setUseKeepAlive(true);
@@ -32,7 +32,7 @@ public class testStressTest {
         return httpSamplerProxy;
     }
 
-    @Disabled("This test is still under development and should not be run automatically")
+    @Disabled("This test is still under development and should not run automatically")
     @Test
     public void stressTest() {
         // Initialize JMeter

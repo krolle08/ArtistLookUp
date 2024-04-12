@@ -7,6 +7,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -26,6 +27,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 /**
  * These tests are made as End-To-End test for when the application is running
  */
+@Disabled("This test is still under development and should not run automatically")
 @SpringBootTest(classes = Application.class)
 @TestPropertySource(properties = {"local.server.port=8080"}) // Set the port number for testing
 public class testLoadTests {

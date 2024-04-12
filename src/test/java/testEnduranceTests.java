@@ -30,7 +30,7 @@ public class testEnduranceTests {
         ReflectionTestUtils.setField(userInputUtil, "scannerWrapper", scannerWrapper);
     }
 
-    @Disabled("This test is still under development and should not be run automatically")
+    @Disabled("This test is still under development and should not run automatically")
     @Test
     public void testLoadScenario() throws InterruptedException {
 

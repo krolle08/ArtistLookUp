@@ -60,11 +60,13 @@ public class RestApiRequester {
           //  return ResponseEntity.ok(Json.createJsonResponse(entity));
         } catch (InvalidSearchRequestException e) {
             e.printStackTrace();
+            logger.warn(e.getMessage());
             HttpHeaders headers = new HttpHeaders();
             headers.add("Reason", "Invalid search value");
             return ResponseEntity.badRequest().headers(headers).body(e.getMessage());
         } catch (InvalidArtistException e) {
             e.printStackTrace();
+            logger.warn(e.getMessage());
             HttpHeaders headers = new HttpHeaders();
             headers.add("Reason", "Invalid artist");
             return ResponseEntity.badRequest().headers(headers).body(e.getMessage());

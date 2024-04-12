@@ -30,6 +30,17 @@ To start the program follow this guide:
 3.4.4   Go to Gradle Projects section and change make sure 'Download external annotations and dependencies' is
         ticked on, 'Set Build and run using:' to Gradle (default) and 'Run Tests using:' to Gradle (default), Set
         'Distribution' to Wrapper and 'Gradle JVM' to JAVA HOME or what you prefer.
+3.4.4.1 If using gradle wrapper, content of gradle-wrapper.properties (version number may differ):
+
+        distributionBase=GRADLE_USER_HOME
+        distributionPath=wrapper/dists
+        distributionUrl=https\://services.gradle.org/distributions/gradle-8.4-bin.zip
+        networkTimeout=10000
+        validateDistributionUrl=true
+        zipStoreBase=GRADLE_USER_HOME
+        zipStorePath=wrapper/dists
+
+
 3.4.5   Go to File | Settings | Build, Execution, Deployment | Compiler | Java Compiler: Set 'Use compiler' to Javac and
         set 'Project bytecode version' to 8
 4.      Restart the program.
@@ -45,8 +56,18 @@ To start the program follow this guide:
         top right corner in IntelliJ), and start the application, or else navigate to the main class Application and
         execute the main method.
 
+Tip:
+
+1. If having issues starting the application check your java and gradle settings, and change "INFO" to "DEBUG" for the
+following two properties in the application.properties file:
+
+logging.level.org.springframework=INFO
+logging.level.org.springframework.boot=INFO
+
+2. If you want to use spring boots own logging, you can delete the file or the content of logback-spring.xml
+
 Changes involving libraries, dependencies, build.gradle, imports, external features, methods, class and fields
-requires a repeat of step 5.1 - 7.
+requires a repeat of step 6 - 7.
 
 
 ###Future Improvements
