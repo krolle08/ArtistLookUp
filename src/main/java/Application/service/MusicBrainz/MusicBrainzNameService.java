@@ -49,10 +49,10 @@ public class MusicBrainzNameService {
             while (annotationIterator.hasNext() && !foundUUID) {
                 JsonNode annotation = annotationIterator.next();
                 boolean isNamePresent = annotation.path("name").asText().equalsIgnoreCase(UserInputUtil.sanitizeInput(searchParam));
-                if (isNamePresent && (annotation.path("type").asText().equals("Group") || annotation.path("type").asText().equals("Person"))) {
+                if (isNamePresent && annotation.path("type").asText().equals("artist")) {
                     mbid = annotation.path("id").asText();
                     foundUUID = true;
-                } else if (isNamePresent) {
+                } else if (annotation.path("type").asText().equals("artist")) {
                     text = annotation.get("text").asText();
                     String uuid = extractUUIDForTerm(text, searchParam);
                     if (uuid != null) {
@@ -73,23 +73,15 @@ public class MusicBrainzNameService {
     }
 
     public static String extractUUIDForTerm(String text, String searchTerm) {
-        String regex = "\\[http://musicbrainz.org/artist/([a-fA-F0-9\\-]+)\\.html\\|" + Pattern.quote(searchTerm) + "]";
+        String regex = "\\[artist:([a-fA-F0-9\\-]+)\\|" + Pattern.quote(searchTerm) + "]";
         Pattern pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
         Matcher matcher = pattern.matcher(text);
         if (matcher.find()) {
-            return matcher.group(1);
+            // Check if the match contains both UUID and search term
+            if (matcher.group(1) != null && matcher.group(1).length() > 0) {
+                return matcher.group(1);
+            }
         }
         return null;
-    }
-
-    public static String extractUUID(String text) {
-        String regex = "\\[artist:([a-fA-F0-9\\-]+)\\|.*\\]";
-        Pattern pattern = Pattern.compile(regex);
-        Matcher matcher = pattern.matcher(text);
-        if (matcher.find()) {
-            return matcher.group(1);
-        } else {
-            return null;
-        }
     }
 }
