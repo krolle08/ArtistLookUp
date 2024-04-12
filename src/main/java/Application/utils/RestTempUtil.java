@@ -9,6 +9,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
+import java.util.UUID;
 
 public class RestTempUtil {
     private static final Logger logger = LoggerFactory.getLogger(RestTempUtil.class.getName());
@@ -33,12 +34,15 @@ public class RestTempUtil {
 
     }
 
-    private void addParamtoURI(StringBuilder uriBuilder, RestTemplateConfig config){
-        if (config.getJson() != null) {
-            uriBuilder.append("&fmt=").append(config.getJson());
-        }
-        if (config.getPostPreFix() != null) {
-            uriBuilder.append("&inc=").append(config.getPostPreFix());
+    public static boolean isValidUUID(String id) {
+        try {
+            // Attempt to parse the ID as a UUID
+            UUID.fromString(id);
+            return true; // Parsing succeeded, so it's a valid UUID
+        } catch (IllegalArgumentException e) {
+            e.printStackTrace();
+            // Parsing failed, so it's not a valid UUID
+            return false;
         }
     }
 

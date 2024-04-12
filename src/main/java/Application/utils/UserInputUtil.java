@@ -23,6 +23,7 @@ public class UserInputUtil {
     public UserInputUtil(ScannerWrapper scannerWrapper) {
         this.scannerWrapper = scannerWrapper;
     }
+
     public static void IsSearchRequestAllowed(Map<String, String> searchRequest) throws InvalidSearchRequestException {
         Map<String, String> searchTypes = SearchTypeUtil.getInputTypes();
         String searchType = searchRequest.entrySet().iterator().next().getKey();
@@ -34,6 +35,9 @@ public class UserInputUtil {
                 logger.info("Empty and/or the provided search value is not possible: " + searchValue);
                 throw new InvalidSearchRequestException("Empty and/or the provided search value is not possible: " + searchValue);
             } else {
+                if (RestTempUtil.isValidUUID(searchValue)) {
+                    return;
+                }
                 String sanitizedValue = sanitizeInput(searchValue);
                 searchRequest.entrySet().iterator().next().setValue(sanitizedValue);
                 return;

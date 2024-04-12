@@ -8,6 +8,7 @@ import Application.service.MusicBrainz.MusicBrainzNameService;
 import Application.service.MusicEntityObj;
 import Application.service.Wikidata.WikidataService;
 import Application.service.Wikipedia.WikiPediaService;
+import Application.utils.RestTempUtil;
 import Application.utils.TypeOfSearchEnum;
 import Application.utils.UserInputUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -73,7 +74,7 @@ public class SearchArtistService implements DataProcessor<ArtistInfoObj> {
     private ArtistInfoObj getMusicBrainzData(Map<String, String> searchParam) throws InvalidArtistException {
         String searchValue = searchParam.entrySet().iterator().next().getValue();
         ArtistInfoObj entity;
-        if (isValidUUID(searchValue)) {
+        if (RestTempUtil.isValidUUID(searchValue)) {
             entity = musicBrainzIdService.getMBData(searchValue);
             return entity;
         } else {
@@ -88,19 +89,10 @@ public class SearchArtistService implements DataProcessor<ArtistInfoObj> {
         return entity;
     }
 
-    private boolean isValidUUID(String id) {
-        try {
-            // Attempt to parse the ID as a UUID
-            UUID.fromString(id);
-            return true; // Parsing succeeded, so it's a valid UUID
-        } catch (IllegalArgumentException e) {
-            // Parsing failed, so it's not a valid UUID
-            return false;
-        }
-    }
+
 
     private boolean IsMBIdPresent(ArtistInfoObj entity) {
-        return entity == null || entity.getmBID() != null && !entity.getmBID().isEmpty() && isValidUUID(entity.getmBID());
+        return entity == null || entity.getmBID() != null && !entity.getmBID().isEmpty() && RestTempUtil.isValidUUID(entity.getmBID());
     }
 
     private void updateEntity(ArtistInfoObj entity, ArtistInfoObj newEntity, String searchParam) {

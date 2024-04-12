@@ -42,7 +42,7 @@ public class MusicBrainzNameService {
         ObjectMapper mapper = new ObjectMapper();
         try {
             JsonNode rootNode = mapper.readTree(responseEntity.getBody().toString());
-            Iterator<JsonNode> annotationIterator = rootNode.path("artists").elements();
+            Iterator<JsonNode> annotationIterator = rootNode.path("annotations").elements();
             boolean foundUUID = false; // Flag to track if UUID is found
             String text = "";
             String mbid = "";
