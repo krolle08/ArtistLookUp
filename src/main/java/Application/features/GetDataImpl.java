@@ -3,11 +3,9 @@ package Application.features;
 import Application.service.Area.SearchAreaService;
 import Application.service.Artist.SearchArtistService;
 import Application.service.DataController;
-import Application.service.InvalidArtistException;
+import Application.utils.LoggingUtility;
 import Application.utils.TypeOfSearchEnum;
 import Application.utils.UserInputUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -19,7 +17,6 @@ import java.util.Map;
  */
 @Component
 public class GetDataImpl implements DataController {
-    private static final Logger logger = LoggerFactory.getLogger(GetDataImpl.class);
     private static final int MAX_RETRIES = 3;
     private static final long RETRY_DELAY_MS = 1000; // 1 second delay between retries
     private final SearchArtistService searchArtistService;
@@ -46,7 +43,7 @@ public class GetDataImpl implements DataController {
         while (retryCount < MAX_RETRIES) {
             try {
                 if (searchParam.isEmpty()) {
-                    logger.warn("No search parameters were available. Please try again.");
+                    LoggingUtility.warn("No search parameters were available. Please try again.");
                     retryCount++;
                     continue;
                 }
@@ -60,17 +57,17 @@ public class GetDataImpl implements DataController {
                         searchArtistService.getData(searchParam);
                         break;
                     default:
-                        logger.warn("Unsupported type of search: {}", typeOfSearch);
+                        LoggingUtility.warn("Unsupported type of search: {}", typeOfSearch);
                         break;
                 }
                 return;
-            } catch (RuntimeException | InvalidArtistException e) {
-                logger.error("An error occurred: {}, while searching for artist: " + searchParam
-                        .get(TypeOfSearchEnum.ARTIST.getSearchType()),e.getMessage());
+            } catch (RuntimeException e) {
+                LoggingUtility.error("An error occurred: {}, while searching for artist: " + searchParam
+                        .get(TypeOfSearchEnum.ARTIST.getSearchType()), e.getMessage());
                 e.printStackTrace();
                 retryCount++;
                 if (retryCount < MAX_RETRIES) {
-                    logger.info("Retrying...");
+                    LoggingUtility.info("Retrying...");
                     try {
                         Thread.sleep(RETRY_DELAY_MS); // Introduce delay before retry
                     } catch (InterruptedException ex) {
@@ -79,7 +76,7 @@ public class GetDataImpl implements DataController {
                 }
             }
         }
-        logger.warn("Operation failed after {} retries.", MAX_RETRIES);
+        LoggingUtility.warn("Operation failed after {} retries.", MAX_RETRIES);
     }
 }
 

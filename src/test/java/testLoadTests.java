@@ -1,7 +1,5 @@
 import Application.Application;
 import Application.service.Artist.SearchArtistService;
-import Application.utils.TestConfig;
-import Application.utils.TypeOfSearchEnum;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
@@ -15,9 +13,7 @@ import org.springframework.test.context.TestPropertySource;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -33,10 +29,9 @@ import static org.junit.jupiter.api.Assertions.fail;
 public class testLoadTests {
 
     @Autowired
-    TestConfig testConfig;
-
-    @Autowired
     SearchArtistService searchArtistService;
+
+    private String port = "8080";
 
     @Test
     public void testLoadScenario() throws Exception {
@@ -45,13 +40,13 @@ public class testLoadTests {
         ExecutorService executor = Executors.newFixedThreadPool(numUsers);
 
         List<String> responses = new ArrayList<>();
-        // Define the base URL of your application
-        String baseUrl = "http://localhost:" + testConfig.getPortNumber(); // Use port from configuration
+        // Define the base URL of the application
+        String baseUrl = "http://localhost:" + port;
 
         // Define the endpoint URL
-        String endpoint = "/artist/Nik&Jay"; // Change this to the desired artist ID
+        String endpoint = "/artist/Nirvana";
 
-        // Create an HttpClient instance
+        // HttpClient instance
 
         for (int i = 0; i < numUsers; i++) {
             executor.submit(() -> {
@@ -67,8 +62,6 @@ public class testLoadTests {
 
                     // Consume the response entity
                     responses.add(EntityUtils.toString(response.getEntity()));
-
-                    // Optionally, you can log or assert the response if needed
 
                     // Ensure the response is fully consumed to release the connection
                     EntityUtils.consume(response.getEntity());

@@ -13,6 +13,7 @@ public class ArtistInfoObj {
     private List<AlbumInfoObj> albums = new ArrayList<>();
 
     public ArtistInfoObj() {
+        this.iD = UUID.randomUUID().toString();
     }
 
     public ArtistInfoObj(String name, String mBid, WikiInfoObj wikiInfoObj, List<AlbumInfoObj> albums) {
@@ -76,10 +77,7 @@ public class ArtistInfoObj {
     }
 
     public boolean isEmpty() {
-        return
-                (name == null || name.isEmpty()) &&
-                        (mBID == null || mBID.isEmpty()) &&
-                        wikiInfoObj == null &&
-                        (albums == null || albums.isEmpty());
+        return (mBID == null || mBID.isEmpty()) ||
+                (wikiInfoObj.getWikidataSearchTerm() == null || wikiInfoObj.getWikidataSearchTerm().isEmpty());
     }
 }

@@ -2,7 +2,9 @@ package Application.service.UserInput;
 
 import java.util.HashMap;
 import java.util.Map;
-
+/**
+ * Handling terminal userinput events. Not implemented yet.
+ */
 public class UserInputEvent {
     private boolean restartSearch;
     private Map<String, String> searchParam = new HashMap<>();

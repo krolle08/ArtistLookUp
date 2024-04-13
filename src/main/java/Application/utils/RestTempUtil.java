@@ -1,7 +1,5 @@
 package Application.utils;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -9,11 +7,9 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
-import java.util.UUID;
+import java.util.regex.Pattern;
 
 public class RestTempUtil {
-    private static final Logger logger = LoggerFactory.getLogger(RestTempUtil.class.getName());
-
 
     public static URI getMBIdUriconstructor(String id, RestTemplateConfig config) {
         StringBuilder uriBuilder = new StringBuilder()
@@ -35,15 +31,10 @@ public class RestTempUtil {
     }
 
     public static boolean isValidUUID(String id) {
-        try {
-            // Attempt to parse the ID as a UUID
-            UUID.fromString(id);
-            return true; // Parsing succeeded, so it's a valid UUID
-        } catch (IllegalArgumentException e) {
-            e.printStackTrace();
-            // Parsing failed, so it's not a valid UUID
-            return false;
-        }
+        // Regular expression for UUID format
+        String uuidPattern = "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$";
+        // Check if the ID matches the UUID pattern
+        return Pattern.matches(uuidPattern, id);
     }
 
     public static URI getMBNameUriconstructor(Map<String, String> filterParams, RestTemplateConfig config) {
@@ -121,7 +112,7 @@ public class RestTempUtil {
                     .replaceAll("\\%28", "(")
                     .replaceAll("\\%29", ")");
         } catch (Exception e) {
-            logger.warn("Error encoding input: " + input);
+            LoggingUtility.warn("Error encoding input: " + input);
             throw new RuntimeException(e);
         }
     }
@@ -133,7 +124,7 @@ public class RestTempUtil {
         try {
             return java.net.URLDecoder.decode(input, StandardCharsets.UTF_8.name());
         } catch (Exception e) {
-            logger.warn("Error decoding input: " + input);
+            LoggingUtility.warn("Error decoding input: " + input);
             throw new RuntimeException(e);
         }
     }

@@ -2,10 +2,6 @@ package api;
 
 import Application.Application;
 import Application.api.WikidataSearchRoute;
-import Application.service.Artist.WikiInfoObj;
-import Application.service.Wikidata.WikidataService;
-import Application.utils.RestTempUtil;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.JsonObject;
@@ -19,13 +15,8 @@ import org.springframework.http.ResponseEntity;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.skyscreamer.jsonassert.JSONAssert.assertEquals;
 import static org.springframework.test.util.AssertionErrors.assertNotNull;
 
 @SpringBootTest(classes = Application.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -45,12 +36,7 @@ public class testWikiDataSearchRoute {
 
         // When
         ResponseEntity<String> result = null;
-        try {
-            result = wikidataSearchRoute.handleResponse(responseEntity, apiUrl);
-        } catch (URISyntaxException e) {
-            System.out.println("Should not have thrown an exception");
-            fail();
-        }
+        result = wikidataSearchRoute.handleResponse(responseEntity, apiUrl);
         JsonObject jsonObject = JsonParser.parseString(result.getBody()).getAsJsonObject();
 
         // Then
@@ -87,12 +73,7 @@ public class testWikiDataSearchRoute {
 
         // When
         ResponseEntity<String> result = null;
-        try {
-            result = wikidataSearchRoute.doGetResponse(wikidataSearchTerm);
-        } catch (URISyntaxException e) {
-            System.out.println("Should not have thrown an exception");
-            fail();
-        }
+        result = wikidataSearchRoute.doGetResponse(wikidataSearchTerm);
 
         // Then
         assertFalse(result.getBody().isEmpty());

@@ -27,11 +27,6 @@ public enum TypeOfSearchEnum {
     }
 
     public static TypeOfSearchEnum convertToEnum(String type) {
-        try {
-            return TypeOfSearchEnum.valueOf(type.toUpperCase()); // Assuming the input string is in uppercase
-        } catch (IllegalArgumentException e) {
-            e.printStackTrace();
-            throw new IllegalArgumentException("Invalid search type");
-        }
+            return TypeOfSearchEnum.valueOf(type.toUpperCase());
     }
 }

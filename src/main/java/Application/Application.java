@@ -1,5 +1,6 @@
 package Application;
 
+import Application.utils.LoggingUtility;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -14,14 +15,12 @@ import java.util.Arrays;
 
 /**
  * The main class of the application, serving as the entry point.
- * This class initializes the Spring application context, runs the search engine,
- * and handles any exceptions that may occur during execution.
+ * This class initializes the Spring application context.
  */
 
 @EnableAsync
 @SpringBootApplication
 public class Application {
-    private static final Logger logger = LoggerFactory.getLogger(Application.class.getName());
     @Autowired
     private Environment env;
 
@@ -36,6 +35,6 @@ public class Application {
     @PostConstruct
     public void init() {
         String activeProfiles = Arrays.toString(env.getActiveProfiles());
-        logger.info("Active profiles: " + activeProfiles);
+        LoggingUtility.info("Active profiles: " + activeProfiles);
     }
 }

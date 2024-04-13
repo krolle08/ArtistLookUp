@@ -1,8 +1,5 @@
 package Application.utils;
 
-import Application.service.InvalidSearchRequestException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -13,7 +10,6 @@ import java.util.regex.Pattern;
 
 @Component
 public class UserInputUtil {
-    private static final Logger logger = LoggerFactory.getLogger(UserInputUtil.class);
     private static final int MAX_TYPING_ERRORS = 10;
     private static final String YES_OPTION = "Yes";
     private static final String NO_OPTION = "No";
@@ -24,7 +20,7 @@ public class UserInputUtil {
         this.scannerWrapper = scannerWrapper;
     }
 
-    public static void IsSearchRequestAllowed(Map<String, String> searchRequest) throws InvalidSearchRequestException {
+    public static boolean IsSearchRequestAllowed(Map<String, String> searchRequest) {
         Map<String, String> searchTypes = SearchTypeUtil.getInputTypes();
         String searchType = searchRequest.entrySet().iterator().next().getKey();
 
@@ -32,19 +28,17 @@ public class UserInputUtil {
         if (searchTypes.containsValue(searchType)) {
             String searchValue = searchRequest.entrySet().iterator().next().getValue();
             if (searchValue.isEmpty() || !containsAlphanumeric(searchValue)) {
-                logger.info("Empty and/or the provided search value is not possible: " + searchValue);
-                throw new InvalidSearchRequestException("Empty and/or the provided search value is not possible: " + searchValue);
             } else {
                 if (RestTempUtil.isValidUUID(searchValue)) {
-                    return;
+                    return true;
                 }
                 String sanitizedValue = sanitizeInput(searchValue);
                 searchRequest.entrySet().iterator().next().setValue(sanitizedValue);
-                return;
+                return true;
             }
         }
-        logger.warn("SearchType is not available: " + searchType);
-        throw new InvalidSearchRequestException("SearchType is not available: " + searchType);
+        LoggingUtility.warn("SearchType is not available: " + searchType);
+        return false;
     }
 
     public static String sanitizeInput(String input) {
@@ -91,16 +85,16 @@ public class UserInputUtil {
                 System.out.println("What " + searchType + " do you want to search for?");
                 String searchValue = scannerWrapper.getNextLine().trim().toUpperCase();
                 if (searchValue.isEmpty() || !containsAlphanumeric(searchValue)) {
-                    logger.info("searching with user input is not possible:" + searchTypeNumber);
+                    LoggingUtility.info("searching with user input is not possible:" + searchTypeNumber);
                     System.out.println("Invalid to search for: " + searchType + ". Please enter a valid search criteria.");
                 } else {
                     return Collections.singletonMap(searchType, searchValue);
                 }
             } else {
-                logger.info("Invalid number for a search type:" + searchTypeNumber);
+                LoggingUtility.info("Invalid number for a search type:" + searchTypeNumber);
                 ++typos;
                 if (typos >= MAX_TYPING_ERRORS) {
-                    logger.warn("Too many typos, restarting searchengine");
+                    LoggingUtility.warn("Too many typos, restarting searchengine");
                     return Collections.emptyMap();
                 }
                 System.out.println("Invalid input. Please enter a valid number.");

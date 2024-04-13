@@ -1,9 +1,8 @@
 package Application.api;
 
+import Application.utils.LoggingUtility;
 import Application.utils.RestTempUtil;
 import Application.utils.RestTemplateConfig;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -20,7 +19,6 @@ import java.net.URI;
  */
 @RestController
 public class WikipediaSearchRoute {
-    private static final Logger logger = LoggerFactory.getLogger(WikipediaSearchRoute.class.getName());
 
     @Value("${wikipedia.protocol}")
     private String protocol;
@@ -39,7 +37,7 @@ public class WikipediaSearchRoute {
         config = new RestTemplateConfig(protocol, host, null, api, null,
                 null, pathPrefix, null, null);
         // Initialize any properties or perform setup logic here
-        logger.info("Initialized MusicBrainzIDSearchRoute with properties: " +
+        LoggingUtility.info("Initialized MusicBrainzIDSearchRoute with properties: " +
                         "protocol={}, host={}, pathPrefix={}, api={}",
                 protocol, host, pathPrefix, api);
     }

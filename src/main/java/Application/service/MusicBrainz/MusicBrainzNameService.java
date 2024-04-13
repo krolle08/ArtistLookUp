@@ -2,15 +2,12 @@ package Application.service.MusicBrainz;
 
 import Application.api.MusicBrainzNameSearchRoute;
 import Application.service.Artist.ArtistInfoObj;
-import Application.service.InvalidArtistException;
-import Application.utils.RestTempUtil;
+import Application.utils.LoggingUtility;
 import Application.utils.TypeOfSearchEnum;
 import Application.utils.UserInputUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -22,29 +19,30 @@ import java.util.regex.Pattern;
 
 @Service
 public class MusicBrainzNameService {
-    private static final Logger logger = LoggerFactory.getLogger(MusicBrainzNameService.class.getName());
 
     @Autowired
     MusicBrainzNameSearchRoute musicBrainzNameSearchRoute;
 
-    public ArtistInfoObj getMBIdData(Map<String, String> searchParam) throws IllegalArgumentException, InvalidArtistException {
+    public ArtistInfoObj getMBId(Map<String, String> searchParam) {
         ResponseEntity<String> response = musicBrainzNameSearchRoute.doGetResponse(searchParam);
-        if (RestTempUtil.isBodyEmpty(response)) {
-            logger.info("No response on the provided searchparameters: {}, {}.", searchParam.entrySet().iterator().next().getKey(),
-                    searchParam.entrySet().iterator().next().getValue());
-            throw new InvalidArtistException("No response on the provided search value: " + searchParam.entrySet().iterator().next().getValue());
-        }
-        return extractDataAndPopulateObj(response, searchParam.get(TypeOfSearchEnum.ARTIST.getSearchType()));
+        ArtistInfoObj artistInfoObj = extractDataAndPopulateObj(response, searchParam.get(TypeOfSearchEnum.ARTIST.getSearchType()));
+        return artistInfoObj;
     }
 
     public ArtistInfoObj extractDataAndPopulateObj(ResponseEntity responseEntity, String searchParam) {
         ArtistInfoObj artistInfoObj = new ArtistInfoObj();
         ObjectMapper mapper = new ObjectMapper();
+        JsonNode rootNode;
         try {
-            JsonNode rootNode = mapper.readTree(responseEntity.getBody().toString());
+            rootNode = mapper.readTree(responseEntity.getBody().toString());
+        } catch (JsonProcessingException e) {
+            LoggingUtility.warn("A problem occurred mapping the response: " + e.getMessage());
+            e.printStackTrace();
+            return artistInfoObj;
+        }
             Iterator<JsonNode> annotationIterator = rootNode.path("annotations").elements();
             boolean foundUUID = false; // Flag to track if UUID is found
-            String text = "";
+            String text;
             String mbid = "";
             while (annotationIterator.hasNext() && !foundUUID) {
                 JsonNode annotation = annotationIterator.next();
@@ -65,12 +63,8 @@ public class MusicBrainzNameService {
             artistInfoObj.setName(searchParam);
             artistInfoObj.setmBStatusCode(responseEntity.getStatusCodeValue());
             return artistInfoObj;
-        } catch (JsonProcessingException e) {
-            logger.warn("A problem occurred mapping the response: " + e.getMessage());
-            e.printStackTrace();
-            return artistInfoObj;
         }
-    }
+
 
     public static String extractUUIDForTerm(String text, String searchTerm) {
         String regex = "\\[artist:([a-fA-F0-9\\-]+)\\|" + Pattern.quote(searchTerm) + "]";
@@ -85,3 +79,4 @@ public class MusicBrainzNameService {
         return null;
     }
 }
+

@@ -1,44 +1,44 @@
-package Application.service.Wikipedia;
+package Application.service.Wiki;
 
 import Application.api.WikipediaSearchRoute;
 import Application.service.Artist.WikiInfoObj;
+import Application.utils.LoggingUtility;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-
 @Service
 public class WikiPediaService {
-    private static final Logger logger = LoggerFactory.getLogger(WikiPediaService.class.getName());
 
     @Autowired
     WikipediaSearchRoute wikipediaSearchRoute;
 
-    public void getWikiPediadata(WikiInfoObj wikiInfoObj) throws URISyntaxException, JsonProcessingException {
+    public void getWikiPediadata(WikiInfoObj wikiInfoObj) {
         ResponseEntity<String> response = wikipediaSearchRoute.doGetResponse(wikiInfoObj.getWikipediaSearchTerm());
-        if (response.getBody() == null || response.getBody().isEmpty()) {
-            logger.warn("No results on provided wikipediaSearchTerm: {}", wikiInfoObj.getWikipediaSearchTerm());
-        } else {
-            wikiInfoObj.setDescription(extractDescription(response.getBody()));
-        }
+        getDescription(response, wikiInfoObj);
         wikiInfoObj.setWikiPediaStatuscode(response.getStatusCodeValue());
     }
 
-    public String extractDescription(String responseBody) throws JsonProcessingException {
-        String description = "";
+    public void getDescription(ResponseEntity response, WikiInfoObj wikiInfoObj) {
         ObjectMapper mapper = new ObjectMapper();
-        JsonNode rootNode = mapper.readTree(String.valueOf(responseBody));
+        JsonNode rootNode;
+        try {
+            rootNode = mapper.readTree(response.getBody().toString());
+        } catch (JsonProcessingException e) {
+            LoggingUtility.error("Error occurred when mapping the response in WikiPediaService.getDescription.37. " +
+                    e.getMessage());
+            e.printStackTrace();
+            wikiInfoObj.setDescription("Error occurred when mapping the response from Wikipedia");
+            return;
+        }
         JsonNode extractNode = rootNode.path("query").path("pages").elements().next().get("extract");
         if (extractNode != null && !extractNode.isNull()) {
-            description = extractNode.asText();
+            wikiInfoObj.setDescription(extractNode.asText());
+            return;
         }
-        return description;
+        wikiInfoObj.setDescription("No description found");
     }
 }

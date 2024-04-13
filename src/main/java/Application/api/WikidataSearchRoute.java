@@ -1,10 +1,9 @@
 package Application.api;
 
 import Application.utils.CustomRetryTemplate;
+import Application.utils.LoggingUtility;
 import Application.utils.RestTempUtil;
 import Application.utils.RestTemplateConfig;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.retry.RetryCallback;
@@ -17,14 +16,13 @@ import java.net.URISyntaxException;
 
 /**
  * Wikidata documentation:
- * There is no hard speed limit on read requests, but be considerate and try not to take a site down. Most system
- * administrators reserve the right to unceremoniously block you if you do endanger the stability of their site.
- * Making your requests in series rather than in parallel, by waiting for one request to finish before sending a new
- * request, should result in a safe request rate (https://www.mediawiki.org/wiki/API:Etiquette)
+ * There is no speed limit on read requests. Most system administrators reserve the right to unceremoniously block the
+ * application if it endangers the stability of the site.
+ * Making requests in series rather than in parallel is preferred.
+ * (https://www.mediawiki.org/wiki/API:Etiquette)
  */
 @RestController
 public class WikidataSearchRoute {
-    private static final Logger logger = LoggerFactory.getLogger(WikidataSearchRoute.class.getName());
     @Value("${wikiData.protocol}")
     private String protocol;
 
@@ -40,14 +38,14 @@ public class WikidataSearchRoute {
     @PostConstruct
     public void init() {
         config = new RestTemplateConfig(protocol, host, null, api, null,
-                null, pathPrefix, null,null);
+                null, pathPrefix, null, null);
         // Initialize any properties or perform setup logic here
-        logger.info("Initialized MusicBrainzIDSearchRoute with properties: " +
+        LoggingUtility.info("Initialized MusicBrainzIDSearchRoute with properties: " +
                         "protocol={}, host={}, pathPrefix={}, api={}",
                 protocol, host, pathPrefix, api);
     }
 
-    public ResponseEntity<String> doGetResponse(String wikidataSearchTerm) throws URISyntaxException {
+    public ResponseEntity<String> doGetResponse(String wikidataSearchTerm) {
         URI uri = getUri(wikidataSearchTerm);
         ResponseEntity<String> response = RestTempUtil.getResponse(uri);
         handleResponse(response, uri.toString());
@@ -58,31 +56,38 @@ public class WikidataSearchRoute {
         return RestTempUtil.getWikiDataUriconstructor(wikidataSearchTerm, config);
     }
 
-    private static ResponseEntity<String> handleRateLimitations(String url) throws URISyntaxException {
-        logger.warn("Rate limits detected. Retrying...");
+    private static ResponseEntity<String> handleRateLimitations(String uri) {
+        LoggingUtility.warn("Rate limits detected. Retrying...");
         // Construct RetryTemplate
         CustomRetryTemplate retryTemplate = new CustomRetryTemplate();
         RetryCallback<ResponseEntity<String>, URISyntaxException> retryCallback = retryContext -> {
             RestTemplate restTemplate = new RestTemplate();
-            return restTemplate.getForEntity(url, String.class);
+            return restTemplate.getForEntity(uri, String.class);
         };
-        // Execute with RetryTemplate
-        ResponseEntity<String> newResponse = retryTemplate.execute(retryCallback);
-        if (newResponse.getBody().isEmpty()) {
-            logger.info("The request on uri:" + url + " did not match any data in Wikidata");
+        ResponseEntity<String> newResponse = null;
+        try {
+            // Execute with RetryTemplate
+            newResponse = retryTemplate.execute(retryCallback);
+            if (newResponse.getBody().isEmpty()) {
+                LoggingUtility.info("The response on uri:" + uri + " did not match any data on Wikidata");
+            }
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+            LoggingUtility.error("Error occured while creating the uri. " + e.getMessage());
         }
         return newResponse;
     }
 
-    public ResponseEntity<String> handleResponse(ResponseEntity<String> response, String url) throws URISyntaxException {
+    public ResponseEntity<String> handleResponse(ResponseEntity<String> response, String uri) {
         if (response.getBody() == null || response.getBody().isEmpty() || response.getBody().contains("no-such-entity")) {
-            logger.info("The requested uri:" + url + " did not match any data on Wikidata");
+            LoggingUtility.info("The requested uri:" + uri + " did not match any data on Wikidata");
         } else if (response.getBody().contains("ratelimits")) {
-            return handleRateLimitations(url);
+            return handleRateLimitations(uri);
         }
         return response;
     }
-    public RestTemplateConfig getRestConfig(){
+
+    public RestTemplateConfig getRestConfig() {
         return config;
     }
 }

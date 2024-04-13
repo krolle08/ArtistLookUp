@@ -2,9 +2,8 @@ package service.Wikidata;
 
 import Application.Application;
 import Application.service.Artist.WikiInfoObj;
-import Application.service.Wikidata.WikidataService;
+import Application.service.Wiki.WikiDataService;
 import Application.utils.RestTempUtil;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 public class testWikiDataService {
 
     @Autowired
-    private WikidataService wikidataService;
+    private WikiDataService wikiDataService;
 
     @Test
     public void testgetWikiData_Success() {
@@ -30,7 +29,7 @@ public class testWikiDataService {
 
         // When
         try {
-            wikidataService.getWikidata(wikiInfoObj);
+            wikiDataService.getWikidata(wikiInfoObj);
         } catch (Exception e) {
             System.out.println("Should not have thrown an exception");
             fail();
@@ -50,12 +49,7 @@ public class testWikiDataService {
         WikiInfoObj wikiInfoObj = new WikiInfoObj(nirvanaTerm, null);
 
         // When
-        try {
-            wikidataService.extractWikiPediaData(responseEntity, wikiInfoObj);
-        } catch (JsonProcessingException e) {
-            System.out.println("Should not have thrown an exception");
-            fail();
-        }
+        wikiDataService.extractWikiPediaData(responseEntity, wikiInfoObj);
 
         // Then
         Assertions.assertFalse(wikiInfoObj.getWikipediaSearchTerm().isEmpty());
@@ -71,12 +65,7 @@ public class testWikiDataService {
 
 
         // When
-        try {
-            wikidataService.extractWikiPediaData(responseEntity, wikiInfoObj);
-        } catch (JsonProcessingException e) {
-            System.out.println("Should not have thrown an exception");
-            fail();
-        }
+        wikiDataService.extractWikiPediaData(responseEntity, wikiInfoObj);
 
         // Then
         Assertions.assertNull(wikiInfoObj.getWikipediaSearchTerm());

@@ -2,17 +2,14 @@ package service.wikipedia;
 
 import Application.Application;
 import Application.service.Artist.WikiInfoObj;
-import Application.service.Wikipedia.WikiPediaService;
+import Application.service.Wiki.WikiPediaService;
 import Application.utils.RestTempUtil;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
-import java.net.URISyntaxException;
-
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(classes = Application.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -28,12 +25,7 @@ public class testWikiPediaService {
         WikiInfoObj wikiInfoObj = new WikiInfoObj(null, nirvanaURLQuery);
 
         //When
-        try {
-            wikiPediaService.getWikiPediadata(wikiInfoObj);
-        } catch (URISyntaxException | JsonProcessingException e) {
-           System.out.println("Exception should not be thrown");
-           fail();
-        }
+        wikiPediaService.getWikiPediadata(wikiInfoObj);
 
         //Then
         assertEquals((int) wikiInfoObj.getWikiPediaStatuccode(), HttpStatus.OK.value());
@@ -48,29 +40,25 @@ public class testWikiPediaService {
         WikiInfoObj wikiInfoObj = new WikiInfoObj(null, nirvanaURLQuery);
 
         //When
-        try {
-            wikiPediaService.getWikiPediadata(wikiInfoObj);
-        } catch (URISyntaxException | JsonProcessingException e) {
-            System.out.println("Exception should not be thrown");
-            fail();
-        }
+        wikiPediaService.getWikiPediadata(wikiInfoObj);
 
         //Then
         assertEquals((int) wikiInfoObj.getWikiPediaStatuccode(), HttpStatus.OK.value());
-        assertTrue(wikiInfoObj.getDescription().isEmpty());
+        assertTrue(wikiInfoObj.getDescription().equals("No description found"));
     }
     @Test
-    public void testExtractDescription_Succes() throws JsonProcessingException {
+    public void testExtractDescription_Succes() {
         //Given
-        String responseBody = getResponseBody();
+        WikiInfoObj wikiInfoObj = new WikiInfoObj("", "");
+        ResponseEntity<String> response = ResponseEntity.ok().body(getResponseBody());
         String expectedSubstring = "<b>Nirvana</b>"; // Specify the substring expected to be present in the extract
 
         //When
 
-        String result = wikiPediaService.extractDescription(responseBody);
+        wikiPediaService.getDescription(response, wikiInfoObj);
 
         //Then
-        assertTrue(result.contains(expectedSubstring));
+        assertTrue(wikiInfoObj.getDescription().contains(expectedSubstring));
     }
 
     private String getResponseBody(){

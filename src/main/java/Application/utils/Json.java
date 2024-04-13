@@ -1,8 +1,6 @@
 package Application.utils;
 
 import Application.service.Artist.AlbumInfoObj;
-import Application.features.GetDataImpl;
-import Application.service.InvalidSearchRequestException;
 import Application.service.MusicEntityObj;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -11,17 +9,15 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import org.apache.juli.logging.Log;
-import org.apache.juli.logging.LogFactory;
 
 public class Json {
 
-    private static final Log log = LogFactory.getLog(GetDataImpl.class);
     private static final ObjectMapper mapper = new ObjectMapper();
-    public static String createJsonResponse(MusicEntityObj entity) throws InvalidSearchRequestException {
+    public static String createJsonResponse(MusicEntityObj entity) {
         if(entity.getArtistInfoObj().getmBID() == null || entity.getArtistInfoObj().getmBID().isEmpty()){
-            throw new InvalidSearchRequestException("No information found on: " +
-                    entity.getArtistInfoObj().getName());
+            String warn = "No information found on: " + entity.getArtistInfoObj().getName();
+            LoggingUtility.warn(warn);
+            return warn;
         }
 
         // Format the dataContainer data as JSON
@@ -41,18 +37,20 @@ public class Json {
             albumNode.put("image", album.getImageURL());
             albumsNode.add(albumNode);
         }
-
-        try {
-            // String formatted_response = objectMapper.writeValueAsString(response_data);
-            return writeValueAsString(rootNode);
-        } catch (JsonProcessingException e) {
-            log.error("Error occured during processing the rootNode into the desired jsonformat");
-            e.printStackTrace();
-            throw new RuntimeException("Failed processing the rootNode");
+        return writeValueAsString(rootNode);
         }
-    }
-    private static String writeValueAsString(JsonNode rootNode) throws JsonProcessingException {
-        return mapper.writeValueAsString(rootNode);
+
+    private static String writeValueAsString(JsonNode rootNode) {
+        String output;
+        try {
+            output = mapper.writeValueAsString(rootNode);
+        } catch (JsonProcessingException e){
+            String errorMessage = "Error occured during processing the rootNode into the desired jsonformat. " + e.getMessage();
+            LoggingUtility.error(errorMessage);
+            e.printStackTrace();
+            throw new RuntimeException(errorMessage, e);
+        }
+        return output;
     }
     private static String formatDescription(String description) {
         // Remove HTML tags

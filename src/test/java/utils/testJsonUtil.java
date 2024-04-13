@@ -1,10 +1,10 @@
 package utils;
 
 import Application.Application;
-import Application.service.*;
 import Application.service.Artist.AlbumInfoObj;
 import Application.service.Artist.ArtistInfoObj;
 import Application.service.Artist.WikiInfoObj;
+import Application.service.MusicEntityObj;
 import Application.utils.Json;
 import com.google.gson.JsonParser;
 import org.junit.jupiter.api.Test;
@@ -13,9 +13,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.mock;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest(classes = Application.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class testJsonUtil {
@@ -26,12 +24,7 @@ public class testJsonUtil {
         String expectedJson = getExpectedOutput();
 
         // When
-        String actualJson = null;
-        try {
-            actualJson = Json.createJsonResponse(entity);
-        } catch (InvalidSearchRequestException e) {
-            throw new RuntimeException(e);
-        }
+        String actualJson = Json.createJsonResponse(entity);
 
         // Parse JSON strings into JSON objects'
         com.google.gson.JsonObject actualObject = JsonParser.parseString(actualJson).getAsJsonObject();

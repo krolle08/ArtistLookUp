@@ -1,9 +1,8 @@
 package Application.api;
 
+import Application.utils.LoggingUtility;
 import Application.utils.RestTempUtil;
 import Application.utils.RestTemplateConfig;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -18,7 +17,6 @@ import java.util.Map;
  */
 @RestController
 public class MusicBrainzNameSearchRoute {
-    private static final Logger logger = LoggerFactory.getLogger(MusicBrainzNameSearchRoute.class.getName());
 
     @Value("${musicBrainzName.protocol}")
     private String protocol;
@@ -53,7 +51,7 @@ public class MusicBrainzNameSearchRoute {
         config = new RestTemplateConfig(protocol, host, port, pathPostfix, version,
                 query, pathPrefix, json, inc);
         // Initialize any properties or perform setup logic here
-        logger.info("Initialized MusicBrainzIDSearchRoute with properties: " +
+        LoggingUtility.info("Initialized MusicBrainzIDSearchRoute with properties: " +
                         "protocol={}, host={}, port={}, pathPrefix={}, version={}",
                 protocol, host, port, pathPrefix, version);
     }
@@ -65,9 +63,10 @@ public class MusicBrainzNameSearchRoute {
         try {
             uri = new URI(RestTempUtil.getMBNameUriconstructor(filterParams, config).toString());
         } catch (URISyntaxException e) {
-            logger.error("Error constructing URI with param: " + filterParams.entrySet().iterator().next().getValue() +
-                    " " + e.getMessage());
-            throw new IllegalArgumentException(e.getMessage());
+            String errorMessage = "Error constructing URI with the name: " + filterParams.entrySet().iterator().next().getValue()
+                    + " " + e.getMessage();
+            LoggingUtility.error(errorMessage);
+            throw new IllegalArgumentException(errorMessage);
         }
         return uri;
     }

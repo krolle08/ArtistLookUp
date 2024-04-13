@@ -2,17 +2,13 @@ package Application.service.RestClient;
 
 import Application.service.Area.SearchAreaService;
 import Application.service.Artist.SearchArtistService;
-import Application.service.InvalidArtistException;
-import Application.service.InvalidSearchRequestException;
 import Application.service.MusicEntityObj;
 import Application.utils.Json;
+import Application.utils.LoggingUtility;
 import Application.utils.TypeOfSearchEnum;
 import Application.utils.UserInputUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -26,8 +22,6 @@ import java.util.Map;
  */
 @RestController
 public class RestApiRequester {
-    private static final Logger logger = LoggerFactory.getLogger(RestApiRequester.class.getName());
-
     private final SearchArtistService searchArtistService;
     private final SearchAreaService searchAreaService;
 
@@ -35,51 +29,33 @@ public class RestApiRequester {
     public RestApiRequester(SearchArtistService searchArtistService, SearchAreaService searchAreaService) {
         this.searchArtistService = searchArtistService;
         this.searchAreaService = searchAreaService;
-        logger.info("RestApiRequester bean initialized");
+        LoggingUtility.info("RestApiRequester bean initialized");
     }
 
     @GetMapping("/artist/{id}")
     public ResponseEntity<String> getArtistRequest(@PathVariable String id) {
-        try {
             Map<String, String> searchParam = new HashMap<>();
-            MusicEntityObj entity;
+            MusicEntityObj entity = new MusicEntityObj();
             searchParam.put(TypeOfSearchEnum.ARTIST.getSearchType(), id);
 
-            UserInputUtil.IsSearchRequestAllowed(searchParam);
-
-            entity = searchArtistService.getData(searchParam);
-
-            if (entity.getArtistInfoObj() == null || entity.getArtistInfoObj().isEmpty()) {
-                throw new InvalidArtistException("Invalid artist: " + id);
+            boolean isSearchAllowed = UserInputUtil.IsSearchRequestAllowed(searchParam);
+            if(isSearchAllowed) {
+                entity = searchArtistService.getData(searchParam);
             }
-            logger.info("Request Completed for: " + searchParam.entrySet().iterator().next().getValue());
+            if (entity.getArtistInfoObj() == null || entity.getArtistInfoObj().isEmpty()) {
+                LoggingUtility.warn("Invalid artist: " + id);
+                HttpHeaders headers = new HttpHeaders();
+                headers.add("Reason", "Invalid artist");
+                return ResponseEntity.badRequest().headers(headers).body("Invalid search value: " + id);
+            }
+            LoggingUtility.info("Request Completed for: " + searchParam.entrySet().iterator().next().getValue());
             HttpHeaders headers = new HttpHeaders();
             headers.add("Request", "Completed with success");
             return ResponseEntity.ok().headers(headers).body(Json.createJsonResponse(entity));
-
-          //  return ResponseEntity.ok(Json.createJsonResponse(entity));
-        } catch (InvalidSearchRequestException e) {
-            e.printStackTrace();
-            logger.warn(e.getMessage());
-            HttpHeaders headers = new HttpHeaders();
-            headers.add("Reason", "Invalid search value");
-            return ResponseEntity.badRequest().headers(headers).body(e.getMessage());
-        } catch (InvalidArtistException e) {
-            e.printStackTrace();
-            logger.warn(e.getMessage());
-            HttpHeaders headers = new HttpHeaders();
-            headers.add("Reason", "Invalid artist");
-            return ResponseEntity.badRequest().headers(headers).body(e.getMessage());
-        } catch (Exception e) {
-            e.printStackTrace();
-            HttpHeaders headers = new HttpHeaders();
-            headers.add("Reason", "Internal Server Error");
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).headers(headers).body(e.getMessage());
-        }
     }
 
     @GetMapping("/area/{id}")
-    public ResponseEntity<String> getAreaRequest(@PathVariable String id) throws InvalidSearchRequestException {
+    public ResponseEntity<String> getAreaRequest(@PathVariable String id) {
         Map<String, String> searchParam = new HashMap<>();
         searchParam.put(TypeOfSearchEnum.AREA.getSearchType(), id);
         MusicEntityObj entity = searchAreaService.getData(searchParam);

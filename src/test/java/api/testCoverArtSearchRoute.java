@@ -3,22 +3,18 @@ package api;
 import Application.Application;
 import Application.api.CoverArtArchiveSearchRoute;
 import Application.service.Artist.AlbumInfoObj;
+import fm.last.musicbrainz.coverart.CoverArt;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import fm.last.musicbrainz.coverart.CoverArt;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
 @SpringBootTest(classes = Application.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ExtendWith(MockitoExtension.class)
@@ -26,9 +22,6 @@ public class testCoverArtSearchRoute {
 
     @Autowired
     CoverArtArchiveSearchRoute coverArtArchiveSearchRoute;
-
-    @Mock
-    Logger logger;
 
     @Test
     public void testCoverArtEndpoint_Succes() {
@@ -54,9 +47,6 @@ public class testCoverArtSearchRoute {
     public void testIllegalArgumentExceptionThrownForInvalidUUID() {
         // Given
         String Invallid ="InvalidUUID";
-
-        // Create an instance of CoverArtArchiveSearchRoute with the spy logger
-        coverArtArchiveSearchRoute.setLogger(logger);
 
         //When Then
         assertThrows(IllegalArgumentException.class, () -> coverArtArchiveSearchRoute.doGetCoverData(Invallid));

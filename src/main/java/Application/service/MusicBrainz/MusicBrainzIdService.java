@@ -4,23 +4,20 @@ import Application.api.MusicBrainzIDSearchRoute;
 import Application.service.Artist.AlbumInfoObj;
 import Application.service.Artist.ArtistInfoObj;
 import Application.service.Artist.WikiInfoObj;
+import Application.utils.LoggingUtility;
 import Application.utils.RestTempUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
 public class MusicBrainzIdService {
-    private static final Logger logger = LoggerFactory.getLogger(MusicBrainzIdService.class.getName());
 
     @Autowired
     MusicBrainzIDSearchRoute musicBrainzIDSearchRoute;
@@ -30,7 +27,7 @@ public class MusicBrainzIdService {
         ArtistInfoObj artistInfoObj = new ArtistInfoObj();
         ResponseEntity<String> response = musicBrainzIDSearchRoute.doGetResponse(mbid);
         if (RestTempUtil.isBodyEmpty(response)) {
-            logger.info("No body was provided on mbid: " + mbid + " make sure that the search " +
+            LoggingUtility.info("No body was provided on mbid: " + mbid + " make sure that the search " +
                     "type and search criteria are correct");
             return artistInfoObj;
         } else {
@@ -42,19 +39,21 @@ public class MusicBrainzIdService {
 
     public ArtistInfoObj extractData(ResponseEntity response, String mbid) {
         ObjectMapper mapper = new ObjectMapper();
+        JsonNode rootNode;
         try {
-            JsonNode rootNode = mapper.readTree(response.getBody().toString());
+            rootNode = mapper.readTree(response.getBody().toString());
+        } catch (JsonProcessingException e) {
+            String errorMessage = "An error occurred when mapping the response: " + e.getMessage();
+            LoggingUtility.error(errorMessage);
+            e.printStackTrace();
+            throw new RuntimeException(errorMessage, e);
+        }
             String name = extractName(rootNode, mbid);
             WikiInfoObj wikiInfoObj = extractwikiData(rootNode);
             List<AlbumInfoObj> albums = extractCoverIdAndTitle(rootNode);
             ArtistInfoObj artistInfoObj = new ArtistInfoObj(name,mbid,wikiInfoObj,albums);
             artistInfoObj.setmBStatusCode(response.getStatusCode().value()); // Relevant for future development, handling bad responses
             return artistInfoObj;
-        } catch (JsonProcessingException e) {
-            logger.error("A problem occurred when mapping the response: " + e.getMessage());
-            e.printStackTrace();
-            throw new RuntimeException("Error processing response", e);
-        }
     }
 
     private String extractName(JsonNode rootNode, String mbid) {
@@ -62,7 +61,7 @@ public class MusicBrainzIdService {
         if (nameNode != null && !nameNode.isNull()) {
             return nameNode.asText();
         } else {
-            logger.warn("No information available for the provided input neither as an Artist or MusicBrainz ID " +
+            LoggingUtility.warn("No information available for the provided input neither as an Artist or MusicBrainz ID " +
                     mbid);
             return null;
         }

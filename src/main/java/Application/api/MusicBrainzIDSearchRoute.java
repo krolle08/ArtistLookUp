@@ -1,9 +1,8 @@
 package Application.api;
 
+import Application.utils.LoggingUtility;
 import Application.utils.RestTempUtil;
 import Application.utils.RestTemplateConfig;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -21,7 +20,6 @@ import java.net.URISyntaxException;
 @RestController
 public class MusicBrainzIDSearchRoute {
 
-    private static final Logger logger = LoggerFactory.getLogger(MusicBrainzIDSearchRoute.class.getName());
     @Value("${musicBrainz.protocol}")
     private String protocol;
 
@@ -48,7 +46,7 @@ public class MusicBrainzIDSearchRoute {
         config = new RestTemplateConfig(protocol, host, null, null, version,
                 queryTypeArtist, pathPrefix, json, inc);
         // Initialize any properties or perform setup logic here
-        logger.info("Initialized MusicBrainzIDSearchRoute with properties: " +
+        LoggingUtility.info("Initialized MusicBrainzIDSearchRoute with properties: " +
                         "protocol={}, host={}, version={}, pathPrefix={},  queryTypeArtist={}",
                 protocol, host, version, pathPrefix , queryTypeArtist);
     }
@@ -65,10 +63,9 @@ public class MusicBrainzIDSearchRoute {
         try {
             uri = new URI(RestTempUtil.getMBIdUriconstructor(searchTerm, config).toString());
         } catch (URISyntaxException e) {
-            logger.error("Error constructing URI with Music Brainz id: " + searchTerm +
-                    " " + e.getMessage());
-            throw new IllegalArgumentException("Error constructing URI with Music Brainz id: " + searchTerm +
-                    " " + e.getMessage());
+            String errorMessage = "Error constructing URI with Music Brainz id: " + searchTerm + " " + e.getMessage();
+            LoggingUtility.error(errorMessage);
+            throw new RuntimeException(errorMessage);
         }
         return uri;
     }
