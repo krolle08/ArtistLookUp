@@ -1,9 +1,6 @@
 package Application.utils;
 
 import org.springframework.stereotype.Component;
-
-import java.io.Closeable;
-import java.io.IOException;
 import java.util.Scanner;
 
 /**

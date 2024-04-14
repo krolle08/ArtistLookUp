@@ -4,6 +4,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
@@ -111,8 +112,9 @@ public class RestTempUtil {
                     .replaceAll("_", "%20") // Replace underscores with %5F
                     .replaceAll("\\%28", "(")
                     .replaceAll("\\%29", ")");
-        } catch (Exception e) {
+        } catch (UnsupportedEncodingException e) {
             LoggingUtility.warn("Error encoding input: " + input);
+            e.printStackTrace();
             throw new RuntimeException(e);
         }
     }
@@ -125,6 +127,7 @@ public class RestTempUtil {
             return java.net.URLDecoder.decode(input, StandardCharsets.UTF_8.name());
         } catch (Exception e) {
             LoggingUtility.warn("Error decoding input: " + input);
+            e.printStackTrace();
             throw new RuntimeException(e);
         }
     }

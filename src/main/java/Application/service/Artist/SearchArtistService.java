@@ -35,7 +35,7 @@ public class SearchArtistService implements DataProcessor<ArtistInfoObj> {
         MusicEntityObj entity = new MusicEntityObj();
         ArtistInfoObj artistInfoObj;
             artistInfoObj = getMusicBrainzData(searchParam);
-            if (artistInfoObj.getmBID() == null || artistInfoObj.getmBID().isEmpty()) {
+            if (artistInfoObj.isEmpty()) {
                 LoggingUtility.info("No results found for: {} as an {}", searchParam.entrySet().iterator().next().getValue(),
                         searchParam.entrySet().iterator().next().getKey());
                 return entity;
@@ -69,33 +69,47 @@ public class SearchArtistService implements DataProcessor<ArtistInfoObj> {
     }
 
     private void updateEntity(ArtistInfoObj entity, ArtistInfoObj newEntity, String searchParam) {
-        checkAndAddMBIdPresence(entity, newEntity);
-        checkAndAddNamePresence(entity, newEntity, searchParam);
-        checkAndAddWikiInfo(entity, newEntity);
+        boolean isMBIdPresent = isMBIdsSimilar(entity, newEntity);
+        boolean isNamePresent = isNameSimilar(entity, newEntity, searchParam);
+        boolean isWikiDataPresent = isWikiInfoPresent(entity, newEntity);
         addAlbumsIfNotPresent(entity, newEntity);
-    }
 
-    private void checkAndAddMBIdPresence(ArtistInfoObj entity, ArtistInfoObj newEntity) {
-        if (!entity.getmBID().equals(newEntity.getmBID())) {
-            LoggingUtility.warn("MusicBrainz ID are different in the entity and newEntity object: {}, {}", entity.getmBID(), newEntity.getmBID());
-            throw new RuntimeException("MusicBrainz ID are different in the entity and newEntity object");
+        if(!isMBIdPresent || !isNamePresent || !isWikiDataPresent){
+            String errorMessage = "Error occurred when comparing the responses from MusicBrainz with one response based" +
+                    "on the by name provided by the request: " + searchParam + " and when searching by MusicBrainz ID: "
+                    + newEntity.getmBID();
+            LoggingUtility.error(errorMessage);
         }
     }
 
-    private void checkAndAddNamePresence(ArtistInfoObj entity, ArtistInfoObj newEntity, String searchParam) {
-        // Update name if not already set
+    private boolean isMBIdsSimilar(ArtistInfoObj entity, ArtistInfoObj newEntity) {
+        if (!entity.getmBID().equals(newEntity.getmBID())) {
+            LoggingUtility.warn("MusicBrainz IDs are different in the entity and newEntity objects: {}, {}",
+                    entity.getmBID(), newEntity.getmBID());
+            return false;
+        }
+        return true;
+    }
+
+    private boolean isNameSimilar(ArtistInfoObj entity, ArtistInfoObj newEntity, String searchParam) {
         if (entity.getName() == null || entity.getName().isEmpty()) {
             entity.setName(newEntity.getName());
         } else if (!entity.getName().equalsIgnoreCase(newEntity.getName())) {
-            throw new RuntimeException("Different names has been received doing the search of: " + searchParam +
-                    " and when searching with the following mbid: " + entity.getmBID());
+            LoggingUtility.warn("Different names were received when searching for: " + searchParam +
+                    " and when searching with the following MBID: " + entity.getmBID());
         }
+        return true;
     }
 
-    private void checkAndAddWikiInfo(ArtistInfoObj entity, ArtistInfoObj newEntity) {
+    private boolean isWikiInfoPresent(ArtistInfoObj entity, ArtistInfoObj newEntity) {
         if (entity.getWikiInfo() == null || entity.getWikiInfo().isEmpty()) {
             entity.setWikiInfo(newEntity.getWikiInfo());
+            return true;
+        } else if(!entity.getWikiInfo().getWikidataSearchTerm().equalsIgnoreCase(newEntity.getWikiInfo().getWikidataSearchTerm())){
+            LoggingUtility.warn("Different Wikidata was received when searching for the name: " + entity.getName() +
+                    " and when searching with the following MusicBrainz ID: " + entity.getmBID());
         }
+        return false;
     }
 
     private void addAlbumsIfNotPresent(ArtistInfoObj entity, ArtistInfoObj newEntity) {
@@ -106,16 +120,11 @@ public class SearchArtistService implements DataProcessor<ArtistInfoObj> {
             entity.setAlbums(newAlbums);
         } else if (newAlbums != null) {
             for (AlbumInfoObj newAlbum : newAlbums) {
-                boolean albumExists = false;
                 for (AlbumInfoObj existingAlbum : existingAlbums) {
                     // Check if album with the same albumId already exists
-                    if (existingAlbum.getAlbumId().equals(newAlbum.getAlbumId())) {
-                        albumExists = true;
-                        break;
+                    if (!existingAlbum.getAlbumId().equals(newAlbum.getAlbumId())) {
+                        existingAlbums.add(newAlbum);
                     }
-                }
-                if (!albumExists) {
-                    existingAlbums.add(newAlbum);
                 }
             }
         }

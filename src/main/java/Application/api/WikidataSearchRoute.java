@@ -72,8 +72,10 @@ public class WikidataSearchRoute {
                 LoggingUtility.info("The response on uri:" + uri + " did not match any data on Wikidata");
             }
         } catch (URISyntaxException e) {
+            String errorMessage = "Error occured while creating the uri. " + e.getMessage();
+            LoggingUtility.error(errorMessage);
             e.printStackTrace();
-            LoggingUtility.error("Error occured while creating the uri. " + e.getMessage());
+            throw new RuntimeException(errorMessage, e);
         }
         return newResponse;
     }

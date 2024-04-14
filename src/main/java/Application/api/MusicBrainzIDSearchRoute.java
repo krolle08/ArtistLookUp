@@ -65,7 +65,8 @@ public class MusicBrainzIDSearchRoute {
         } catch (URISyntaxException e) {
             String errorMessage = "Error constructing URI with Music Brainz id: " + searchTerm + " " + e.getMessage();
             LoggingUtility.error(errorMessage);
-            throw new RuntimeException(errorMessage);
+            e.printStackTrace();
+            throw new IllegalArgumentException(errorMessage);
         }
         return uri;
     }

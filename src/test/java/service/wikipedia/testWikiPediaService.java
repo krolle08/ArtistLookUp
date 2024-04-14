@@ -46,6 +46,21 @@ public class testWikiPediaService {
         assertEquals((int) wikiInfoObj.getWikiPediaStatuccode(), HttpStatus.OK.value());
         assertTrue(wikiInfoObj.getDescription().equals("No description found"));
     }
+
+    @Test
+    public void testGetWikiepediaData_EmptyValue(){
+        //Given
+        String emptyWikiPediaSearchTerm = "";
+        String nirvanaURLQuery = RestTempUtil.encodeIfNeeded(emptyWikiPediaSearchTerm);
+        WikiInfoObj wikiInfoObj = new WikiInfoObj(null, nirvanaURLQuery);
+
+        //When
+        wikiPediaService.getWikiPediadata(wikiInfoObj);
+
+        //Then
+        assertEquals((int) wikiInfoObj.getWikiPediaStatuccode(), HttpStatus.OK.value());
+        assertFalse(wikiInfoObj.getDescription().isEmpty());
+    }
     @Test
     public void testExtractDescription_Succes() {
         //Given

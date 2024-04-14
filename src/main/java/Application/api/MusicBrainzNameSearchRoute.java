@@ -58,7 +58,7 @@ public class MusicBrainzNameSearchRoute {
 
 
 
-    public URI getUri(Map<String, String> filterParams) throws IllegalArgumentException {
+    public URI getUri(Map<String, String> filterParams) {
         URI uri;
         try {
             uri = new URI(RestTempUtil.getMBNameUriconstructor(filterParams, config).toString());
@@ -66,6 +66,7 @@ public class MusicBrainzNameSearchRoute {
             String errorMessage = "Error constructing URI with the name: " + filterParams.entrySet().iterator().next().getValue()
                     + " " + e.getMessage();
             LoggingUtility.error(errorMessage);
+            e.printStackTrace();
             throw new IllegalArgumentException(errorMessage);
         }
         return uri;

@@ -92,8 +92,8 @@ public class WikiAndCoverArtExecutorService {
     }
 
     private void handleServiceError(ArtistInfoObj entity) {
-        LoggingUtility.error("No response given on Music Brainz ID: {}", entity.getmBID());
-        throw new RuntimeException("No response on Music Brainz ID: " + entity.getmBID());
-
+        String errorMessage = String.format("No response given on WikiData: {}", entity.getWikiInfo().getWikidataSearchTerm());
+        LoggingUtility.error(errorMessage);
+        entity.getWikiInfo().setWikipediaSearchTerm(errorMessage);
     }
 }

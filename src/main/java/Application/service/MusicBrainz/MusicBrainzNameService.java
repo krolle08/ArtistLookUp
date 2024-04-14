@@ -36,7 +36,7 @@ public class MusicBrainzNameService {
         try {
             rootNode = mapper.readTree(responseEntity.getBody().toString());
         } catch (JsonProcessingException e) {
-            LoggingUtility.warn("A problem occurred mapping the response: " + e.getMessage());
+            LoggingUtility.warn("A problem occurred when mapping the response: " + e.getMessage());
             e.printStackTrace();
             return artistInfoObj;
         }

@@ -71,6 +71,7 @@ public class GetDataImpl implements DataController {
                     try {
                         Thread.sleep(RETRY_DELAY_MS); // Introduce delay before retry
                     } catch (InterruptedException ex) {
+                        e.printStackTrace();
                         Thread.currentThread().interrupt(); // Restore interrupted status
                     }
                 }

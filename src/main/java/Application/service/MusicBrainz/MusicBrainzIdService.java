@@ -40,18 +40,22 @@ public class MusicBrainzIdService {
     public ArtistInfoObj extractData(ResponseEntity response, String mbid) {
         ObjectMapper mapper = new ObjectMapper();
         JsonNode rootNode;
+        ArtistInfoObj artistInfoObj = new ArtistInfoObj();
         try {
             rootNode = mapper.readTree(response.getBody().toString());
         } catch (JsonProcessingException e) {
             String errorMessage = "An error occurred when mapping the response: " + e.getMessage();
             LoggingUtility.error(errorMessage);
             e.printStackTrace();
-            throw new RuntimeException(errorMessage, e);
+            return artistInfoObj;
         }
             String name = extractName(rootNode, mbid);
             WikiInfoObj wikiInfoObj = extractwikiData(rootNode);
             List<AlbumInfoObj> albums = extractCoverIdAndTitle(rootNode);
-            ArtistInfoObj artistInfoObj = new ArtistInfoObj(name,mbid,wikiInfoObj,albums);
+            artistInfoObj.setName(name);
+            artistInfoObj.setmBID(mbid);
+            artistInfoObj.setWikiInfo(wikiInfoObj);
+            artistInfoObj.setAlbums(albums);
             artistInfoObj.setmBStatusCode(response.getStatusCode().value()); // Relevant for future development, handling bad responses
             return artistInfoObj;
     }
