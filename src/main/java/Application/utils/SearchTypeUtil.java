@@ -3,6 +3,10 @@ package Application.utils;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Responsible to check if type of search requested is possible
+ * Not implemented yet.
+ */
 public class SearchTypeUtil {
     private static final Map<String, String> searchTypes = createMapOfSearchTypes();
 

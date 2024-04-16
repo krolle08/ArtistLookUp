@@ -4,7 +4,6 @@ import Application.Application;
 import Application.utils.ScannerWrapper;
 import Application.utils.TypeOfSearchEnum;
 import Application.utils.UserInputUtil;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -17,7 +16,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
-@Disabled("Userinput for the terminal has not been fully implemented")
 @SpringBootTest(classes = Application.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class testUserInputUtil {
 

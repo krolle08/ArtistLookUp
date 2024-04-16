@@ -8,6 +8,10 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * Responsible to check if the input is allowed, and to cleanse the input
+ * Remaining methods have not been implemented yet.
+ */
 @Component
 public class UserInputUtil {
     private static final int MAX_TYPING_ERRORS = 10;

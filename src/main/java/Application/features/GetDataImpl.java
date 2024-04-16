@@ -14,6 +14,7 @@ import java.util.Map;
 
 /**
  * Component responsible for retrieving data based on user input and search parameters.
+ * Not fully implemented.
  */
 @Component
 public class GetDataImpl implements DataController {

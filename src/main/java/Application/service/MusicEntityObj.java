@@ -6,7 +6,7 @@ import Application.service.Artist.ArtistInfoObj;
 import java.util.UUID;
 
 public class MusicEntityObj {
-    private String iD = UUID.randomUUID().toString();
+    private String iD;
     private ArtistInfoObj artistInfoObj;
     private AreaInfoObj areaInfoObj;
 
