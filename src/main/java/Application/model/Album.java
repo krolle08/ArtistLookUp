@@ -1,15 +1,15 @@
-package Application.service.Artist;
+package Application.model;
 
 import java.util.UUID;
 
-public class AlbumInfoObj {
+public class Album {
 
     private final String iD;
     private String albumId;
     private String title;
     private String imageURL;
 
-    public AlbumInfoObj(String albumId, String title){
+    public Album(String albumId, String title){
         this.iD = UUID.randomUUID().toString();
         this.albumId = albumId;
         this.title = title;

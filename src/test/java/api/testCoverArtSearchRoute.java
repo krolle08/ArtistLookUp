@@ -1,7 +1,6 @@
 package api;
 
 import Application.Application;
-import Application.api.CoverArtArchiveSearchRoute;
 import Application.service.Artist.AlbumInfoObj;
 import fm.last.musicbrainz.coverart.CoverArt;
 import org.assertj.core.api.Assertions;

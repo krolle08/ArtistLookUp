@@ -1,8 +1,8 @@
-package Application.service.Artist;
+package Application.model;
 
 import java.util.UUID;
 
-public class WikiInfoObj {
+public class WikiData {
 
     private final String iD;
     private final String wikidataSearchTerm;
@@ -39,7 +39,7 @@ public class WikiInfoObj {
         this.wikiPediaStatuscode = wikiPediaStatuscode;
     }
 
-    public WikiInfoObj(String wikidataSearchTerm, String wikipediaSearchTerm) {
+    public WikiData(String wikidataSearchTerm, String wikipediaSearchTerm) {
         this.iD = UUID.randomUUID().toString();
         this.wikidataSearchTerm = wikidataSearchTerm;
         this.wikipediaSearchTerm = wikipediaSearchTerm;
@@ -58,12 +58,5 @@ public class WikiInfoObj {
 
     public String getWikipediaSearchTerm() {
         return wikipediaSearchTerm;
-    }
-
-
-    public boolean isEmpty() {
-        return  wikidataSearchTerm == null &&
-                wikipediaSearchTerm == null &&
-                description == null;
     }
 }

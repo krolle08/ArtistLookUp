@@ -8,7 +8,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.annotation.PostConstruct;
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -18,7 +17,7 @@ import java.net.URISyntaxException;
  * <a href="https://musicbrainz.org/doc/MusicBrainz_API">...</a>
  */
 @RestController
-public class MusicBrainzIDSearchRoute {
+public class MusicBrainzClient {
 
     @Value("${musicBrainz.protocol}")
     private String protocol;
@@ -40,16 +39,6 @@ public class MusicBrainzIDSearchRoute {
     @Value("${musicBrainz.inc}")
     private String inc;
     private RestTemplateConfig config;
-
-    @PostConstruct
-    public void init() {
-        config = new RestTemplateConfig(protocol, host, null, null, version,
-                queryTypeArtist, pathPrefix, json, inc);
-        // Initialize any properties or perform setup logic here
-        LoggingUtility.info("Initialized MusicBrainzIDSearchRoute with properties: " +
-                        "protocol={}, host={}, version={}, pathPrefix={},  queryTypeArtist={}",
-                protocol, host, version, pathPrefix , queryTypeArtist);
-    }
 
     @ResponseBody
     public ResponseEntity<String> doGetResponse(String searchTerm) {
