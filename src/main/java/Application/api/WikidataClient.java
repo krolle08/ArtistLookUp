@@ -22,7 +22,7 @@ import java.net.URISyntaxException;
  * (https://www.mediawiki.org/wiki/API:Etiquette)
  */
 @RestController
-public class WikidataSearchRoute {
+public class WikidataClient {
     @Value("${wikiData.protocol}")
     private String protocol;
 
@@ -40,7 +40,7 @@ public class WikidataSearchRoute {
         config = new RestTemplateConfig(protocol, host, null, api, null,
                 null, pathPrefix, null, null);
         // Initialize any properties or perform setup logic here
-        LoggingUtility.info("Initialized MusicBrainzIDSearchRoute with properties: " +
+        LoggingUtility.info("Initialized MusicBrainzClient with properties: " +
                         "protocol={}, host={}, pathPrefix={}, api={}",
                 protocol, host, pathPrefix, api);
     }

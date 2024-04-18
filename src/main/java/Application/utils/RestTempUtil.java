@@ -31,12 +31,7 @@ public class RestTempUtil {
 
     }
 
-    public static boolean isValidUUID(String id) {
-        // Regular expression for UUID format
-        String uuidPattern = "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$";
-        // Check if the ID matches the UUID pattern
-        return Pattern.matches(uuidPattern, id);
-    }
+
 
     public static URI getMBNameUriconstructor(Map<String, String> filterParams, RestTemplateConfig config) {
         String path = config.getPathPrefix() + config.getVersion() + config.getPathPostFix() + config.getQueryTypeArtist();

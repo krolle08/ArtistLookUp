@@ -18,7 +18,7 @@ import java.net.URI;
  * request, should result in a safe request rate (https://www.mediawiki.org/wiki/API:Etiquette)
  */
 @RestController
-public class WikipediaSearchRoute {
+public class WikipediaClient {
 
     @Value("${wikipedia.protocol}")
     private String protocol;
@@ -37,7 +37,7 @@ public class WikipediaSearchRoute {
         config = new RestTemplateConfig(protocol, host, null, api, null,
                 null, pathPrefix, null, null);
         // Initialize any properties or perform setup logic here
-        LoggingUtility.info("Initialized MusicBrainzIDSearchRoute with properties: " +
+        LoggingUtility.info("Initialized MusicBrainzClient with properties: " +
                         "protocol={}, host={}, pathPrefix={}, api={}",
                 protocol, host, pathPrefix, api);
     }
