@@ -1,12 +1,13 @@
 package Application.controller;
 
+import Application.model.ArtistDetails;
 import Application.service.ArtistService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 /**
- * API Requester for HTTP request, accepts both Name and MusicBrainz ID
+ * API Requester for HTTP request, accepts both Name and MusicBrainzClientImpl ID
  */
 @RestController
 @RequestMapping("/artist")
@@ -17,9 +18,9 @@ public class ArtistController {
     public ArtistController(ArtistService artistService) {
         this.artistService = artistService;
     }
-    @GetMapping("/{mBId}")
-    public ResponseEntity<String> getArtistByMBId(@RequestParam(value ="mBId", defaultValue = "") String mBId) throws Exception {
-        String artist = artistService.getArtistData(mBId);
+    @GetMapping()
+    public ResponseEntity<ArtistDetails> getArtistByMBId(@RequestParam(value ="mBId", defaultValue = "") String mBId) throws Exception {
+        ArtistDetails artist = artistService.getData(mBId);
         return ResponseEntity.ok(artist);
     }
 }

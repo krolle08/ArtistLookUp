@@ -2,7 +2,7 @@ package service.musicbrainz;
 
 import Application.Application;
 import Application.service.Artist.ArtistInfoObj;
-import Application.service.MusicBrainz.MusicBrainzNameService;
+import Application.service.MusicBrainzService.MusicBrainzNameService;
 import Application.utils.TypeOfSearchEnum;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,10 +13,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(classes = Application.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class testMusicBrainzNameService {
+public class testMusicBrainzServiceImplNameService {
     @Autowired
     private MusicBrainzNameService musicBrainzNameService;
 

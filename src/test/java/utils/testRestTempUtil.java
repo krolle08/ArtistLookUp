@@ -4,7 +4,6 @@ import Application.Application;
 import Application.api.MusicBrainzIDSearchRoute;
 import Application.api.MusicBrainzNameSearchRoute;
 import Application.api.WikidataSearchRoute;
-import Application.utils.RestTempUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockitoAnnotations;

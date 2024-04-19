@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest(classes = Application.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ExtendWith(MockitoExtension.class)
-public class testCoverArtSearchRoute {
+public class testCoverArtServiceSearchRoute {
 
     @Autowired
     CoverArtArchiveSearchRoute coverArtArchiveSearchRoute;

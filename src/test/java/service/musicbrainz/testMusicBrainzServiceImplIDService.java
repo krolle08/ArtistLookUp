@@ -2,7 +2,7 @@ package service.musicbrainz;
 
 import Application.Application;
 import Application.service.Artist.ArtistInfoObj;
-import Application.service.MusicBrainz.MusicBrainzIdService;
+import Application.service.MusicBrainzService.MusicBrainzIdService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -12,7 +12,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(classes = Application.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class testMusicBrainzIDService {
+public class testMusicBrainzServiceImplIDService {
 
     @Autowired
     private MusicBrainzIdService musicBrainzIdService;

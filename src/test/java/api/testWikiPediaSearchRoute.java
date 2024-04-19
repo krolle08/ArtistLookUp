@@ -2,7 +2,6 @@ package api;
 
 import Application.Application;
 import Application.api.WikipediaSearchRoute;
-import Application.utils.RestTempUtil;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Assertions;

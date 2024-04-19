@@ -1,80 +1,84 @@
 package Application.service.impl;
 
-import Application.api.MusicBrainzClient;
+import Application.model.Album;
+import Application.model.ArtistDetails;
+import Application.model.ArtistInfo;
+import Application.model.response.AlbumResponse;
 import Application.model.response.ArtistResponse;
+import Application.model.response.WikiDataResponse;
+import Application.model.response.WikipediaResponse;
 import Application.service.ArtistService;
-import Application.service.Executor.WikiAndCoverArtExecutorService;
-import Application.service.MusicBrainz.MusicBrainzService;
-import Application.service.MusicBrainzConfig;
 import Application.utils.AppUtils;
-import Application.utils.Json;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
-import java.net.URI;
-import java.net.URISyntaxException;
+import java.util.List;
 
 /**
  * The service handles the API calls and populates the MusicEntityObj that is used to process the final Json Response
  */
 @Service
 public class ArtistServiceImpl implements ArtistService {
-    Logger logger = LoggerFactory.getLogger(ArtistServiceImpl.class);
+    private final Logger logger = LoggerFactory.getLogger(ArtistServiceImpl.class);
 
-    private final MusicBrainzClient musicBrainzClient;
-    private MusicBrainzConfig musicBrainzConfig;
+    private final MusicBrainzServiceImpl musicBrainzService;
+    private final WikidataServiceImpl wikidataService;
+    private final WikipediaServiceImpl wikipediaService;
+    private final CoverArtServiceImpl coverArtService;
+
     @Autowired
-    public ArtistServiceImpl(MusicBrainzClient musicBrainzClient,
-                             MusicBrainzConfig musicBrainzConfig) {
-        this.musicBrainzClient = musicBrainzClient;
-        this.musicBrainzConfig = musicBrainzConfig;
+    public ArtistServiceImpl(MusicBrainzServiceImpl musicBrainzService,
+                             WikidataServiceImpl wikidataService,
+                             WikipediaServiceImpl wikipediaService,
+                             CoverArtServiceImpl coverArtService) {
+        this.musicBrainzService = musicBrainzService;
+        this.wikidataService = wikidataService;
+        this.wikipediaService = wikipediaService;
+        this.coverArtService = coverArtService;
     }
 
     @Override
-    public String getArtistData(String mBId){
+    public ArtistDetails getData(String mBId) throws Exception {
         AppUtils.validateMusicBrainzId(mBId);
+        ArtistInfo artistInfo = new ArtistInfo(mBId);
+        ArtistDetails artistDetails = getArtistDetails(artistInfo);
+        return artistDetails;
+    }
 
-        ArtistResponse artistResponse;
-        try{
-          artistResponse = new ObjectMapper().readValue(doHttpRequest("/ws/2/artist/:" + mBId), ArtistResponse.class);
-          if(artistResponse.getmBID() != null || !artistResponse.getmBID().isEmpty()){
-              musicBrainzClient.getMBData(mBId);
+    private ArtistDetails getArtistDetails(ArtistInfo artistInfo) throws Exception {
+        ArtistResponse artistResponse = getArtistInfoFromMusicBrainz(artistInfo.getmBId());
+        String wikiDataId = artistResponse.getWikidataId();
 
-              wikiAndCoverArtExecutorService.getWikiAndCoverData(entity);
-
-          }
-        }catch (Exception e){
-
+        WikipediaResponse wikipediaResponse = null;
+        if (wikiDataId != null) {
+            WikiDataResponse wikiDataResponse = getWikipediaValueFromWikiData(wikiDataId); // Delegate to specific service
+            wikipediaResponse = getDescriptionFromWikipedia(wikiDataResponse.getId());
         }
 
-        return Json.createJsonResponse(entity);
+        List<AlbumResponse> albums = null;
+        if (artistResponse.getAlbums() != null || !artistResponse.getAlbums().isEmpty()) {
+            albums = getImageUrlFromCoverArt(artistResponse.getAlbums());
+        }
+        return new ArtistDetails(artistResponse.getmBID(), wikipediaResponse.getDescription(), albums);
+    }
+
+    private ArtistResponse getArtistInfoFromMusicBrainz(String mBId) throws Exception {
+        return musicBrainzService.getArtistInfo(mBId);
 
     }
 
-
-    public String doHttpRequest(String uri) throws URISyntaxException {
-        RestTemplate restTemplate = new RestTemplate();
-        String result = restTemplate.getForObject(buildUri(uri).toString(), String.class);
-        logger.debug("doHttpRequest::get result: [{}]", result);
-        return result;
+    private WikiDataResponse getWikipediaValueFromWikiData(String wikiDataId) throws Exception {
+        return wikidataService.getWikipediaId(wikiDataId);
     }
 
-    /**
-     * Build uri
-     *
-     * @param path
-     *
-     * @return
-     *
-     * @throws URISyntaxException
-     */
-    private URI buildUri(String path) throws URISyntaxException {
-        return new URI(musicBrainzConfig.getHost() + path + "?fmt=json&inc=url-rels+release-groups");
+    private WikipediaResponse getDescriptionFromWikipedia(String wikiPediaId) throws Exception {
+        return wikipediaService.getDescription(wikiPediaId);
     }
 
+    private List<AlbumResponse> getImageUrlFromCoverArt(List<Album> albums) throws Exception {
+        return coverArtService.getImageUrls(albums);
+    }
 }
 

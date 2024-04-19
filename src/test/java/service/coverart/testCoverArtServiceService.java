@@ -14,7 +14,7 @@ import java.util.logging.Logger;
 import static org.mockito.Mockito.*;
 
 @SpringBootTest(classes = Application.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class testCoverArtService {
+public class testCoverArtServiceService {
 
     @Autowired
     private CoverArtArchiveService coverArtArchiveService;

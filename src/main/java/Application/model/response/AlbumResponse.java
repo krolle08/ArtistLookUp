@@ -1,14 +1,18 @@
 package Application.model.response;
 
-public class AlbumResponse {
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-    private String albumId;
+public class AlbumResponse {
+    @JsonProperty("title")
     private String title;
+    @JsonProperty("id")
+    private String albumId;
+    @JsonProperty("image")
     private String imageURL;
 
-    public AlbumResponse(String albumId, String title, String imageURL){
-        this.albumId = albumId;
+    public AlbumResponse(String title, String albumId, String imageURL) {
         this.title = title;
+        this.albumId = albumId;
         this.imageURL = imageURL;
     }
 

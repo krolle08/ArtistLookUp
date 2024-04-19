@@ -1,6 +1,7 @@
 package api;
 
 import Application.Application;
+import Application.api.MusicBrainzClientImpl;
 import Application.api.MusicBrainzIDSearchRoute;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -13,10 +14,10 @@ import java.net.URI;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(classes = Application.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class testMusicBrainzIdServiceRoute {
+public class testMusicBrainzServiceImplIdServiceRoute {
 
     @Autowired
-    private MusicBrainzIDSearchRoute musicBrainzIdService;
+    private MusicBrainzClientImpl musicBrainzIdService;
     @Test
     public void testInputForUri_Success() {
         //Given

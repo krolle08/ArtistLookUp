@@ -1,7 +1,9 @@
 package Application.service;
 
+import Application.model.ArtistDetails;
+
 public interface ArtistService {
 
-    String getArtistData(String searchParam);
+    ArtistDetails getData(String searchParam) throws Exception;
 
 }

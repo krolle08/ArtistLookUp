@@ -3,7 +3,6 @@ package service.Wikidata;
 import Application.Application;
 import Application.service.Artist.WikiInfoObj;
 import Application.service.Wiki.WikiDataService;
-import Application.utils.RestTempUtil;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
