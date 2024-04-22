@@ -3,7 +3,7 @@ IMPORTANT NOTICE
 
 Entire project is undergoing a springboot configuration update.
 The project will therefore not be fully functional until the update is complete.
-It is expected that the update will be completed the 21.04.2024
+It is expected that the update will be completed the 23.04.2024
 
 
 ### Reference Documentation
