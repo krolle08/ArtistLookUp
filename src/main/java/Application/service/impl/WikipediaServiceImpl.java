@@ -6,6 +6,9 @@ import Application.service.WikipediaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.net.URI;
+import java.net.URLEncoder;
+
 @Service
 
 public class WikipediaServiceImpl implements WikipediaService {
@@ -13,7 +16,7 @@ public class WikipediaServiceImpl implements WikipediaService {
     WikipediaClientImpl wikipediaClient;
     @Override
     public WikipediaResponse getDescription(String wikipediaId) throws Exception {
-        String url = wikipediaClient.buildUrl(wikipediaId);
+        URI url = new URI(wikipediaClient.buildUrl(URLEncoder.encode(wikipediaId)));
         WikipediaResponse wikipediaResponse = wikipediaClient.getForObject(url).getBody();
         return wikipediaResponse;
     }

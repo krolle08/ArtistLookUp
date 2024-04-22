@@ -7,6 +7,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.net.URI;
+
 /**
  * WikipediaService documentation:
  * There is no hard speed limit on read requests, but be considerate and try not to take a site down. Most system
@@ -27,7 +29,7 @@ public class WikipediaClientImpl {
         return wikipediaUrl + path;
     }
 
-    public ResponseEntity<WikipediaResponse> getForObject(String url) throws Exception {
+    public ResponseEntity<WikipediaResponse> getForObject(URI url) throws Exception {
         ResponseEntity<WikipediaResponse> response = restTemplate.getForEntity(url, WikipediaResponse.class);
         return response;    }
 }

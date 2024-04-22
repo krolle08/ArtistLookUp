@@ -54,7 +54,7 @@ public class ArtistServiceImpl implements ArtistService {
         WikipediaResponse wikipediaResponse = null;
         if (wikiDataId != null) {
             WikiDataResponse wikiDataResponse = getWikipediaValueFromWikiData(wikiDataId); // Delegate to specific service
-            wikipediaResponse = getDescriptionFromWikipedia(wikiDataResponse.getId());
+            wikipediaResponse = getDescriptionFromWikipedia(wikiDataResponse.getWikipediaId());
         }
 
         List<AlbumResponse> albums = null;

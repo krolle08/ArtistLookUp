@@ -2,6 +2,8 @@ package Application.controller;
 
 import Application.model.ArtistDetails;
 import Application.service.ArtistService;
+import Application.service.impl.ArtistServiceImpl;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,9 +15,9 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/artist")
 public class ArtistController {
     @Autowired
-    private ArtistService artistService;
+    private ArtistServiceImpl artistService;
     @Autowired
-    public ArtistController(ArtistService artistService) {
+    public ArtistController(ArtistServiceImpl artistService) {
         this.artistService = artistService;
     }
     @GetMapping()

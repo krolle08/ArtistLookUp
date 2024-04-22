@@ -1,9 +1,7 @@
 package Application.api;
 
-import Application.model.response.ArtistResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -26,8 +24,7 @@ public class MusicBrainzClientImpl{
         return musicBrainzBaseUrl + mBId + musicBrainzParam;
     }
 
-    public ResponseEntity<ArtistResponse> getForObject(String url) throws Exception {
-        ResponseEntity<ArtistResponse> response = restTemplate.getForEntity(url, ArtistResponse.class);
-        return response;
+    public String getForObject(String url) throws Exception {
+        return restTemplate.getForObject(url, String.class);
     }
 }
