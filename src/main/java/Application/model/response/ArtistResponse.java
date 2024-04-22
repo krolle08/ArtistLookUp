@@ -2,10 +2,8 @@ package Application.model.response;
 
 import Application.model.Album;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonSetter;
 import org.apache.logging.log4j.core.config.plugins.validation.constraints.NotBlank;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -26,35 +24,13 @@ public class ArtistResponse {
 
     public ArtistResponse() {
     }
-
-    @JsonSetter("release-groups")
-    public void setAlbums(List<Map<String, Object>> albums) {
+    public void setAlbums(List<Album> albums) {
         if (albums != null) {
-            this.albums = parseAlbums(albums);
+            this.albums = albums;
         }
     }
-
-    public List<Album> parseAlbums(List<Map<String, Object>> albums) {
-        List<Album> parsedAlbums = new ArrayList<>();
-        for (Map<String, Object> albumData : albums) {
-            if (albumData.get("primary-type").equals("Album")) {
-                String albumTitle = (String) albumData.get("title");
-                String albumId = (String) albumData.get("id");
-                Album album = new Album(albumTitle, albumId);
-                parsedAlbums.add(album);
-            }
-        }
-        return parsedAlbums;
-    }
-
-    @JsonSetter("relations")
-    public void setWikidataId(List<Map<String, Object>> relations) {
-        for (Map<String, Object> node : relations) {
-            if (node.get("type") != null && node.get("type").equals("wikidata")) {
-                parseWikidataIdFromNode(node);
-                break;
-            }
-        }
+    public void setWikidataId(String wikidataId) {
+        this.wikidataId = wikidataId;
     }
 
     private void parseWikidataIdFromNode(Map<String, Object> node) {
